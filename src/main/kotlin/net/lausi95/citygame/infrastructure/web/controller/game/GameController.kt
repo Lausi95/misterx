@@ -10,6 +10,8 @@ import net.lausi95.citygame.application.usecase.game.creategame.CreateGameComman
 import net.lausi95.citygame.application.usecase.game.creategame.CreateGameUseCase
 import net.lausi95.citygame.application.usecase.game.getgame.GetGameUseCase
 import net.lausi95.citygame.application.usecase.game.getgames.GetGamesUseCase
+import net.lausi95.citygame.application.usecase.game.updategame.UpdateGameCommand
+import net.lausi95.citygame.application.usecase.game.updategame.UpdateGameUseCase
 import net.lausi95.citygame.domain.Tenant
 import net.lausi95.citygame.domain.game.GameId
 import net.lausi95.citygame.domain.game.GameTitle
@@ -26,6 +28,7 @@ class GameController(
     private val createGameUseCase: CreateGameUseCase,
     private val getGameUseCase: GetGameUseCase,
     private val getGamesUseCase: GetGamesUseCase,
+    private val updateGameUseCase: UpdateGameUseCase,
 ) {
 
     @PostMapping
@@ -75,9 +78,23 @@ class GameController(
     @GetMapping
     fun getGames(
         @PageableDefault pageable: Pageable,
-        @RequestAttribute tenant: Tenant
+        @RequestAttribute tenant: Tenant,
     ): GameCollection {
         val games = getGamesUseCase(pageable, tenant)
         return GameCollection(games)
+    }
+
+    @PutMapping("/{gameId}")
+    fun updateGame(
+        @PathVariable gameId: String,
+        @RequestBody @Valid request: UpdateGameRequest,
+        @RequestAttribute tenant: Tenant,
+    ): ResponseEntity<Unit> {
+        val command = UpdateGameCommand(
+            gameId = GameId(gameId),
+            title = GameTitle(requireNotNull(request.title))
+        )
+        updateGameUseCase(command, tenant)
+        return ResponseEntity.accepted().build()
     }
 }

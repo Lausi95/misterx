@@ -9,6 +9,9 @@ import net.lausi95.citygame.application.usecase.game.creategame.CreateGameResult
 import net.lausi95.citygame.application.usecase.game.creategame.CreateGameUseCase
 import net.lausi95.citygame.application.usecase.game.getgame.GetGameUseCase
 import net.lausi95.citygame.application.usecase.game.getgames.GetGamesUseCase
+import net.lausi95.citygame.application.usecase.game.updategame.UpdateGameCommand
+import net.lausi95.citygame.application.usecase.game.updategame.UpdateGameUseCase
+import net.lausi95.citygame.bdd.random
 import net.lausi95.citygame.bdd.randomGame
 import net.lausi95.citygame.domain.DomainException
 import net.lausi95.citygame.domain.Tenant
@@ -30,6 +33,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 
 @WebMvcTest(GameController::class)
 class GameControllerTest {
@@ -37,14 +41,17 @@ class GameControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     private lateinit var createGameUseCase: CreateGameUseCase
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     private lateinit var getGameUseCase: GetGameUseCase
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     private lateinit var getGamesUseCase: GetGamesUseCase
+
+    @MockkBean(relaxed = true)
+    private lateinit var updateGameUseCase: UpdateGameUseCase
 
     @Nested
     @DisplayName("POST /games")
@@ -251,5 +258,61 @@ class GameControllerTest {
 
             assertThat(pageable.captured.pageNumber).isEqualTo(3)
         }
+    }
+
+    @Nested
+    @DisplayName("PUT /games/{gameId}")
+    inner class UpdateGame {
+
+        @Test
+        fun `should accept valid request`() {
+            val gameId = GameId.random()
+            val gameTitle = GameTitle.random()
+
+            mockMvc.put("/games/{gameId}", gameId.value) {
+                contentType = MediaType.APPLICATION_JSON
+                with(jwt())
+                content = updateGameRequest(gameTitle)
+            }.andExpect { status { isAccepted() } }
+        }
+
+        @Test
+        fun `should deny request with empty title`() {
+            val gameId = GameId.random()
+            val gameTitle = GameTitle("")
+
+            mockMvc.put("/games/{gameId}", gameId.value) {
+                contentType = MediaType.APPLICATION_JSON
+                with(jwt())
+                content = updateGameRequest(gameTitle)
+            }.andExpect { status { isBadRequest() } }
+        }
+
+        @Test
+        fun `should map request to command and pass to use case`() {
+            val gameId = GameId.random()
+            val gameTitle = GameTitle.random()
+
+            mockMvc.put("/games/{gameId}", gameId.value) {
+                contentType = MediaType.APPLICATION_JSON
+                with(jwt())
+                content = updateGameRequest(gameTitle)
+            }.andExpect { status { isAccepted() } }
+
+            val updateGameCommandSlot = slot<UpdateGameCommand>()
+            val tenant = slot<Tenant>()
+            verify { updateGameUseCase(capture(updateGameCommandSlot), capture(tenant)) }
+
+            val command = updateGameCommandSlot.captured
+            assertThat(command.gameId).isEqualTo(gameId)
+            assertThat(command.title).isEqualTo(gameTitle)
+            assertThat(tenant.captured).isNotNull()
+        }
+
+        fun updateGameRequest(title: GameTitle) = /* language=json */ """
+            {
+                "title": "${title.value}"
+            }
+        """.trimIndent()
     }
 }
