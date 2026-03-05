@@ -1,5 +1,6 @@
 package net.lausi95.citygame
 
+import org.junit.jupiter.api.Tag
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -12,4 +13,5 @@ import org.springframework.test.context.ActiveProfiles
 @Import(TestcontainersConfiguration::class)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
+@Tag("IntegrationTest")
 annotation class IntegrationTest()

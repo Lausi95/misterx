@@ -9,4 +9,8 @@ class Game(
 
     val title: GameTitle
         get() = _title
+
+    fun updateTitle(newTitle: GameTitle) {
+        _title = newTitle
+    }
 }

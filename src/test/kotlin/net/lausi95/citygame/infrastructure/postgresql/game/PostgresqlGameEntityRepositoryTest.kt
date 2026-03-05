@@ -1,6 +1,6 @@
 package net.lausi95.citygame.infrastructure.postgresql.game
 
-import net.lausi95.citygame.TestcontainersConfiguration
+import net.lausi95.citygame.DatabaseIntegrationTest
 import net.lausi95.citygame.bdd.random
 import net.lausi95.citygame.domain.Tenant
 import net.lausi95.citygame.domain.game.Game
@@ -12,12 +12,9 @@ import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
-import org.springframework.context.annotation.Import
 import org.springframework.data.domain.Pageable
 
-@DataJpaTest
-@Import(TestcontainersConfiguration::class)
+@DatabaseIntegrationTest
 class PostgresqlGameEntityRepositoryTest {
 
     @Autowired

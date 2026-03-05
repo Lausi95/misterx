@@ -2,7 +2,7 @@ package net.lausi95.citygame.domain
 
 data class Tenant(val value: String) {
     companion object {
-        const val OVERRIDE_HEADER_NAME = "X-TENANT-OVERRIDE"
+        const val OVERRIDE_TENANT_HEADER_NAME = "X-TENANT-OVERRIDE"
 
         fun parse(host: String): Tenant {
             var x = 0

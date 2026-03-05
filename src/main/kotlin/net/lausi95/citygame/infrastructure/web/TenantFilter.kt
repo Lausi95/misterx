@@ -34,7 +34,7 @@ class TenantFilter(
 
     private fun determineTenant(request: HttpServletRequest): String {
         if (tenantOverrideEnabled) {
-            val tenantFromHeader: String? = request.getHeader(Tenant.OVERRIDE_HEADER_NAME)
+            val tenantFromHeader: String? = request.getHeader(Tenant.OVERRIDE_TENANT_HEADER_NAME)
             if (tenantFromHeader != null) {
                 return tenantFromHeader
             }
