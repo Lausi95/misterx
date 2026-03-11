@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.usecase.game.creategame.CreateGameCommand
 import net.lausi95.citygame.application.usecase.game.creategame.CreateGameUseCase
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
+@Tag(name = "Games")
 @RestController
 @RequestMapping("/games")
 class GameController(
@@ -50,11 +52,13 @@ class GameController(
         content = [Content(mediaType = "application/json", schema = Schema(ProblemDetail::class))],
     )
     fun postGame(
-        @RequestBody @Valid requestDto: CreateGameRequestDto,
+        @RequestBody @Valid request: CreateGameRequest,
         @RequestAttribute tenant: Tenant
     ): ResponseEntity<Unit> {
         val command = CreateGameCommand(
-            title = GameTitle(requireNotNull(requestDto.title)),
+            title = GameTitle(requireNotNull(request.title)),
+            startTime = requireNotNull(request.startTime),
+            endTime = requireNotNull(request.endTime)
         )
 
         val result = createGameUseCase(command, tenant)
@@ -66,6 +70,12 @@ class GameController(
         return ResponseEntity.created(uri).build()
     }
 
+    @Operation(summary = "Returns a specific game")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Game with the given ID",
+        content = [Content(mediaType = "application/json", schema = Schema(GameResource::class))],
+    )
     @GetMapping("/{gameId}")
     fun getGame(
         @PathVariable gameId: String,
@@ -75,6 +85,12 @@ class GameController(
         return GameResource(game)
     }
 
+    @Operation(summary = "Collection of games")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Collection of games",
+        content = [Content(mediaType = "application/json", schema = Schema(GameCollection::class))],
+    )
     @GetMapping
     fun getGames(
         @PageableDefault pageable: Pageable,
@@ -84,15 +100,28 @@ class GameController(
         return GameCollection(games)
     }
 
-    @PutMapping("/{gameId}")
+    @Operation(summary = "Updates the editable fields of a game")
+    @ApiResponse(
+        responseCode = "202",
+        description = "Game was updated successfully",
+        content = [],
+    )
+    @ApiResponse(
+        responseCode = "400",
+        description = "Game was not updates. At least one of the fields contained errors.",
+        content = [],
+    )
+    @PatchMapping("/{gameId}")
     fun updateGame(
         @PathVariable gameId: String,
-        @RequestBody @Valid request: UpdateGameRequest,
+        @RequestBody @Valid request: PatchGameRequest,
         @RequestAttribute tenant: Tenant,
     ): ResponseEntity<Unit> {
         val command = UpdateGameCommand(
             gameId = GameId(gameId),
-            title = GameTitle(requireNotNull(request.title))
+            title = request.title?.let { GameTitle(it) },
+            startTime = request.startTime,
+            endTime = request.endTime,
         )
         updateGameUseCase(command, tenant)
         return ResponseEntity.accepted().build()

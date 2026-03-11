@@ -12,12 +12,22 @@ class UpdateGameUseCase(
 ) {
 
     operator fun invoke(command: UpdateGameCommand, tenant: Tenant) {
-        if (gameRepository.existsByTitle(command.title, tenant)) {
-            gameTitleAlreadyExists(command.title)
+        val game = gameRepository.findById(command.gameId, tenant) ?: gameNotFound(command.gameId)
+
+        command.title?.also {
+            if (gameRepository.existsByTitle(it, tenant)) {
+                gameTitleAlreadyExists(it)
+            }
+            game.updateTitle(it)
         }
 
-        val game = gameRepository.findById(command.gameId, tenant) ?: gameNotFound(command.gameId)
-        game.updateTitle(command.title)
+        command.startTime?.also {
+            game.updateStartTime(it)
+        }
+
+        command.endTime?.also {
+            game.updateEndTime(it)
+        }
 
         gameRepository.save(game, tenant)
     }

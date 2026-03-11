@@ -22,7 +22,7 @@ class CreateGameUseCase(
             gameTitleAlreadyExists(command.title)
         }
 
-        val game = Game(GameId.random(), command.title)
+        val game = Game(GameId.random(), command.title, command.startTime, command.endTime)
         gameRepository.save(game, tenant)
 
         log.info { "Game created" }
