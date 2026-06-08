@@ -10,10 +10,7 @@ import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.game.GameTitle
 import net.lausi95.citygame.application.domain.model.game.Grid
-import net.lausi95.citygame.application.port.`in`.game.CreateGameUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetGameUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetGamesUseCase
-import net.lausi95.citygame.application.port.`in`.game.UpdateGameUseCase
+import net.lausi95.citygame.application.port.`in`.game.*
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
@@ -31,6 +28,7 @@ class GameController(
     private val getGameUseCase: GetGameUseCase,
     private val getGamesUseCase: GetGamesUseCase,
     private val updateGameUseCase: UpdateGameUseCase,
+    private val getMapUseCase: GetMapUseCase,
 ) {
 
     @PostMapping
@@ -112,6 +110,14 @@ class GameController(
     ): GameCollection {
         val games = getGamesUseCase.getGames(pageable, tenant)
         return GameCollection(games)
+    }
+
+    @GetMapping("/{gameId}/map")
+    fun getMap(
+        @PathVariable gameId: String,
+        @RequestAttribute tenant: Tenant,
+    ): MapResource {
+        return MapResource(GameId(gameId), getMapUseCase.getMap(GameId(gameId), tenant))
     }
 
     @Operation(summary = "Updates the editable fields of a game")

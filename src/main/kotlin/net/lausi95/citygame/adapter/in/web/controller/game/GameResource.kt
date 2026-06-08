@@ -5,6 +5,7 @@ import net.lausi95.citygame.application.domain.model.game.Game
 import java.time.OffsetDateTime
 
 data class GameResource(
+
     @field:JsonProperty("id")
     val id: String,
 
@@ -29,12 +30,13 @@ data class GameResource(
     constructor(game: Game) : this(
         id = game.id.value,
         title = game.title.value,
-        startTime = OffsetDateTime.now(),
-        endTime = OffsetDateTime.now(),
+        startTime = game.startTime,
+        endTime = game.endTime,
         teams = 0,
         agents = 0,
         links = mapOf(
-            "self" to "/games/${game.id.value}"
+            "self" to "/games/${game.id.value}",
+            "map" to "/games/${game.id.value}/map"
         )
     )
 }
