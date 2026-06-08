@@ -3,6 +3,8 @@ package net.lausi95.citygame.application.usecase.game.updategame
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import net.lausi95.citygame.application.port.`in`.game.UpdateGameUseCase
+import net.lausi95.citygame.application.port.`in`.game.updategame.UpdateGameCommand
 import net.lausi95.citygame.bdd.random
 import net.lausi95.citygame.domain.Tenant
 import net.lausi95.citygame.domain.game.*

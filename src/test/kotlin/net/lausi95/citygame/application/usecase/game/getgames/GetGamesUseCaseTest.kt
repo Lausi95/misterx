@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
+import net.lausi95.citygame.application.port.`in`.game.GetGamesUseCase
 import net.lausi95.citygame.bdd.random
 import net.lausi95.citygame.domain.Tenant
 import net.lausi95.citygame.domain.game.Game

@@ -33,7 +33,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
+    // implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -90,8 +90,6 @@ tasks.withType<Test> {
 
 tasks.jacocoTestReport {
     reports {
-        xml.required.set(true)
-        html.required.set(true)
         csv.required.set(false)
     }
 }
