@@ -1,26 +1,26 @@
 package net.lausi95.citygame.application.domain.sevice
 
-import net.lausi95.citygame.application.domain.model.game.gameNotFound
-import net.lausi95.citygame.application.domain.model.game.gameTitleAlreadyExists
 import net.lausi95.citygame.application.port.`in`.game.UpdateGameUseCase
-import net.lausi95.citygame.application.port.out.GameRepository
+import net.lausi95.citygame.application.port.out.game.CheckGameWithTitleDoesNotExistPort
+import net.lausi95.citygame.application.port.out.game.GetGamePort
+import net.lausi95.citygame.application.port.out.game.SaveGamePort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 internal class UpdateGameService(
-    private val gameRepository: GameRepository
+    private val getGamePort: GetGamePort,
+    private val saveGamePort: SaveGamePort,
+    private val gameWithTitleDoesNotExistPort: CheckGameWithTitleDoesNotExistPort,
 ) : UpdateGameUseCase {
 
     @Transactional
     override fun updateGame(command: UpdateGameUseCase.Command, tenant: Tenant) {
-        val game = gameRepository.findById(command.gameId, tenant) ?: gameNotFound(command.gameId)
+        val game = getGamePort.getGame(command.gameId, tenant)
 
         command.title?.also {
-            if (gameRepository.existsByTitle(it, tenant)) {
-                gameTitleAlreadyExists(it)
-            }
+            gameWithTitleDoesNotExistPort.assertGameWithTitleDoesNotExist(command.title, tenant)
             game.updateTitle(it)
         }
 
@@ -44,6 +44,6 @@ internal class UpdateGameService(
             game.updateGrid(it)
         }
 
-        gameRepository.save(game, tenant)
+        saveGamePort.saveGame(game, tenant)
     }
 }

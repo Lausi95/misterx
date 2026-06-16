@@ -4,7 +4,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface GameEntityRepository : JpaRepository<GameEntity, String> {
+internal interface GameEntityRepository : JpaRepository<GameEntity, String> {
+
+    fun existsByIdAndTenant(id: String, tenant: String): Boolean
 
     fun findByIdAndTenant(id: String, tenant: String): GameEntity?
 

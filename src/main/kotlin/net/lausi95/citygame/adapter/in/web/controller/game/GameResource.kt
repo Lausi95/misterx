@@ -36,7 +36,9 @@ data class GameResource(
         agents = 0,
         links = mapOf(
             "self" to "/games/${game.id.value}",
-            "map" to "/games/${game.id.value}/map"
+            "map" to "/games/${game.id.value}/map",
+            "agents" to "/games/${game.id.value}/agents",
+            "teams" to "/games/${game.id.value}/teams",
         )
     )
 }

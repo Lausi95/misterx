@@ -18,3 +18,26 @@ CREATE TABLE map
     rows               INT          NOT NULL,
     columns            INT          NOT NULL
 );
+
+CREATE TABLE agent
+(
+    id           VARCHAR(255) PRIMARY KEY,
+    tenant       VARCHAR(255) NOT NULL,
+    game_id      VARCHAR(255) NOT NULL REFERENCES game (id),
+    type         VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(255) NOT NULL,
+    first_name   VARCHAR(255) NOT NULL,
+    last_name    VARCHAR(255) NOT NULL,
+    alias        VARCHAR(255) NOT NULL,
+    active       BIT          NOT NULL
+);
+
+CREATE TABLE agent_location
+(
+    id        VARCHAR(255) PRIMARY KEY,
+    tenant    VARCHAR(255),
+    agent_id  VARCHAR(255) REFERENCES agent (id),
+    timestamp TIMESTAMP NOT NULL,
+    latitude  FLOAT     NOT NULL,
+    longitude FLOAT     NOT NULL
+);

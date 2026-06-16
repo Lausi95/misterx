@@ -1,23 +1,25 @@
 package net.lausi95.citygame.application.domain.sevice
 
-import net.lausi95.citygame.application.domain.model.game.*
+import net.lausi95.citygame.application.domain.model.game.Game
+import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.game.Map
+import net.lausi95.citygame.application.domain.model.game.MapId
 import net.lausi95.citygame.application.port.`in`.game.CreateGameUseCase
-import net.lausi95.citygame.application.port.out.GameRepository
+import net.lausi95.citygame.application.port.out.game.CheckGameWithTitleDoesNotExistPort
+import net.lausi95.citygame.application.port.out.game.SaveGamePort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CreateGameService(
-    private val gameRepository: GameRepository
+    private val gameWithTitleDoesNotExistPort: CheckGameWithTitleDoesNotExistPort,
+    private val saveGamePort: SaveGamePort,
 ) : CreateGameUseCase {
 
     @Transactional
     override fun createGame(command: CreateGameUseCase.Command, tenant: Tenant): GameId {
-        if (gameRepository.existsByTitle(command.title, tenant)) {
-            gameTitleAlreadyExists(command.title)
-        }
+        gameWithTitleDoesNotExistPort.assertGameWithTitleDoesNotExist(command.title, tenant)
 
         val game = Game(
             GameId(),
@@ -32,7 +34,7 @@ class CreateGameService(
             )
         )
 
-        gameRepository.save(game, tenant)
+        saveGamePort.saveGame(game, tenant)
 
         return game.id
     }

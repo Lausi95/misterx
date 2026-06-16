@@ -9,9 +9,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: city-game
     labels:
       - traefik.enable=true
-      - traefik.http.routers.tcm.rule=Host(`misterx.lausi95.net`)
-      - traefik.http.routers.tcm.entrypoints=websecure
-      - traefik.http.routers.tcm.tls.certresolver=letsencrypt
+      - traefik.http.routers.cgb.rule=Host(`city-game-backend.lausi95.net`)
+      - traefik.http.routers.cgb.entrypoints=websecure
+      - traefik.http.routers.cgb.tls.certresolver=letsencrypt
 
   city-game-api-postgres:
     image: 'postgres:latest'

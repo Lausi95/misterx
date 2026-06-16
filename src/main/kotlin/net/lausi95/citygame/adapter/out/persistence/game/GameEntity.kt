@@ -12,7 +12,7 @@ import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "game")
-class GameEntity() {
+internal class GameEntity {
 
     @Id
     @Column(name = "id")
@@ -30,7 +30,7 @@ class GameEntity() {
     @Column(name = "end_time")
     var endTime: OffsetDateTime? = null
 
-    constructor(game: Game, tenant: Tenant) : this() {
+    constructor(game: Game, tenant: Tenant) {
         this.id = game.id.value
         this.tenant = tenant.value
         this.title = game.title.value

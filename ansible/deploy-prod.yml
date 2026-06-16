@@ -2,7 +2,7 @@
 - name: Deploy
   hosts: all
   vars:
-    directory: ~/misterx.lausi95.net
+    directory: ~/city-game-backend.lausi95.net
     docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
     docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
   tasks:

@@ -8,7 +8,7 @@ import net.lausi95.citygame.application.domain.model.game.Game
 
 @Entity
 @Table(name = "map")
-class MapEntity() {
+internal class MapEntity() {
 
     @Id
     @Column(name = "id")
