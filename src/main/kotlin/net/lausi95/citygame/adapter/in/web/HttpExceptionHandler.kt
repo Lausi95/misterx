@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.domain.DomainException
 import net.lausi95.citygame.application.domain.NotFoundDomainException
 import org.springframework.http.ProblemDetail
-import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -22,14 +21,6 @@ class HttpExceptionHandler {
             details.setProperty(it.field, it.defaultMessage ?: "Invalid Value")
         }
         return details
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleHttpMessageNotReadableException(): ProblemDetail {
-        log.warn { "Request with invalid JSON" }
-        val problemDetail = ProblemDetail.forStatus(400)
-        problemDetail.setProperty("details", "Input Error: Invalid JSON")
-        return problemDetail
     }
 
     @ExceptionHandler(DomainException::class)

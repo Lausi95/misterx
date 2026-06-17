@@ -79,7 +79,9 @@ class GameController(
             .path("/games/{gameId}")
             .build(gameId.value)
 
-        return ResponseEntity.created(uri).build()
+        return ResponseEntity.created(uri).headers {
+            it.set("X-GameId", gameId.value)
+        }.build()
     }
 
     @Operation(summary = "Returns a specific game")
@@ -143,19 +145,19 @@ class GameController(
             startTime = request.startTime,
             endTime = request.endTime,
             map = UpdateGameUseCase.MapDto(
-                cornerA = request.point1?.let {
+                cornerA = request.map?.cornerA?.let {
                     GeoLocation(
                         latitude = requireNotNull(it.latitude),
                         longitude = requireNotNull(it.longitude),
                     )
                 },
-                cornerB = request.point2?.let {
+                cornerB = request.map?.cornerA?.let {
                     GeoLocation(
                         latitude = requireNotNull(it.latitude),
                         longitude = requireNotNull(it.longitude),
                     )
                 },
-                grid = request.grid?.let {
+                grid = request.map?.grid?.let {
                     Grid(
                         rows = requireNotNull(it.rows),
                         columns = requireNotNull(it.columns),

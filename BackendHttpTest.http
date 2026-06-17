@@ -1,0 +1,68 @@
+### Create a game
+< {%
+    client.global.set("gameTitle", crypto.randomUUID())
+%}
+POST http://localhost:8080/games
+Content-Type: application/json
+
+{
+  "title": "{{gameTitle}}",
+  "startTime": "2026-06-25T12:00:00Z",
+  "endTime": "2026-06-25T12:00:00Z",
+  "map": {
+    "cornerA": {
+      "latitude": 53.0,
+      "longitude": 54.0
+    },
+    "cornerB": {
+      "latitude": 53.0,
+      "longitude": 54.0
+    },
+    "grid": {
+      "rows": 20,
+      "columns": 20
+    }
+  }
+}
+
+> {%
+    const gameId = response.headers.valueOf("X-GameId")
+    client.global.set("gameId", gameId)
+
+    client.test("Game ID is present", () => {
+        client.assert(gameId !== null)
+    });
+%}
+
+### Create an angent
+POST http://localhost:8080/games/{{gameId}}/agents
+Content-Type: application/json
+
+{
+  "firstName": "Tom",
+  "lastName": "Lausmann",
+  "alias": "Lausi",
+  "phoneNumber": "01754242277",
+  "active": true,
+  "type": "MISTERX"
+}
+
+> {%
+    const agentId = response.headers.valueOf("X-AgentId")
+    client.global.set("agentId", agentId)
+
+    client.test("Agent ID is present", () => {
+        client.assert(agentId !== null)
+    })
+%}
+
+### Send a location for an agent
+POST http://localhost:8080/location
+Content-Type: application/json
+X-GameId: {{gameId}}
+X-AgentId: {{agentId}}
+
+{
+  "latitude": 50.0,
+  "longitude": 51.0
+}

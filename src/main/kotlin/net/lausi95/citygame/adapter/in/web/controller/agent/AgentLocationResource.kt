@@ -7,14 +7,14 @@ import java.time.ZonedDateTime
 
 data class AgentLocationResource(
 
-    @field:JsonProperty("timestamp")
-    @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @JsonProperty("timestamp")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     val timestamp: ZonedDateTime,
 
-    @field:JsonProperty("latitude")
+    @JsonProperty("latitude")
     val latitude: Double,
 
-    @field:JsonProperty("longitude")
+    @JsonProperty("longitude")
     val longitude: Double,
 ) {
 

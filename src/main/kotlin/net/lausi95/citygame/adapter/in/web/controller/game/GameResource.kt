@@ -6,25 +6,25 @@ import java.time.OffsetDateTime
 
 data class GameResource(
 
-    @field:JsonProperty("id")
+    @JsonProperty("id")
     val id: String,
 
-    @field:JsonProperty("title")
+    @JsonProperty("title")
     val title: String,
 
-    @field:JsonProperty("startTime")
+    @JsonProperty("startTime")
     val startTime: OffsetDateTime,
 
-    @field:JsonProperty("endTime")
+    @JsonProperty("endTime")
     val endTime: OffsetDateTime,
 
-    @field:JsonProperty("teams")
+    @JsonProperty("teams")
     val teams: Int,
 
-    @field:JsonProperty("agents")
+    @JsonProperty("agents")
     val agents: Int,
 
-    @field:JsonProperty("links")
+    @JsonProperty("links")
     val links: Map<String, String>
 ) {
     constructor(game: Game) : this(

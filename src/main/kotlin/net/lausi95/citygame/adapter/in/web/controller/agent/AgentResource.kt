@@ -4,31 +4,31 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import net.lausi95.citygame.application.domain.model.agent.Agent
 
 data class AgentResource(
-    @field:JsonProperty("id")
+    @JsonProperty("id")
     val id: String,
 
-    @field:JsonProperty("type")
+    @JsonProperty("type")
     val type: Agent.Type,
 
-    @field:JsonProperty("phoneNumber")
+    @JsonProperty("phoneNumber")
     val phoneNumber: String,
 
-    @field:JsonProperty("firstName")
+    @JsonProperty("firstName")
     val firstName: String,
 
-    @field:JsonProperty("lastName")
+    @JsonProperty("lastName")
     val lastName: String,
 
-    @field:JsonProperty("alias")
+    @JsonProperty("alias")
     val alias: String,
 
-    @field:JsonProperty("active")
+    @JsonProperty("active")
     val active: Boolean,
 
-    @field:JsonProperty("location")
+    @JsonProperty("location")
     val location: AgentLocationResource?,
 
-    @field:JsonProperty("links")
+    @JsonProperty("links")
     val links: Map<String, String>,
 
     ) {

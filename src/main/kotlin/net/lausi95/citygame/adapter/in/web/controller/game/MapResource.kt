@@ -8,16 +8,16 @@ import net.lausi95.citygame.common.GeoLocation
 
 data class MapResource(
 
-    @field:JsonProperty("cornerA")
+    @JsonProperty("cornerA")
     val cornerA: GeoLocationDto,
 
-    @field:JsonProperty("cornerB")
+    @JsonProperty("cornerB")
     val cornerB: GeoLocationDto,
 
-    @field:JsonProperty("grid")
+    @JsonProperty("grid")
     val grid: GridDto,
 
-    @field:JsonProperty("links")
+    @JsonProperty("links")
     val links: kotlin.collections.Map<String, String>
 ) {
     constructor(gameId: GameId, map: Map) : this(
@@ -30,15 +30,23 @@ data class MapResource(
     )
 
     data class GeoLocationDto(
+
+        @JsonProperty("latitude")
         val latitude: Double,
+
+        @JsonProperty("longitude")
         val longitude: Double,
     ) {
         constructor(geoLocation: GeoLocation) : this(geoLocation.latitude, geoLocation.longitude)
     }
 
     data class GridDto(
+
+        @JsonProperty("longitude")
         val rows: Int,
-        val column: Int,
+
+        @JsonProperty("columns")
+        val columns: Int,
     ) {
         constructor(grid: Grid) : this(grid.rows, grid.columns)
     }

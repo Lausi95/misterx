@@ -8,33 +8,33 @@ import net.lausi95.citygame.application.domain.model.agent.Agent
 
 data class CreateAgentRequest(
 
-    @field:Parameter(name = "type", description = "Type of the agent", required = true)
-    @field:NotNull
-    @field:JsonProperty("type")
+    @Parameter(name = "type", description = "Type of the agent", required = true)
+    @NotNull
+    @JsonProperty("type")
     var type: Agent.Type?,
 
-    @field:Parameter(name = "phoneNumber", description = "Phone number of the agent", required = true)
-    @field:NotEmpty
-    @field:JsonProperty("phoneNumber")
+    @Parameter(name = "phoneNumber", description = "Phone number of the agent", required = true)
+    @NotEmpty
+    @JsonProperty("phoneNumber")
     var phoneNumber: String?,
 
-    @field:Parameter(name = "firstName", description = "First name of the agent", required = true)
-    @field:NotEmpty
-    @field:JsonProperty("firstName")
+    @Parameter(name = "firstName", description = "First name of the agent", required = true)
+    @NotEmpty
+    @JsonProperty("firstName")
     var firstName: String?,
 
-    @field:Parameter(name = "lastName", description = "Last name of the agent", required = true)
-    @field:NotEmpty
-    @field:JsonProperty("lastName")
+    @Parameter(name = "lastName", description = "Last name of the agent", required = true)
+    @NotEmpty
+    @JsonProperty("lastName")
     var lastName: String?,
 
-    @field:Parameter(name = "alias", description = "Alias for the agent", required = true)
-    @field:NotEmpty
-    @field:JsonProperty("alias")
+    @Parameter(name = "alias", description = "Alias for the agent", required = true)
+    @NotEmpty
+    @JsonProperty("alias")
     var alias: String?,
 
-    @field:Parameter(name = "active", description = "Determines if the agent is active", required = true)
-    @field:NotNull
-    @field:JsonProperty("active")
+    @Parameter(name = "active", description = "Determines if the agent is active", required = true)
+    @NotNull
+    @JsonProperty("active")
     var active: Boolean?,
 )

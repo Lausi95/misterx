@@ -9,69 +9,69 @@ import java.time.OffsetDateTime
 
 data class CreateGameRequest(
 
-    @field:Parameter(name = "title", description = "Title of the game", required = true)
-    @field:JsonProperty("title")
-    @field:NotEmpty(message = "'title' cannot be null or empty")
+    @Parameter(name = "title", description = "Title of the game", required = true)
+    @JsonProperty("title")
+    @NotEmpty(message = "'title' cannot be null or empty")
     var title: String?,
 
-    @field:Parameter(name = "startTime", description = "Start date of the game", required = true)
-    @field:JsonProperty("startTime")
-    @field:NotNull
-    @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Parameter(name = "startTime", description = "Start date of the game", required = true)
+    @JsonProperty("startTime")
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     var startTime: OffsetDateTime?,
 
-    @field:Parameter(name = "endTime", description = "End date of the game", required = true)
-    @field:JsonProperty("endTime")
-    @field:NotNull
-    @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Parameter(name = "endTime", description = "End date of the game", required = true)
+    @JsonProperty("endTime")
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     var endTime: OffsetDateTime?,
 
-    @field:Parameter(name = "map", description = "Map of the game", required = true)
-    @field:JsonProperty("map")
-    @field:NotNull
+    @Parameter(name = "map", description = "Map of the game", required = true)
+    @JsonProperty("map")
+    @NotNull
     var map: MapDto?
 ) {
     data class MapDto(
 
-        @field:Parameter(name = "cornerA", description = "Corner A of the map", required = true)
-        @field:JsonProperty("cornerA")
-        @field:NotNull
+        @Parameter(name = "cornerA", description = "Corner A of the map", required = true)
+        @JsonProperty("cornerA")
+        @NotNull
         var cornerA: GeoLocationDto?,
 
-        @field:Parameter(name = "cornerB", description = "Corner B of the map", required = true)
-        @field:JsonProperty("cornerB")
-        @field:NotNull
+        @Parameter(name = "cornerB", description = "Corner B of the map", required = true)
+        @JsonProperty("cornerB")
+        @NotNull
         var cornerB: GeoLocationDto?,
 
-        @field:Parameter(name = "grid", description = "Grid of the Map", required = true)
-        @field:JsonProperty("grid")
-        @field:NotNull
+        @Parameter(name = "grid", description = "Grid of the Map", required = true)
+        @JsonProperty("grid")
+        @NotNull
         var grid: GridDto?,
     )
 
     data class GeoLocationDto(
 
-        @field:Parameter(name = "latitude", description = "Latitude of the GeoLocation", required = true)
-        @field:JsonProperty("latitude")
-        @field:NotNull
+        @Parameter(name = "latitude", description = "Latitude of the GeoLocation", required = true)
+        @JsonProperty("latitude")
+        @NotNull
         var latitude: Double?,
 
-        @field:Parameter(name = "longitude", description = "Longitude of the GeoLocation", required = true)
-        @field:JsonProperty("longitude")
-        @field:NotNull
+        @Parameter(name = "longitude", description = "Longitude of the GeoLocation", required = true)
+        @JsonProperty("longitude")
+        @NotNull
         var longitude: Double?,
     )
 
     data class GridDto(
 
-        @field:Parameter(name = "rows", description = "Amount of rows in the grid", required = true)
-        @field:JsonProperty("rows")
-        @field:NotNull
+        @Parameter(name = "rows", description = "Amount of rows in the grid", required = true)
+        @JsonProperty("rows")
+        @NotNull
         var rows: Int?,
 
-        @field:Parameter(name = "columns", description = "Amount of columns in the grid", required = true)
-        @field:JsonProperty("columns")
-        @field:NotNull
+        @Parameter(name = "columns", description = "Amount of columns in the grid", required = true)
+        @JsonProperty("columns")
+        @NotNull
         var columns: Int?,
     )
 }
