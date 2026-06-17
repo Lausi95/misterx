@@ -1,5 +1,11 @@
 package net.lausi95.citygame.adapter.`in`.web.controller.team
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.headers.Header
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
@@ -10,10 +16,12 @@ import net.lausi95.citygame.application.port.`in`.team.UpdateTeamUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
+@Tag(name = "Teams")
 @RestController
 @RequestMapping("/games/{gameId}/teams")
 class TeamController(
@@ -23,6 +31,17 @@ class TeamController(
     private val updateTeamUseCase: UpdateTeamUseCase,
 ) {
 
+    @Operation(summary = "Returns a paginated collection of teams for a game")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Collection of teams",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = TeamCollection::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @GetMapping
     fun getTeams(
         @PageableDefault pageable: Pageable,
@@ -33,6 +52,26 @@ class TeamController(
         return TeamCollection(teams)
     }
 
+    @Operation(summary = "Creates a new team in a game")
+    @ApiResponse(
+        responseCode = "201",
+        description = "Team was created successfully",
+        headers = [
+            Header(name = "Location", description = "URI of the new team"),
+            Header(name = "X-TeamId", description = "Identifier of the created team"),
+        ],
+        content = [],
+    )
+    @ApiResponse(
+        responseCode = "400",
+        description = "Input validation errors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @PostMapping
     fun createTeam(
         @PathVariable gameId: String,
@@ -55,6 +94,22 @@ class TeamController(
         }.build()
     }
 
+    @Operation(summary = "Returns a specific team")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Team with the given ID",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = TeamResource::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Team not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @GetMapping("/{teamId}")
     fun getTeam(
         @PathVariable gameId: String,
@@ -65,6 +120,23 @@ class TeamController(
         return TeamResource(team)
     }
 
+    @Operation(summary = "Updates the fields of a team")
+    @ApiResponse(responseCode = "200", description = "Team was updated successfully", content = [])
+    @ApiResponse(
+        responseCode = "400",
+        description = "Input validation errors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Team not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @PatchMapping("/{teamId}")
     fun updateTeam(
         @PathVariable gameId: String,

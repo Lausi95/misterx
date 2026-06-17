@@ -1,4 +1,4 @@
-package net.lausi95.citygame.application.domain.sevice
+package net.lausi95.citygame.application.domain.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.port.`in`.team.UpdateTeamUseCase

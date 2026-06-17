@@ -1,7 +1,6 @@
-package net.lausi95.citygame.application.domain.sevice
+package net.lausi95.citygame.application.domain.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.nayuki.qrcodegen.QrCode
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.GetAgentPort
 import net.lausi95.citygame.application.port.out.agent.SaveAgentPort
@@ -49,8 +48,6 @@ class UpdateAgentService(
         }
 
         saveAgentPort.saveAgent(agent, tenant)
-        val code = QrCode.encodeText(":)", QrCode.Ecc.MEDIUM)
-
 
         log.info { "Agent updated." }
     }

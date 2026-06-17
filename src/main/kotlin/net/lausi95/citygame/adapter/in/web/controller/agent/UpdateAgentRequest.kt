@@ -1,32 +1,33 @@
 package net.lausi95.citygame.adapter.`in`.web.controller.agent
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
 import net.lausi95.citygame.application.domain.model.agent.Agent
 
+@Schema(description = "Request body to partially update an agent")
 data class UpdateAgentRequest(
 
-    @Parameter(name = "type", description = "Type of the agent", required = true)
+    @Schema(description = "Type of the agent")
     @JsonProperty("type")
     var type: Agent.Type?,
 
-    @Parameter(name = "phoneNumber", description = "Phone number of the agent", required = true)
+    @Schema(description = "Phone number of the agent")
     @JsonProperty("phoneNumber")
     var phoneNumber: String?,
 
-    @Parameter(name = "firstName", description = "First name of the agent", required = true)
+    @Schema(description = "First name of the agent")
     @JsonProperty("firstName")
     var firstName: String?,
 
-    @Parameter(name = "lastName", description = "Last name of the agent", required = true)
+    @Schema(description = "Last name of the agent")
     @JsonProperty("lastName")
     var lastName: String?,
 
-    @Parameter(name = "alias", description = "Alias for the agent", required = true)
+    @Schema(description = "In-game alias for the agent")
     @JsonProperty("alias")
     var alias: String?,
 
-    @Parameter(name = "active", description = "Determines if the agent is active", required = true)
+    @Schema(description = "Whether the agent is active")
     @JsonProperty("active")
     var active: Boolean?,
 )

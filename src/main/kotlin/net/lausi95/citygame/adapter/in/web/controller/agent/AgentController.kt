@@ -1,5 +1,11 @@
 package net.lausi95.citygame.adapter.`in`.web.controller.agent
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.headers.Header
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
@@ -7,14 +13,15 @@ import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agentlocation.UpdateAgentLocationUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
+@Tag(name = "Agents")
 @RestController
 @RequestMapping("/games/{gameId}/agents")
 class AgentController(
@@ -22,9 +29,19 @@ class AgentController(
     private val createAgentUseCase: CreateAgentUseCase,
     private val getAgentUseCase: GetAgentUseCase,
     private val updateAgentUseCase: UpdateAgentUseCase,
-    private val updateAgentLocationUseCase: UpdateAgentLocationUseCase,
 ) {
 
+    @Operation(summary = "Returns a paginated collection of agents for a game")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Collection of agents",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = AgentCollection::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @GetMapping
     fun getAgents(
         @PageableDefault pageable: Pageable,
@@ -35,6 +52,26 @@ class AgentController(
         return AgentCollection(agents)
     }
 
+    @Operation(summary = "Creates a new agent in a game")
+    @ApiResponse(
+        responseCode = "201",
+        description = "Agent was created successfully",
+        headers = [
+            Header(name = "Location", description = "URI of the new agent"),
+            Header(name = "X-AgentId", description = "Identifier of the created agent"),
+        ],
+        content = [],
+    )
+    @ApiResponse(
+        responseCode = "400",
+        description = "Input validation errors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @PostMapping
     fun createAgent(
         @PathVariable gameId: String,
@@ -62,6 +99,22 @@ class AgentController(
         }.build()
     }
 
+    @Operation(summary = "Returns a specific agent")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Agent with the given ID",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = AgentResource::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Agent not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @GetMapping("/{agentId}")
     fun getAgent(
         @PathVariable gameId: String,
@@ -72,6 +125,23 @@ class AgentController(
         return AgentResource(agent)
     }
 
+    @Operation(summary = "Updates the fields of an agent")
+    @ApiResponse(responseCode = "200", description = "Agent was updated successfully", content = [])
+    @ApiResponse(
+        responseCode = "400",
+        description = "Input validation errors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Agent not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @PatchMapping("/{agentId}")
     fun updateAgent(
         @PathVariable gameId: String,

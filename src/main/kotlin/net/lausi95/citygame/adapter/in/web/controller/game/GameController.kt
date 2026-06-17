@@ -36,18 +36,21 @@ class GameController(
     @ApiResponse(
         responseCode = "201",
         description = "Game was created successfully",
-        headers = [Header(name = "location", description = "URI of the new game")],
+        headers = [
+            Header(name = "Location", description = "URI of the new game"),
+            Header(name = "X-GameId", description = "Identifier of the created game"),
+        ],
         content = [],
     )
     @ApiResponse(
         responseCode = "400",
-        description = "Input Validation Errors",
-        content = [Content(mediaType = "application/json", schema = Schema(ProblemDetail::class))],
+        description = "Input validation errors",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
     )
     @ApiResponse(
         responseCode = "500",
-        description = "Internal Server Error",
-        content = [Content(mediaType = "application/json", schema = Schema(ProblemDetail::class))],
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
     )
     fun postGame(
         @RequestBody @Valid request: CreateGameRequest,
@@ -88,7 +91,17 @@ class GameController(
     @ApiResponse(
         responseCode = "200",
         description = "Game with the given ID",
-        content = [Content(mediaType = "application/json", schema = Schema(GameResource::class))],
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = GameResource::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Game not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
     )
     @GetMapping("/{gameId}")
     fun getGame(
@@ -99,11 +112,16 @@ class GameController(
         return GameResource(game)
     }
 
-    @Operation(summary = "Collection of games")
+    @Operation(summary = "Returns a paginated collection of games")
     @ApiResponse(
         responseCode = "200",
         description = "Collection of games",
-        content = [Content(mediaType = "application/json", schema = Schema(GameCollection::class))],
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = GameCollection::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
     )
     @GetMapping
     fun getGames(
@@ -114,6 +132,22 @@ class GameController(
         return GameCollection(games)
     }
 
+    @Operation(summary = "Returns the map for a specific game")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Map for the given game",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = MapResource::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Game not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
     @GetMapping("/{gameId}/map")
     fun getMap(
         @PathVariable gameId: String,
@@ -130,8 +164,18 @@ class GameController(
     )
     @ApiResponse(
         responseCode = "400",
-        description = "Game was not updates. At least one of the fields contained errors.",
-        content = [],
+        description = "At least one field contained a validation error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Game not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
     )
     @PatchMapping("/{gameId}")
     fun updateGame(
