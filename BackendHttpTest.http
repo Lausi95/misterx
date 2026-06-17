@@ -66,3 +66,21 @@ X-AgentId: {{agentId}}
   "latitude": 50.0,
   "longitude": 51.0
 }
+
+
+### Create a Team
+POST http://localhost:8080/games/{{gameId}}/teams
+Content-Type: application/json
+
+{
+  "name": "Die Einzigen"
+}
+
+> {%
+    const teamId = response.headers.valueOf("X-TeamId")
+    client.global.set("teamId", teamId)
+
+    client.test("TeamID is present", () => {
+        client.assert(teamId !== null);
+    });
+%}
