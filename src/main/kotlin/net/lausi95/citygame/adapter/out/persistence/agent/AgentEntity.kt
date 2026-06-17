@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.common.Tenant
 
 @Entity
-@Table(name = "game")
+@Table(name = "agent")
 internal class AgentEntity {
 
     @Id

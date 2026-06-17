@@ -34,7 +34,7 @@ data class CreateAgentRequest(
     var alias: String?,
 
     @field:Parameter(name = "active", description = "Determines if the agent is active", required = true)
-    @field:NotEmpty
+    @field:NotNull
     @field:JsonProperty("active")
     var active: Boolean?,
 )

@@ -1,5 +1,6 @@
 package net.lausi95.citygame.application.domain.sevice
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.port.`in`.game.UpdateGameUseCase
 import net.lausi95.citygame.application.port.out.game.CheckGameWithTitleDoesNotExistPort
 import net.lausi95.citygame.application.port.out.game.GetGamePort
@@ -7,6 +8,8 @@ import net.lausi95.citygame.application.port.out.game.SaveGamePort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+private val log = KotlinLogging.logger { }
 
 @Service
 internal class UpdateGameService(
@@ -17,6 +20,7 @@ internal class UpdateGameService(
 
     @Transactional
     override fun updateGame(command: UpdateGameUseCase.Command, tenant: Tenant) {
+        log.info { "Updating game..." }
         val game = getGamePort.getGame(command.gameId, tenant)
 
         command.title?.also {
@@ -45,5 +49,7 @@ internal class UpdateGameService(
         }
 
         saveGamePort.saveGame(game, tenant)
+
+        log.info { "Game updated." }
     }
 }

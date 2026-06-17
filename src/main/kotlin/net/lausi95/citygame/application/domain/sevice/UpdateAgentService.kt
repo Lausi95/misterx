@@ -1,10 +1,14 @@
 package net.lausi95.citygame.application.domain.sevice
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.nayuki.qrcodegen.QrCode
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.GetAgentPort
 import net.lausi95.citygame.application.port.out.agent.SaveAgentPort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
+
+private val log = KotlinLogging.logger { }
 
 @Service
 class UpdateAgentService(
@@ -16,6 +20,8 @@ class UpdateAgentService(
         command: UpdateAgentUseCase.Command,
         tenant: Tenant,
     ) {
+        log.info { "Updating Agent..." }
+
         val agent = getAgentPort.getAgent(command.agentId, tenant)
 
         command.type?.also {
@@ -43,5 +49,9 @@ class UpdateAgentService(
         }
 
         saveAgentPort.saveAgent(agent, tenant)
+        val code = QrCode.encodeText(":)", QrCode.Ecc.MEDIUM)
+
+
+        log.info { "Agent updated." }
     }
 }

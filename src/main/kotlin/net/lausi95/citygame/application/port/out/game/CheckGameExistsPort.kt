@@ -7,9 +7,6 @@ interface CheckGameExistsPort {
 
     fun gameExists(gameId: GameId, tenant: Tenant): Boolean
 
-    fun assertGameExists(gameId: GameId, tenant: Tenant) {
-        if (!gameExists(gameId, tenant)) {
-            error("Game $gameId does not exist")
-        }
-    }
+    fun requireGameExists(gameId: GameId, tenant: Tenant) =
+        require(gameExists(gameId, tenant)) { "Game with ID '${gameId.value}' does not exist" }
 }

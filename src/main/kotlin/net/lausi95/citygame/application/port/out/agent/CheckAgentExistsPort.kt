@@ -7,9 +7,6 @@ interface CheckAgentExistsPort {
 
     fun agentExists(agentId: AgentId, tenant: Tenant): Boolean
 
-    fun requireAgentExists(agentId: AgentId, tenant: Tenant) {
-        require(agentExists(agentId, tenant)) {
-            "Agent does not exist."
-        }
-    }
+    fun requireAgentExists(agentId: AgentId, tenant: Tenant) =
+        require(agentExists(agentId, tenant)) { "Agent does not exist." }
 }

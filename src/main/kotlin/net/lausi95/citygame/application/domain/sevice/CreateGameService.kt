@@ -1,5 +1,6 @@
 package net.lausi95.citygame.application.domain.sevice
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.domain.model.game.Game
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.game.Map
@@ -11,6 +12,8 @@ import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+private val log = KotlinLogging.logger { }
+
 @Service
 class CreateGameService(
     private val gameWithTitleDoesNotExistPort: CheckGameWithTitleDoesNotExistPort,
@@ -19,6 +22,8 @@ class CreateGameService(
 
     @Transactional
     override fun createGame(command: CreateGameUseCase.Command, tenant: Tenant): GameId {
+        log.info { "Creating new game..." }
+
         gameWithTitleDoesNotExistPort.assertGameWithTitleDoesNotExist(command.title, tenant)
 
         val game = Game(
@@ -35,6 +40,8 @@ class CreateGameService(
         )
 
         saveGamePort.saveGame(game, tenant)
+
+        log.info { "Game created." }
 
         return game.id
     }

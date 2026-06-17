@@ -1,5 +1,6 @@
 package net.lausi95.citygame.application.domain.model.agent
 
+import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.game.GameId
 import java.util.*
 
@@ -36,6 +37,9 @@ class Agent(
     val active: Boolean
         get() = _active
 
+    var location: AgentLocation? = null
+        private set
+
     fun updateType(type: Type) {
         _type = type
     }
@@ -58,6 +62,10 @@ class Agent(
 
     fun updateActive(active: Boolean) {
         _active = active
+    }
+
+    fun setLocation(location: AgentLocation) {
+        this.location = location
     }
 
     enum class Type {

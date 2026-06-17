@@ -29,7 +29,7 @@ CREATE TABLE agent
     first_name   VARCHAR(255) NOT NULL,
     last_name    VARCHAR(255) NOT NULL,
     alias        VARCHAR(255) NOT NULL,
-    active       BIT          NOT NULL
+    active       BOOLEAN      NOT NULL
 );
 
 CREATE TABLE agent_location

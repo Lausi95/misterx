@@ -5,5 +5,5 @@ typealias Longitude = Double
 
 data class GeoLocation(
     val latitude: Latitude,
-    val longitude: Longitude
+    val longitude: Longitude,
 )

@@ -25,9 +25,13 @@ data class AgentResource(
     @field:JsonProperty("active")
     val active: Boolean,
 
+    @field:JsonProperty("location")
+    val location: AgentLocationResource?,
+
     @field:JsonProperty("links")
-    val links: Map<String, String>
-) {
+    val links: Map<String, String>,
+
+    ) {
     constructor(agent: Agent) : this(
         id = agent.id.value,
         type = agent.type,
@@ -36,6 +40,7 @@ data class AgentResource(
         lastName = agent.lastName,
         alias = agent.alias,
         active = agent.active,
+        location = agent.location?.let { AgentLocationResource(it) },
         links = mapOf(
             "self" to "/games/${agent.gameId.value}/agents/${agent.id.value}"
         )

@@ -7,6 +7,8 @@ import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
+import net.lausi95.citygame.application.port.`in`.agentlocation.UpdateAgentLocationUseCase
+import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -21,6 +23,7 @@ class AgentController(
     private val createAgentUseCase: CreateAgentUseCase,
     private val getAgentUseCase: GetAgentUseCase,
     private val updateAgentUseCase: UpdateAgentUseCase,
+    private val updateAgentLocationUseCase: UpdateAgentLocationUseCase,
 ) {
 
     @GetMapping
@@ -87,5 +90,25 @@ class AgentController(
         )
 
         updateAgentUseCase.updateAgent(command, tenant)
+    }
+
+    @PostMapping("/{agentId}/location")
+    fun updateLocation(
+        @PathVariable gameId: String,
+        @PathVariable agentId: String,
+        @Valid @RequestBody request: UpdateAgentLocationRequest,
+        @RequestAttribute tenant: Tenant,
+    ): ResponseEntity<Unit> {
+        val geoLocation = GeoLocation(
+            latitude = requireNotNull(request.latitude),
+            longitude = requireNotNull(request.longitude),
+        )
+        updateAgentLocationUseCase.updateAgentLocation(
+            gameId = GameId(gameId),
+            agentId = AgentId(agentId),
+            geoLocation = geoLocation,
+            tenant = tenant,
+        )
+        return ResponseEntity.accepted().build()
     }
 }
