@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.nayuki.qrcodegen.QrCode
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
@@ -15,12 +16,16 @@ import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
 import net.lausi95.citygame.common.Tenant
+import net.lausi95.citygame.common.toImage
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import org.springframework.web.util.UriComponentsBuilder
+import java.awt.image.BufferedImage
 
 @Tag(name = "Agents")
 @RestController
@@ -164,6 +169,57 @@ class AgentController(
         )
 
         updateAgentUseCase.updateAgent(command, tenant)
+    }
+
+    @Operation(summary = "Generates a setup QR code for an agent")
+    @ApiResponse(
+        responseCode = "200",
+        description = "PNG image of the agent's setup QR code",
+        content = [Content(mediaType = MediaType.IMAGE_PNG_VALUE)],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Agent not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @GetMapping("/{agentId}/setup-qr", produces = [MediaType.IMAGE_PNG_VALUE])
+    fun getSetupQr(
+        @PathVariable gameId: String,
+        @PathVariable agentId: String,
+        @RequestAttribute tenant: Tenant,
+    ): BufferedImage {
+        val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
+
+        val scheme = ServletUriComponentsBuilder.fromCurrentRequest().build().scheme
+
+        val setupUrl = UriComponentsBuilder.newInstance()
+            .scheme(scheme)
+            .host(tenant.value)
+            .path("/setup-agent")
+            .queryParam("type", agent.type)
+            .queryParam("agentId", agent.id.value)
+            .build()
+            .toUriString()
+
+        val qrCode = QrCode.encodeText(setupUrl, QrCode.Ecc.MEDIUM)
+        return qrCode.toImage(
+            scale = QR_SCALE,
+            border = QR_BORDER,
+            lightColor = QR_LIGHT_COLOR,
+            darkColor = QR_DARK_COLOR,
+        )
+    }
+
+    private companion object {
+        const val QR_SCALE = 10
+        const val QR_BORDER = 4
+        const val QR_LIGHT_COLOR = 0xFFFFFF
+        const val QR_DARK_COLOR = 0x000000
     }
 
 }
