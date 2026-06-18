@@ -3,6 +3,7 @@ package net.lausi95.citygame.adapter.`in`.web.controller.agent
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import net.lausi95.citygame.application.domain.model.agent.Agent
+import net.lausi95.citygame.application.domain.model.finding.FindingTeam
 
 @Schema(description = "Represents a game agent (player)")
 data class AgentResource(
@@ -39,12 +40,18 @@ data class AgentResource(
     @JsonProperty("location")
     val location: AgentLocationResource?,
 
+    @Schema(description = "Teams that have found this agent (id and name only)")
+    @JsonProperty("foundByTeams")
+    val foundByTeams: List<FindingTeamResource>,
+
     @Schema(description = "Navigation links")
     @JsonProperty("links")
     val links: Map<String, String>,
 
     ) {
-    constructor(agent: Agent) : this(
+    constructor(agent: Agent) : this(agent, emptyList())
+
+    constructor(agent: Agent, foundByTeams: List<FindingTeam>) : this(
         id = agent.id.value,
         type = agent.type,
         phoneNumber = agent.phoneNumber,
@@ -53,6 +60,7 @@ data class AgentResource(
         alias = agent.alias,
         active = agent.active,
         location = agent.location?.let { AgentLocationResource(it) },
+        foundByTeams = foundByTeams.map { FindingTeamResource(it) },
         links = mapOf(
             "self" to "/games/${agent.gameId.value}/agents/${agent.id.value}"
         )

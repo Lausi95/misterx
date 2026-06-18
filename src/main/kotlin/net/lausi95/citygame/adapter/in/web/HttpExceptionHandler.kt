@@ -1,8 +1,10 @@
 package net.lausi95.citygame.adapter.`in`.web
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import net.lausi95.citygame.application.domain.ConflictDomainException
 import net.lausi95.citygame.application.domain.DomainException
 import net.lausi95.citygame.application.domain.NotFoundDomainException
+import net.lausi95.citygame.application.domain.UnprocessableDomainException
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -33,6 +35,20 @@ class HttpExceptionHandler {
     @ExceptionHandler(NotFoundDomainException::class)
     fun handleNotFoundDomainException(ex: NotFoundDomainException): ProblemDetail {
         val problemDetail = ProblemDetail.forStatus(404)
+        problemDetail.setProperty("details", ex.message)
+        return problemDetail
+    }
+
+    @ExceptionHandler(ConflictDomainException::class)
+    fun handleConflictDomainException(ex: ConflictDomainException): ProblemDetail {
+        val problemDetail = ProblemDetail.forStatus(409)
+        problemDetail.setProperty("details", ex.message)
+        return problemDetail
+    }
+
+    @ExceptionHandler(UnprocessableDomainException::class)
+    fun handleUnprocessableDomainException(ex: UnprocessableDomainException): ProblemDetail {
+        val problemDetail = ProblemDetail.forStatus(422)
         problemDetail.setProperty("details", ex.message)
         return problemDetail
     }

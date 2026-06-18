@@ -8,5 +8,7 @@ internal interface TeamMemberEntityRepository : JpaRepository<TeamMemberEntity, 
 
     fun findByTeamIdAndGameIdAndTenant(teamId: String, gameId: String, tenant: String, pageable: Pageable): Page<TeamMemberEntity>
 
+    fun findByIdAndTenant(id: String, tenant: String): TeamMemberEntity?
+
     fun countByTeamIdAndTenant(teamId: String, tenant: String): Long
 }

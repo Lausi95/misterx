@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
+import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.team.CreateTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
@@ -31,6 +32,7 @@ class TeamController(
     private val getTeamUseCase: GetTeamUseCase,
     private val updateTeamUseCase: UpdateTeamUseCase,
     private val getTeamMembersUseCase: GetTeamMembersUseCase,
+    private val getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase,
 ) {
 
     @Operation(summary = "Returns a paginated collection of teams for a game")
@@ -120,7 +122,8 @@ class TeamController(
     ): TeamResource {
         val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
         val memberCount = getTeamMembersUseCase.countTeamMembers(TeamId(teamId), tenant)
-        return TeamResource(team, memberCount)
+        val foundAgents = getTeamFoundAgentsUseCase.getFoundAgents(TeamId(teamId), tenant)
+        return TeamResource(team, memberCount, foundAgents)
     }
 
     @Operation(summary = "Updates the fields of a team")

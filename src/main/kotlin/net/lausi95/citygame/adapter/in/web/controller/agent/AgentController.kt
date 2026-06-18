@@ -13,6 +13,7 @@ import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -29,6 +30,7 @@ class AgentController(
     private val createAgentUseCase: CreateAgentUseCase,
     private val getAgentUseCase: GetAgentUseCase,
     private val updateAgentUseCase: UpdateAgentUseCase,
+    private val getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase,
 ) {
 
     @Operation(summary = "Returns a paginated collection of agents for a game")
@@ -122,7 +124,8 @@ class AgentController(
         @RequestAttribute tenant: Tenant,
     ): AgentResource {
         val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
-        return AgentResource(agent)
+        val foundByTeams = getAgentFindingTeamsUseCase.getFindingTeams(AgentId(agentId), tenant)
+        return AgentResource(agent, foundByTeams)
     }
 
     @Operation(summary = "Updates the fields of an agent")
