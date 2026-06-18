@@ -15,8 +15,8 @@ data class TeamCollection(
     @Schema(description = "Navigation links")
     val links: Map<String, String>,
 ) {
-    constructor(teams: Page<Team>) : this(
-        teams = teams.map { TeamResource(it) },
+    constructor(teams: Page<Team>, countFn: (Team) -> Long) : this(
+        teams = teams.map { TeamResource(it, countFn(it)) },
         links = mapOf(),
     )
 }

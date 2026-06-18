@@ -4,7 +4,10 @@ import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.game.GameId
 import java.util.*
 
-data class AgentId(val value: String = UUID.randomUUID().toString())
+@JvmInline
+value class AgentId(val value: String = UUID.randomUUID().toString()) {
+    override fun toString(): String = value
+}
 
 class Agent(
     val id: AgentId,

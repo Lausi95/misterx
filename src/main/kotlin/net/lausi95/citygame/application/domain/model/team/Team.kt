@@ -3,7 +3,10 @@ package net.lausi95.citygame.application.domain.model.team
 import net.lausi95.citygame.application.domain.model.game.GameId
 import java.util.*
 
-data class TeamId(val value: String = UUID.randomUUID().toString())
+@JvmInline
+value class TeamId(val value: String = UUID.randomUUID().toString()) {
+    override fun toString(): String = value
+}
 
 class Team(
     val id: TeamId,

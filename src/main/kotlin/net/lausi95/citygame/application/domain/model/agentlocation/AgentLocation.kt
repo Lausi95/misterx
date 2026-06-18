@@ -5,7 +5,10 @@ import net.lausi95.citygame.common.GeoLocation
 import java.time.ZonedDateTime
 import java.util.*
 
-data class AgentLocationId(val value: String = UUID.randomUUID().toString())
+@JvmInline
+value class AgentLocationId(val value: String = UUID.randomUUID().toString()) {
+    override fun toString(): String = value
+}
 
 class AgentLocation(
     val id: AgentLocationId,

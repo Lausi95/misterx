@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.`in`.team.CreateTeamUseCase
+import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamsUseCase
 import net.lausi95.citygame.application.port.`in`.team.UpdateTeamUseCase
@@ -29,6 +30,7 @@ class TeamController(
     private val createTeamUseCase: CreateTeamUseCase,
     private val getTeamUseCase: GetTeamUseCase,
     private val updateTeamUseCase: UpdateTeamUseCase,
+    private val getTeamMembersUseCase: GetTeamMembersUseCase,
 ) {
 
     @Operation(summary = "Returns a paginated collection of teams for a game")
@@ -49,7 +51,7 @@ class TeamController(
         @RequestAttribute tenant: Tenant,
     ): TeamCollection {
         val teams = getTeamsUseCase.getTeams(GameId(gameId), pageable, tenant)
-        return TeamCollection(teams)
+        return TeamCollection(teams) { team -> getTeamMembersUseCase.countTeamMembers(team.id, tenant) }
     }
 
     @Operation(summary = "Creates a new team in a game")
@@ -117,7 +119,8 @@ class TeamController(
         @RequestAttribute tenant: Tenant,
     ): TeamResource {
         val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
-        return TeamResource(team)
+        val memberCount = getTeamMembersUseCase.countTeamMembers(TeamId(teamId), tenant)
+        return TeamResource(team, memberCount)
     }
 
     @Operation(summary = "Updates the fields of a team")

@@ -15,15 +15,21 @@ data class TeamResource(
     @JsonProperty("name")
     val name: String,
 
+    @Schema(description = "Number of registered members in this team")
+    @JsonProperty("memberCount")
+    val memberCount: Long,
+
     @Schema(description = "Navigation links")
     @JsonProperty("links")
     val links: Map<String, String>,
 ) {
-    constructor(team: Team) : this(
+    constructor(team: Team, memberCount: Long) : this(
         id = team.id.value,
         name = team.name,
+        memberCount = memberCount,
         links = mapOf(
-            "self" to "/games/${team.gameId.value}/teams/${team.id.value}"
+            "self" to "/games/${team.gameId.value}/teams/${team.id.value}",
+            "members" to "/games/${team.gameId.value}/teams/${team.id.value}/members",
         )
     )
 }

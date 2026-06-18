@@ -75,7 +75,10 @@ data class Grid(
     val columns: Int,
 )
 
-data class MapId(val value: String = UUID.randomUUID().toString())
+@JvmInline
+value class MapId(val value: String = UUID.randomUUID().toString()) {
+    override fun toString(): String = value
+}
 
 class Map(
     val id: MapId,
