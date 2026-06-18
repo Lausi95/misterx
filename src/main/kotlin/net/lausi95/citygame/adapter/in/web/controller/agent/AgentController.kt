@@ -1,12 +1,12 @@
 package net.lausi95.citygame.adapter.`in`.web.controller.agent
 
+import io.nayuki.qrcodegen.QrCode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.nayuki.qrcodegen.QrCode
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
@@ -203,6 +203,7 @@ class AgentController(
             .path("/setup-agent")
             .queryParam("type", agent.type)
             .queryParam("agentId", agent.id.value)
+            .queryParam("gameId", agent.gameId.value)
             .build()
             .toUriString()
 
