@@ -47,7 +47,7 @@ internal class AgentEntity {
         this.gameId = agent.gameId.value
         this.type = agent.type.name
         this.phoneNumber = agent.phoneNumber
-        this.firstName = agent.firstname
+        this.firstName = agent.firstName
         this.lastName = agent.lastName
         this.alias = agent.alias
         this.active = agent.active

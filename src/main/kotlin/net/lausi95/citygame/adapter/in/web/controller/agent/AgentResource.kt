@@ -48,7 +48,7 @@ data class AgentResource(
         id = agent.id.value,
         type = agent.type,
         phoneNumber = agent.phoneNumber,
-        firstName = agent.firstname,
+        firstName = agent.firstName,
         lastName = agent.lastName,
         alias = agent.alias,
         active = agent.active,

@@ -28,7 +28,7 @@ class Agent(
     val phoneNumber: String
         get() = _phoneNumber
 
-    val firstname: String
+    val firstName: String
         get() = _firstName
 
     val lastName: String
@@ -47,8 +47,8 @@ class Agent(
         _type = type
     }
 
-    fun updateFirstName(fistName: String) {
-        _firstName = firstname
+    fun updateFirstName(firstName: String) {
+        _firstName = firstName
     }
 
     fun updateLastName(lastName: String) {
