@@ -12,7 +12,8 @@ import net.lausi95.citygame.application.port.out.team.SaveTeamMemberPort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 private val log = KotlinLogging.logger { }
 
@@ -34,7 +35,7 @@ class RegisterTeamMemberService(
             TeamMemberId(),
             command.teamId,
             command.gameId,
-            Instant.now(),
+            OffsetDateTime.now(ZoneOffset.UTC),
         )
 
         saveTeamMemberPort.saveTeamMember(member, tenant)

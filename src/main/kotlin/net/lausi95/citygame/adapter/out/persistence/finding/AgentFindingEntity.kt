@@ -11,7 +11,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "agent_finding")
@@ -34,7 +34,7 @@ internal class AgentFindingEntity {
     var agentId: String? = null
 
     @Column(name = "found_at")
-    var foundAt: ZonedDateTime? = null
+    var foundAt: OffsetDateTime? = null
 
     @Column(name = "reported_latitude")
     var reportedLatitude: Double? = null

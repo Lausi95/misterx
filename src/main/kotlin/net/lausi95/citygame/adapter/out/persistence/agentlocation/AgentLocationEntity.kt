@@ -9,7 +9,7 @@ import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocationId
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "agent_location")
@@ -26,7 +26,7 @@ internal class AgentLocationEntity {
     var agentId: String? = null
 
     @Column(name = "timestamp")
-    var timestamp: ZonedDateTime? = null
+    var timestamp: OffsetDateTime? = null
 
     @Column(name = "latitude")
     var latitude: Double? = null

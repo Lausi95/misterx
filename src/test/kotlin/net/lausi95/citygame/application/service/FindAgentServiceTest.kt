@@ -40,9 +40,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.Instant
 import java.time.OffsetDateTime
-import java.time.ZonedDateTime
 
 class FindAgentServiceTest {
 
@@ -90,7 +88,7 @@ class FindAgentServiceTest {
     private fun team(game: GameId = gameId) = Team(teamId, game, "Team A")
 
     private fun member(team: TeamId = teamId, game: GameId = gameId) =
-        TeamMember(memberId, team, game, Instant.now())
+        TeamMember(memberId, team, game, OffsetDateTime.now())
 
     private fun command(reportedLocation: GeoLocation? = null) =
         FindAgentUseCase.Command(gameId, teamId, memberId, agentId, reportedLocation)
@@ -110,7 +108,7 @@ class FindAgentServiceTest {
         val reported = GeoLocation(52.5, 13.4)
         val agentLoc = GeoLocation(52.6, 13.5)
         every { getAgentLocationPort.getAgentLocation(agentId) } returns
-            AgentLocation(AgentLocationId(), agentId, ZonedDateTime.now(), agentLoc)
+            AgentLocation(AgentLocationId(), agentId, OffsetDateTime.now(), agentLoc)
 
         val saved = slot<AgentFinding>()
         every { saveAgentFindingPort.saveAgentFinding(capture(saved), tenant) } returns Unit

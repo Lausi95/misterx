@@ -9,7 +9,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamMember
 import net.lausi95.citygame.application.domain.model.team.TeamMemberId
 import net.lausi95.citygame.common.Tenant
-import java.time.Instant
+import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "team_member")
@@ -29,7 +29,7 @@ internal class TeamMemberEntity {
     var teamId: String? = null
 
     @Column(name = "registered_at")
-    var registeredAt: Instant? = null
+    var registeredAt: OffsetDateTime? = null
 
     constructor(member: TeamMember, tenant: Tenant) {
         this.id = member.id.value

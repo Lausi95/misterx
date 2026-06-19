@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import java.time.OffsetDateTime
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 @DatabaseIntegrationTest
@@ -78,7 +77,7 @@ class AgentFindingEntityRepositoryTest {
         val gameId = seedGame()
         val teamId = seedTeam(gameId)
         val agentId = seedAgent(gameId)
-        val foundAt = ZonedDateTime.now()
+        val foundAt = OffsetDateTime.now()
 
         val finding = AgentFinding(
             FindingId(),
@@ -112,7 +111,7 @@ class AgentFindingEntityRepositoryTest {
 
         agentFindingEntityRepository.saveAndFlush(
             AgentFindingEntity(
-                AgentFinding(FindingId(), gameId, teamId, agentId, ZonedDateTime.now(), null, null),
+                AgentFinding(FindingId(), gameId, teamId, agentId, OffsetDateTime.now(), null, null),
                 tenant,
             )
         )
@@ -130,7 +129,7 @@ class AgentFindingEntityRepositoryTest {
 
         agentFindingEntityRepository.saveAndFlush(
             AgentFindingEntity(
-                AgentFinding(FindingId(), gameId, teamId, agentId, ZonedDateTime.now(), null, null),
+                AgentFinding(FindingId(), gameId, teamId, agentId, OffsetDateTime.now(), null, null),
                 tenant,
             )
         )
@@ -138,7 +137,7 @@ class AgentFindingEntityRepositoryTest {
         assertThatThrownBy {
             agentFindingEntityRepository.saveAndFlush(
                 AgentFindingEntity(
-                    AgentFinding(FindingId(), gameId, teamId, agentId, ZonedDateTime.now(), null, null),
+                    AgentFinding(FindingId(), gameId, teamId, agentId, OffsetDateTime.now(), null, null),
                     tenant,
                 )
             )
@@ -151,7 +150,7 @@ class AgentFindingEntityRepositoryTest {
         val teamId = seedTeam(gameId)
         val older = seedAgent(gameId)
         val newer = seedAgent(gameId)
-        val now = ZonedDateTime.now()
+        val now = OffsetDateTime.now()
 
         agentFindingEntityRepository.saveAndFlush(
             AgentFindingEntity(AgentFinding(FindingId(), gameId, teamId, older, now.minusHours(2), null, null), tenant)
@@ -172,7 +171,7 @@ class AgentFindingEntityRepositoryTest {
         val olderTeam = seedTeam(gameId)
         val newerTeam = seedTeam(gameId)
         val agentId = seedAgent(gameId)
-        val now = ZonedDateTime.now()
+        val now = OffsetDateTime.now()
 
         agentFindingEntityRepository.saveAndFlush(
             AgentFindingEntity(AgentFinding(FindingId(), gameId, olderTeam, agentId, now.minusHours(2), null, null), tenant)

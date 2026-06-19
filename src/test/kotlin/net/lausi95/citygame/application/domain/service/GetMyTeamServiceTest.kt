@@ -16,7 +16,7 @@ import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.time.Instant
+import java.time.OffsetDateTime
 
 class GetMyTeamServiceTest {
 
@@ -33,7 +33,7 @@ class GetMyTeamServiceTest {
     private fun aTeam(game: GameId = gameId) = Team(id = teamId, _gameId = game, _name = "Red Squad")
 
     private fun aMember(team: TeamId = teamId, game: GameId = gameId) =
-        TeamMember(id = memberId, teamId = team, gameId = game, registeredAt = Instant.EPOCH)
+        TeamMember(id = memberId, teamId = team, gameId = game, registeredAt = OffsetDateTime.parse("1970-01-01T00:00:00Z"))
 
     @Test
     fun `returns the team when no member id is supplied`() {

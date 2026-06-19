@@ -22,7 +22,7 @@ import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
-import java.time.ZonedDateTime
+import java.time.ZoneOffset
 
 private val log = KotlinLogging.logger { }
 
@@ -43,7 +43,7 @@ class FindAgentService(
 
         // 1. Game must exist and be currently active.
         val game = getGamePort.getGame(command.gameId, tenant)
-        val now = OffsetDateTime.now()
+        val now = OffsetDateTime.now(ZoneOffset.UTC)
         if (now.isBefore(game.startTime) || now.isAfter(game.endTime)) {
             gameNotActive(command.gameId)
         }
@@ -81,7 +81,7 @@ class FindAgentService(
             command.gameId,
             command.teamId,
             command.agentId,
-            ZonedDateTime.now(),
+            OffsetDateTime.now(ZoneOffset.UTC),
             command.reportedLocation,
             agentLocation,
         )

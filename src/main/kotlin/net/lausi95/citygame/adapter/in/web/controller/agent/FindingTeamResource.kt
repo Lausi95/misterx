@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import net.lausi95.citygame.application.domain.model.finding.FindingTeam
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 @Schema(description = "A team that has found this agent, exposing its identity, name and when it found the agent")
 data class FindingTeamResource(
@@ -20,7 +20,7 @@ data class FindingTeamResource(
     @Schema(description = "When this team found the agent")
     @JsonProperty("foundAt")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    val foundAt: ZonedDateTime,
+    val foundAt: OffsetDateTime,
 ) {
     constructor(findingTeam: FindingTeam) : this(
         id = findingTeam.teamId.value,

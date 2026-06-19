@@ -10,6 +10,10 @@ spring:
           issuer-uri: ${keycloak-realm}
   jpa:
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
   docker:
     compose:
       lifecycle-management: start_only

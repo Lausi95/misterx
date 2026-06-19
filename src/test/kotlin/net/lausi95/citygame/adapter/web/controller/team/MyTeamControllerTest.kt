@@ -21,7 +21,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 @WebMvcTest(MyTeamController::class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -69,7 +69,7 @@ class MyTeamControllerTest {
 
     @Test
     fun `serialises foundAt for each found agent in the response body`() {
-        val foundAt = ZonedDateTime.parse("2026-06-19T10:15:30+02:00")
+        val foundAt = OffsetDateTime.parse("2026-06-19T10:15:30+02:00")
         every {
             getMyTeamUseCase.getMyTeam(GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), null), tenant)
         } returns aTeam()

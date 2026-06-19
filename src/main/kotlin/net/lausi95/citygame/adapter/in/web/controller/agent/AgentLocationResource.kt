@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 @Schema(description = "Last known location of an agent")
 data class AgentLocationResource(
@@ -12,7 +12,7 @@ data class AgentLocationResource(
     @Schema(description = "When the location was recorded")
     @JsonProperty("timestamp")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    val timestamp: ZonedDateTime,
+    val timestamp: OffsetDateTime,
 
     @Schema(description = "Latitude in decimal degrees")
     @JsonProperty("latitude")

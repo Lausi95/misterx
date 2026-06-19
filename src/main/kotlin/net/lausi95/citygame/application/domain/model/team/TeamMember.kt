@@ -1,7 +1,7 @@
 package net.lausi95.citygame.application.domain.model.team
 
 import net.lausi95.citygame.application.domain.model.game.GameId
-import java.time.Instant
+import java.time.OffsetDateTime
 import java.util.*
 
 @JvmInline
@@ -13,5 +13,5 @@ class TeamMember(
     val id: TeamMemberId,
     val teamId: TeamId,
     val gameId: GameId,
-    val registeredAt: Instant,
+    val registeredAt: OffsetDateTime,
 )

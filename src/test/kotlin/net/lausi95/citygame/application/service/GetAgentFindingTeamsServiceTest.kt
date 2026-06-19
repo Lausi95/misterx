@@ -14,7 +14,7 @@ import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 class GetAgentFindingTeamsServiceTest {
 
@@ -26,13 +26,13 @@ class GetAgentFindingTeamsServiceTest {
     private val gameId = GameId()
     private val agentId = AgentId()
 
-    private fun finding(teamId: TeamId, foundAt: ZonedDateTime = ZonedDateTime.now()) =
+    private fun finding(teamId: TeamId, foundAt: OffsetDateTime = OffsetDateTime.now()) =
         AgentFinding(FindingId(), gameId, teamId, agentId, foundAt, null, null)
 
     @Test
     fun `exposes finding teams as id, name and found time`() {
         val teamId = TeamId()
-        val foundAt = ZonedDateTime.now()
+        val foundAt = OffsetDateTime.now()
         every { getAgentFindingsPort.getFindingsByAgent(agentId, tenant) } returns listOf(finding(teamId, foundAt))
         every { getTeamPort.getTeamOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
 

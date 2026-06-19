@@ -1,7 +1,7 @@
 package net.lausi95.citygame.application.domain.model.finding
 
 import net.lausi95.citygame.application.domain.model.agent.AgentId
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 
 /**
  * Projection of an agent a team has found, exposing the agent's identity and display name
@@ -10,5 +10,5 @@ import java.time.ZonedDateTime
 class FoundAgent(
     val agentId: AgentId,
     val name: String,
-    val foundAt: ZonedDateTime,
+    val foundAt: OffsetDateTime,
 )

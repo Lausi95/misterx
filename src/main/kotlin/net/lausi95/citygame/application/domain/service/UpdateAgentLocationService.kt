@@ -12,7 +12,8 @@ import net.lausi95.citygame.application.port.out.game.CheckGameExistsPort
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Component
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 private val log = KotlinLogging.logger { }
 
@@ -37,7 +38,7 @@ class UpdateAgentLocationService(
         val agentLocation = AgentLocation(
             AgentLocationId(),
             agentId,
-            ZonedDateTime.now(),
+            OffsetDateTime.now(ZoneOffset.UTC),
             geoLocation,
         )
 

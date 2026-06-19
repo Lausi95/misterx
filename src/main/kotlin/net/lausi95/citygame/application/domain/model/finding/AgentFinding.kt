@@ -4,7 +4,7 @@ import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.common.GeoLocation
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 import java.util.*
 
 @JvmInline
@@ -17,7 +17,7 @@ class AgentFinding(
     val gameId: GameId,
     val teamId: TeamId,
     val agentId: AgentId,
-    val foundAt: ZonedDateTime,
+    val foundAt: OffsetDateTime,
     val reportedLocation: GeoLocation?,
     val agentLocation: GeoLocation?,
 )

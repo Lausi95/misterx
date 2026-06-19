@@ -3,7 +3,7 @@ package net.lausi95.citygame.adapter.`in`.web.controller.team
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import net.lausi95.citygame.application.domain.model.team.TeamMember
-import java.time.Instant
+import java.time.OffsetDateTime
 
 @Schema(description = "Represents a team member")
 data class TeamMemberResource(
@@ -14,7 +14,7 @@ data class TeamMemberResource(
 
     @Schema(description = "Timestamp when the member registered")
     @JsonProperty("registeredAt")
-    val registeredAt: Instant,
+    val registeredAt: OffsetDateTime,
 
     @Schema(description = "Navigation links")
     @JsonProperty("links")
