@@ -1,6 +1,5 @@
 package net.lausi95.citygame.adapter.`in`.web.controller.agent
 
-import io.nayuki.qrcodegen.QrCode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.Content
@@ -16,7 +15,7 @@ import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
 import net.lausi95.citygame.common.Tenant
-import net.lausi95.citygame.common.toImage
+import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.MediaType
@@ -207,20 +206,7 @@ class AgentController(
             .build()
             .toUriString()
 
-        val qrCode = QrCode.encodeText(setupUrl, QrCode.Ecc.MEDIUM)
-        return qrCode.toImage(
-            scale = QR_SCALE,
-            border = QR_BORDER,
-            lightColor = QR_LIGHT_COLOR,
-            darkColor = QR_DARK_COLOR,
-        )
-    }
-
-    private companion object {
-        const val QR_SCALE = 10
-        const val QR_BORDER = 4
-        const val QR_LIGHT_COLOR = 0xFFFFFF
-        const val QR_DARK_COLOR = 0x000000
+        return qrCodeImage(setupUrl)
     }
 
 }

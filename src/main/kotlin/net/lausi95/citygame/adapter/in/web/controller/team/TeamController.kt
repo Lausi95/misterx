@@ -16,12 +16,16 @@ import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamsUseCase
 import net.lausi95.citygame.application.port.`in`.team.UpdateTeamUseCase
 import net.lausi95.citygame.common.Tenant
+import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import org.springframework.web.util.UriComponentsBuilder
+import java.awt.image.BufferedImage
 
 @Tag(name = "Teams")
 @RestController
@@ -156,5 +160,43 @@ class TeamController(
         )
 
         updateTeamUseCase.updateTeam(command, tenant)
+    }
+
+    @Operation(summary = "Generates a setup QR code for a team")
+    @ApiResponse(
+        responseCode = "200",
+        description = "PNG image of the team's setup QR code",
+        content = [Content(mediaType = MediaType.IMAGE_PNG_VALUE)],
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Team not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @GetMapping("/{teamId}/setup-qr", produces = [MediaType.IMAGE_PNG_VALUE])
+    fun getSetupQr(
+        @PathVariable gameId: String,
+        @PathVariable teamId: String,
+        @RequestAttribute tenant: Tenant,
+    ): BufferedImage {
+        val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
+
+        val scheme = ServletUriComponentsBuilder.fromCurrentRequest().build().scheme
+
+        val setupUrl = UriComponentsBuilder.newInstance()
+            .scheme(scheme)
+            .host(tenant.value)
+            .path("/setup-team")
+            .queryParam("gameId", team.gameId.value)
+            .queryParam("teamId", team.id.value)
+            .build()
+            .toUriString()
+
+        return qrCodeImage(setupUrl)
     }
 }

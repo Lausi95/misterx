@@ -3,6 +3,24 @@ package net.lausi95.citygame.common
 import io.nayuki.qrcodegen.QrCode
 import java.awt.image.BufferedImage
 
+private const val QR_SCALE = 10
+private const val QR_BORDER = 4
+private const val QR_LIGHT_COLOR = 0xFFFFFF
+private const val QR_DARK_COLOR = 0x000000
+
+/**
+ * Encodes [text] into a QR code rendered as a PNG-ready [BufferedImage] using the
+ * application's standard rendering parameters (medium error correction, black on white).
+ */
+fun qrCodeImage(text: String): BufferedImage {
+    val qrCode = QrCode.encodeText(text, QrCode.Ecc.MEDIUM)
+    return qrCode.toImage(
+        scale = QR_SCALE,
+        border = QR_BORDER,
+        lightColor = QR_LIGHT_COLOR,
+        darkColor = QR_DARK_COLOR,
+    )
+}
 
 fun QrCode.toImage(scale: Int, border: Int, lightColor: Int, darkColor: Int): BufferedImage {
     require(!(scale <= 0 || border < 0)) { "Value out of range" }
