@@ -195,7 +195,7 @@ class GameController(
                         longitude = requireNotNull(it.longitude),
                     )
                 },
-                cornerB = request.map?.cornerA?.let {
+                cornerB = request.map?.cornerB?.let {
                     GeoLocation(
                         latitude = requireNotNull(it.latitude),
                         longitude = requireNotNull(it.longitude),
