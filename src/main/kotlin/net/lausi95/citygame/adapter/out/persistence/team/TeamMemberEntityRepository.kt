@@ -11,4 +11,6 @@ internal interface TeamMemberEntityRepository : JpaRepository<TeamMemberEntity, 
     fun findByIdAndTenant(id: String, tenant: String): TeamMemberEntity?
 
     fun countByTeamIdAndTenant(teamId: String, tenant: String): Long
+
+    fun deleteByTeamIdAndTenant(teamId: String, tenant: String)
 }

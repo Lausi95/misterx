@@ -53,7 +53,7 @@ data class MapResource(
     data class GridDto(
 
         @Schema(description = "Number of rows in the grid")
-        @JsonProperty("longitude")
+        @JsonProperty("rows")
         val rows: Int,
 
         @Schema(description = "Number of columns in the grid")

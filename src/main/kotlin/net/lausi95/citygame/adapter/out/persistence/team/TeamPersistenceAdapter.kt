@@ -4,6 +4,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.out.team.CheckTeamExistsPort
+import net.lausi95.citygame.application.port.out.team.DeleteTeamPort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.application.port.out.team.GetTeamsPort
 import net.lausi95.citygame.application.port.out.team.SaveTeamPort
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 internal class TeamPersistenceAdapter(
     private val teamEntityRepository: TeamEntityRepository,
-) : SaveTeamPort, GetTeamPort, GetTeamsPort, CheckTeamExistsPort {
+) : SaveTeamPort, GetTeamPort, GetTeamsPort, CheckTeamExistsPort, DeleteTeamPort {
 
     override fun saveTeam(team: Team, tenant: Tenant) {
         teamEntityRepository.save(TeamEntity(team, tenant))
@@ -31,5 +32,9 @@ internal class TeamPersistenceAdapter(
 
     override fun getTeams(pageable: Pageable, gameId: GameId, tenant: Tenant): Page<Team> {
         return teamEntityRepository.findByGameIdAndTenant(gameId.value, tenant.value, pageable).map { it.toTeam() }
+    }
+
+    override fun deleteTeam(teamId: TeamId, tenant: Tenant) {
+        teamEntityRepository.deleteByIdAndTenant(teamId.value, tenant.value)
     }
 }

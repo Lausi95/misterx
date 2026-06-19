@@ -11,4 +11,6 @@ internal interface TeamEntityRepository : JpaRepository<TeamEntity, String> {
     fun existsByIdAndTenant(id: String, tenant: String): Boolean
 
     fun findByGameIdAndTenant(gameId: String, tenant: String, pageable: Pageable): Page<TeamEntity>
+
+    fun deleteByIdAndTenant(id: String, tenant: String)
 }

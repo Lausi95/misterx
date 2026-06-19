@@ -9,4 +9,6 @@ internal interface AgentFindingEntityRepository : JpaRepository<AgentFindingEnti
     fun findByTeamIdAndTenant(teamId: String, tenant: String): List<AgentFindingEntity>
 
     fun findByAgentIdAndTenant(agentId: String, tenant: String): List<AgentFindingEntity>
+
+    fun deleteByTeamIdAndTenant(teamId: String, tenant: String)
 }

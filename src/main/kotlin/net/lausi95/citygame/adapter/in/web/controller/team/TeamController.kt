@@ -11,6 +11,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.team.CreateTeamUseCase
+import net.lausi95.citygame.application.port.`in`.team.DeleteTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamsUseCase
@@ -35,6 +36,7 @@ class TeamController(
     private val createTeamUseCase: CreateTeamUseCase,
     private val getTeamUseCase: GetTeamUseCase,
     private val updateTeamUseCase: UpdateTeamUseCase,
+    private val deleteTeamUseCase: DeleteTeamUseCase,
     private val getTeamMembersUseCase: GetTeamMembersUseCase,
     private val getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase,
 ) {
@@ -160,6 +162,31 @@ class TeamController(
         )
 
         updateTeamUseCase.updateTeam(command, tenant)
+    }
+
+    @Operation(summary = "Deletes a team and all its members and findings")
+    @ApiResponse(responseCode = "204", description = "Team was deleted successfully", content = [])
+    @ApiResponse(
+        responseCode = "404",
+        description = "Team not found or does not belong to this game",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @DeleteMapping("/{teamId}")
+    fun deleteTeam(
+        @PathVariable gameId: String,
+        @PathVariable teamId: String,
+        @RequestAttribute tenant: Tenant,
+    ): ResponseEntity<Unit> {
+        deleteTeamUseCase.deleteTeam(
+            DeleteTeamUseCase.Command(GameId(gameId), TeamId(teamId)),
+            tenant,
+        )
+        return ResponseEntity.noContent().build()
     }
 
     @Operation(summary = "Generates a setup QR code for a team")
