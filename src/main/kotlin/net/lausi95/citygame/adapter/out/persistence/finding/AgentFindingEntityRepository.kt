@@ -6,9 +6,9 @@ internal interface AgentFindingEntityRepository : JpaRepository<AgentFindingEnti
 
     fun existsByTeamIdAndAgentIdAndTenant(teamId: String, agentId: String, tenant: String): Boolean
 
-    fun findByTeamIdAndTenant(teamId: String, tenant: String): List<AgentFindingEntity>
+    fun findByTeamIdAndTenantOrderByFoundAtDesc(teamId: String, tenant: String): List<AgentFindingEntity>
 
-    fun findByAgentIdAndTenant(agentId: String, tenant: String): List<AgentFindingEntity>
+    fun findByAgentIdAndTenantOrderByFoundAtDesc(agentId: String, tenant: String): List<AgentFindingEntity>
 
     fun deleteByTeamIdAndTenant(teamId: String, tenant: String)
 }

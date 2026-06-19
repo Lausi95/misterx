@@ -33,11 +33,13 @@ internal class AgentFindingPersistenceAdapter(
     }
 
     override fun getFindingsByTeam(teamId: TeamId, tenant: Tenant): List<AgentFinding> {
-        return agentFindingEntityRepository.findByTeamIdAndTenant(teamId.value, tenant.value).map { it.toAgentFinding() }
+        return agentFindingEntityRepository.findByTeamIdAndTenantOrderByFoundAtDesc(teamId.value, tenant.value)
+            .map { it.toAgentFinding() }
     }
 
     override fun getFindingsByAgent(agentId: AgentId, tenant: Tenant): List<AgentFinding> {
-        return agentFindingEntityRepository.findByAgentIdAndTenant(agentId.value, tenant.value).map { it.toAgentFinding() }
+        return agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(agentId.value, tenant.value)
+            .map { it.toAgentFinding() }
     }
 
     override fun deleteTeamFindings(teamId: TeamId, tenant: Tenant) {

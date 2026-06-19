@@ -26,16 +26,17 @@ class GetTeamFoundAgentsServiceTest {
     private val gameId = GameId()
     private val teamId = TeamId()
 
-    private fun finding(agentId: AgentId) =
-        AgentFinding(FindingId(), gameId, teamId, agentId, ZonedDateTime.now(), null, null)
+    private fun finding(agentId: AgentId, foundAt: ZonedDateTime = ZonedDateTime.now()) =
+        AgentFinding(FindingId(), gameId, teamId, agentId, foundAt, null, null)
 
     private fun agent(agentId: AgentId, alias: String) =
         Agent(agentId, gameId, Agent.Type.MISTERX, "phone", "first", "last", alias, true)
 
     @Test
-    fun `exposes found agents as id and alias`() {
+    fun `exposes found agents as id, alias and found time`() {
         val agentId = AgentId()
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns listOf(finding(agentId))
+        val foundAt = ZonedDateTime.now()
+        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns listOf(finding(agentId, foundAt))
         every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent(agentId, "Shadow")
 
         val foundAgents = service.getFoundAgents(teamId, tenant)
@@ -43,6 +44,7 @@ class GetTeamFoundAgentsServiceTest {
         assertThat(foundAgents).singleElement().satisfies({
             assertThat(it.agentId).isEqualTo(agentId)
             assertThat(it.name).isEqualTo("Shadow")
+            assertThat(it.foundAt).isEqualTo(foundAt)
         })
     }
 

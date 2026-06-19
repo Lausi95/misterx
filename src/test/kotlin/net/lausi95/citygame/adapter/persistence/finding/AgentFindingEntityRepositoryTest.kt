@@ -91,7 +91,7 @@ class AgentFindingEntityRepositoryTest {
         )
         agentFindingEntityRepository.saveAndFlush(AgentFindingEntity(finding, tenant))
 
-        val reloaded = agentFindingEntityRepository.findByTeamIdAndTenant(teamId.value, tenant.value)
+        val reloaded = agentFindingEntityRepository.findByTeamIdAndTenantOrderByFoundAtDesc(teamId.value, tenant.value)
             .single()
             .toAgentFinding()
 
@@ -117,7 +117,7 @@ class AgentFindingEntityRepositoryTest {
             )
         )
 
-        assertThat(agentFindingEntityRepository.findByAgentIdAndTenant(agentId.value, tenant.value)).hasSize(1)
+        assertThat(agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(agentId.value, tenant.value)).hasSize(1)
         assertThat(agentFindingEntityRepository.existsByTeamIdAndAgentIdAndTenant(teamId.value, agentId.value, tenant.value)).isTrue()
         assertThat(agentFindingEntityRepository.existsByTeamIdAndAgentIdAndTenant(TeamId().value, agentId.value, tenant.value)).isFalse()
     }
@@ -143,5 +143,47 @@ class AgentFindingEntityRepositoryTest {
                 )
             )
         }.isInstanceOf(DataIntegrityViolationException::class.java)
+    }
+
+    @Test
+    fun `returns a team's findings newest first`() {
+        val gameId = seedGame()
+        val teamId = seedTeam(gameId)
+        val older = seedAgent(gameId)
+        val newer = seedAgent(gameId)
+        val now = ZonedDateTime.now()
+
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, teamId, older, now.minusHours(2), null, null), tenant)
+        )
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, teamId, newer, now, null, null), tenant)
+        )
+
+        val ordered = agentFindingEntityRepository.findByTeamIdAndTenantOrderByFoundAtDesc(teamId.value, tenant.value)
+            .map { it.toAgentFinding().agentId }
+
+        assertThat(ordered).containsExactly(newer, older)
+    }
+
+    @Test
+    fun `returns an agent's findings newest first`() {
+        val gameId = seedGame()
+        val olderTeam = seedTeam(gameId)
+        val newerTeam = seedTeam(gameId)
+        val agentId = seedAgent(gameId)
+        val now = ZonedDateTime.now()
+
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, olderTeam, agentId, now.minusHours(2), null, null), tenant)
+        )
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, newerTeam, agentId, now, null, null), tenant)
+        )
+
+        val ordered = agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(agentId.value, tenant.value)
+            .map { it.toAgentFinding().teamId }
+
+        assertThat(ordered).containsExactly(newerTeam, olderTeam)
     }
 }

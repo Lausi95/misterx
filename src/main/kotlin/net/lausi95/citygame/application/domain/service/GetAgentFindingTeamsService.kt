@@ -17,7 +17,7 @@ class GetAgentFindingTeamsService(
     override fun getFindingTeams(agentId: AgentId, tenant: Tenant): List<FindingTeam> {
         return getAgentFindingsPort.getFindingsByAgent(agentId, tenant).mapNotNull { finding ->
             getTeamPort.getTeamOrNull(finding.teamId, tenant)?.let { team ->
-                FindingTeam(team.id, team.name)
+                FindingTeam(team.id, team.name, finding.foundAt)
             }
         }
     }

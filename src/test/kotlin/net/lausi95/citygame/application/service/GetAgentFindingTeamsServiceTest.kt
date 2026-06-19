@@ -26,13 +26,14 @@ class GetAgentFindingTeamsServiceTest {
     private val gameId = GameId()
     private val agentId = AgentId()
 
-    private fun finding(teamId: TeamId) =
-        AgentFinding(FindingId(), gameId, teamId, agentId, ZonedDateTime.now(), null, null)
+    private fun finding(teamId: TeamId, foundAt: ZonedDateTime = ZonedDateTime.now()) =
+        AgentFinding(FindingId(), gameId, teamId, agentId, foundAt, null, null)
 
     @Test
-    fun `exposes finding teams as id and name`() {
+    fun `exposes finding teams as id, name and found time`() {
         val teamId = TeamId()
-        every { getAgentFindingsPort.getFindingsByAgent(agentId, tenant) } returns listOf(finding(teamId))
+        val foundAt = ZonedDateTime.now()
+        every { getAgentFindingsPort.getFindingsByAgent(agentId, tenant) } returns listOf(finding(teamId, foundAt))
         every { getTeamPort.getTeamOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
 
         val teams = service.getFindingTeams(agentId, tenant)
@@ -40,6 +41,7 @@ class GetAgentFindingTeamsServiceTest {
         assertThat(teams).singleElement().satisfies({
             assertThat(it.teamId).isEqualTo(teamId)
             assertThat(it.name).isEqualTo("Team A")
+            assertThat(it.foundAt).isEqualTo(foundAt)
         })
     }
 

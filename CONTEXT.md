@@ -24,3 +24,10 @@ has a `Type` (`MISTERX` or `UTILITY`), and may carry a last-known location. Team
 located an agent are its _finding teams_; the reverse view (agents a team has located) is
 the team's _found agents_.
 _Avoid_: Player, target, NPC
+
+**Finding**:
+The single event of a Team locating an Agent, recorded once with the moment it happened (its
+_found time_). A team can find a given agent only once. There is no separate "agent finds
+team" event: a team's _found agents_ and an agent's _finding teams_ are two views of the same
+findings, and both carry the same found time.
+_Avoid_: Catch, capture, sighting, discovery

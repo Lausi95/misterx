@@ -3,6 +3,8 @@ package net.lausi95.citygame.adapter.web.controller.team
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.controller.team.MyTeamController
+import net.lausi95.citygame.application.domain.model.agent.AgentId
+import net.lausi95.citygame.application.domain.model.finding.FoundAgent
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
@@ -19,6 +21,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import java.time.ZonedDateTime
 
 @WebMvcTest(MyTeamController::class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -61,6 +64,24 @@ class MyTeamControllerTest {
             jsonPath("$.id") { value("t1") }
             jsonPath("$.name") { value("Red Squad") }
             jsonPath("$.memberCount") { value(3) }
+        }
+    }
+
+    @Test
+    fun `serialises foundAt for each found agent in the response body`() {
+        val foundAt = ZonedDateTime.parse("2026-06-19T10:15:30+02:00")
+        every {
+            getMyTeamUseCase.getMyTeam(GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), null), tenant)
+        } returns aTeam()
+        every { getTeamMembersUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 3L
+        every { getTeamFoundAgentsUseCase.getFoundAgents(TeamId("t1"), tenant) } returns
+            listOf(FoundAgent(AgentId("a1"), "Shadow", foundAt))
+
+        getMyTeam().andExpect {
+            status { isOk() }
+            jsonPath("$.foundAgents[0].id") { value("a1") }
+            jsonPath("$.foundAgents[0].name") { value("Shadow") }
+            jsonPath("$.foundAgents[0].foundAt") { exists() }
         }
     }
 
