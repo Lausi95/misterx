@@ -14,7 +14,8 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class TenantFilter(
-    @Value($$"${tenant.override.enabled}") private val tenantOverrideEnabled: Boolean
+    @Value($$"${tenant.override.enabled}") private val tenantOverrideEnabled: Boolean,
+    @Value($$"${tenant.override.value:#{null}}") private val tenantOverrideValue: String?
 ) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -36,6 +37,9 @@ class TenantFilter(
             val tenantFromHeader: String? = request.getHeader(Tenant.OVERRIDE_TENANT_HEADER_NAME)
             if (tenantFromHeader != null) {
                 return tenantFromHeader
+            }
+            if (!tenantOverrideValue.isNullOrBlank()) {
+                return tenantOverrideValue
             }
         }
 

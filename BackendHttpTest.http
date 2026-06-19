@@ -59,8 +59,8 @@ Content-Type: application/json
 ### Send a location for an agent
 POST http://localhost:8080/location
 Content-Type: application/json
-X-GameId: {{gameId}}
-X-AgentId: {{agentId}}
+X-GameId: 3c6d3ac9-836f-4662-92ef-49cbf39a52d8
+X-AgentId: 9a030b0b-90c9-4543-9af5-20849db53b43
 
 {
   "latitude": 50.0,
@@ -84,3 +84,10 @@ Content-Type: application/json
         client.assert(teamId !== null);
     });
 %}
+
+
+### Get my team (member id optional)
+GET http://localhost:8080/my-team
+X-GameId: {{gameId}}
+X-TeamId: {{teamId}}
+X-MemberId: {{teamMemberId}}

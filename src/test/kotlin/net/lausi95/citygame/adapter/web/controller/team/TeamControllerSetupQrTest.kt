@@ -9,6 +9,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.team.CreateTeamUseCase
+import net.lausi95.citygame.application.port.`in`.team.DeleteTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
 import net.lausi95.citygame.application.port.`in`.team.GetTeamsUseCase
@@ -39,6 +40,9 @@ class TeamControllerSetupQrTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @MockkBean
+    private lateinit var deleteTeamUseCase: DeleteTeamUseCase
 
     @MockkBean
     private lateinit var getTeamsUseCase: GetTeamsUseCase

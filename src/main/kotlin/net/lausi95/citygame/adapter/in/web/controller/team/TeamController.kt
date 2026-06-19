@@ -10,12 +10,7 @@ import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.team.CreateTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.DeleteTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamsUseCase
-import net.lausi95.citygame.application.port.`in`.team.UpdateTeamUseCase
+import net.lausi95.citygame.application.port.`in`.team.*
 import net.lausi95.citygame.common.Tenant
 import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.data.domain.Pageable
@@ -217,7 +212,7 @@ class TeamController(
 
         val setupUrl = UriComponentsBuilder.newInstance()
             .scheme(scheme)
-            .host(tenant.value)
+            .host("localhost:3000")
             .path("/setup-team")
             .queryParam("gameId", team.gameId.value)
             .queryParam("teamId", team.id.value)

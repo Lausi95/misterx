@@ -198,7 +198,7 @@ class AgentController(
 
         val setupUrl = UriComponentsBuilder.newInstance()
             .scheme(scheme)
-            .host(tenant.value)
+            .host("localhost:3000")
             .path("/setup-agent")
             .queryParam("type", agent.type)
             .queryParam("agentId", agent.id.value)

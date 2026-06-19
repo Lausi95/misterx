@@ -2,7 +2,7 @@ package net.lausi95.citygame.adapter.`in`.web.controller.game
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
-import net.lausi95.citygame.application.domain.model.game.Game
+import net.lausi95.citygame.application.domain.model.game.GameSummary
 import java.time.OffsetDateTime
 
 @Schema(description = "Represents a game")
@@ -36,18 +36,18 @@ data class GameResource(
     @JsonProperty("links")
     val links: Map<String, String>
 ) {
-    constructor(game: Game) : this(
-        id = game.id.value,
-        title = game.title.value,
-        startTime = game.startTime,
-        endTime = game.endTime,
-        teams = 0,
-        agents = 0,
+    constructor(summary: GameSummary) : this(
+        id = summary.game.id.value,
+        title = summary.game.title.value,
+        startTime = summary.game.startTime,
+        endTime = summary.game.endTime,
+        teams = summary.teamsCount,
+        agents = summary.agentsCount,
         links = mapOf(
-            "self" to "/games/${game.id.value}",
-            "map" to "/games/${game.id.value}/map",
-            "agents" to "/games/${game.id.value}/agents",
-            "teams" to "/games/${game.id.value}/teams",
+            "self" to "/games/${summary.game.id.value}",
+            "map" to "/games/${summary.game.id.value}/map",
+            "agents" to "/games/${summary.game.id.value}/agents",
+            "teams" to "/games/${summary.game.id.value}/teams",
         )
     )
 }

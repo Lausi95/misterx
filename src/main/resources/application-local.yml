@@ -1,0 +1,4 @@
+tenant:
+  override:
+    enabled: true
+    value: localhost:3000
