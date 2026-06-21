@@ -28,12 +28,12 @@ internal class UpdateGameService(
             game.updateTitle(it)
         }
 
-        command.startTime?.also {
-            game.updateStartTime(it)
-        }
-
         command.endTime?.also {
             game.updateEndTime(it)
+        }
+
+        command.startTime?.also {
+            game.updateStartTime(it)
         }
 
         command.map?.cornerA?.also {
