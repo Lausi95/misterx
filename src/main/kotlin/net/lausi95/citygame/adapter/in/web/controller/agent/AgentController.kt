@@ -14,6 +14,7 @@ import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.common.Tenant
 import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.data.domain.Pageable
@@ -23,7 +24,6 @@ import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import org.springframework.web.util.UriComponentsBuilder
 import java.awt.image.BufferedImage
 
 @Tag(name = "Agents")
@@ -35,6 +35,7 @@ class AgentController(
     private val getAgentUseCase: GetAgentUseCase,
     private val updateAgentUseCase: UpdateAgentUseCase,
     private val getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase,
+    private val frontendUriFactory: FrontendUriFactory,
 ) {
 
     @Operation(summary = "Returns a paginated collection of agents for a game")
@@ -194,17 +195,14 @@ class AgentController(
     ): BufferedImage {
         val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
 
-        val scheme = ServletUriComponentsBuilder.fromCurrentRequest().build().scheme
-
-        val setupUrl = UriComponentsBuilder.newInstance()
-            .scheme(scheme)
-            .host("localhost:3000")
-            .path("/setup-agent")
-            .queryParam("type", agent.type)
-            .queryParam("agentId", agent.id.value)
-            .queryParam("gameId", agent.gameId.value)
-            .build()
-            .toUriString()
+        val setupUrl = frontendUriFactory.buildUrl(
+            "/setup-agent",
+            mapOf(
+                "type" to agent.type.name,
+                "agentId" to agent.id.value,
+                "gameId" to agent.gameId.value,
+            ),
+        )
 
         return qrCodeImage(setupUrl)
     }

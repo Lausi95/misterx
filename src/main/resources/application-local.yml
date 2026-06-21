@@ -2,3 +2,9 @@ tenant:
   override:
     enabled: true
     value: localhost:3000
+
+# Frontend and API run on different origins locally (frontend :3000, API :8080),
+# so the QR-code frontend origin can't be derived from the request — set it explicitly.
+# In production each tenant's domain serves both, so this is left unset (see ADR 0006).
+frontend:
+  base-url: http://localhost:3000

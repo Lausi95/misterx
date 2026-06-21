@@ -11,6 +11,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.team.*
+import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.common.Tenant
 import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.data.domain.Pageable
@@ -20,7 +21,6 @@ import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import org.springframework.web.util.UriComponentsBuilder
 import java.awt.image.BufferedImage
 
 @Tag(name = "Teams")
@@ -34,6 +34,7 @@ class TeamController(
     private val deleteTeamUseCase: DeleteTeamUseCase,
     private val getTeamMembersUseCase: GetTeamMembersUseCase,
     private val getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase,
+    private val frontendUriFactory: FrontendUriFactory,
 ) {
 
     @Operation(summary = "Returns a paginated collection of teams for a game")
@@ -208,16 +209,13 @@ class TeamController(
     ): BufferedImage {
         val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
 
-        val scheme = ServletUriComponentsBuilder.fromCurrentRequest().build().scheme
-
-        val setupUrl = UriComponentsBuilder.newInstance()
-            .scheme(scheme)
-            .host("localhost:3000")
-            .path("/setup-team")
-            .queryParam("gameId", team.gameId.value)
-            .queryParam("teamId", team.id.value)
-            .build()
-            .toUriString()
+        val setupUrl = frontendUriFactory.buildUrl(
+            "/setup-team",
+            mapOf(
+                "gameId" to team.gameId.value,
+                "teamId" to team.id.value,
+            ),
+        )
 
         return qrCodeImage(setupUrl)
     }

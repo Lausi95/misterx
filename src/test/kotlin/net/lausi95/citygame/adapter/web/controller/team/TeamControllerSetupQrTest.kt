@@ -2,6 +2,7 @@ package net.lausi95.citygame.adapter.web.controller.team
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.adapter.`in`.web.controller.team.TeamController
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.Team
@@ -62,6 +63,9 @@ class TeamControllerSetupQrTest {
     @MockkBean
     private lateinit var getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase
 
+    @MockkBean
+    private lateinit var frontendUriFactory: FrontendUriFactory
+
     private fun getSetupQr(teamId: String = "t1") =
         mockMvc.get("/games/g1/teams/$teamId/setup-qr") {
             requestAttr("tenant", Tenant("acme"))
@@ -71,6 +75,7 @@ class TeamControllerSetupQrTest {
     @Test
     fun `returns 200 with a PNG image for an existing team`() {
         every { getTeamUseCase.getTeam(TeamId("t1"), Tenant("acme")) } returns aTeam()
+        every { frontendUriFactory.buildUrl(any(), any()) } returns "http://localhost:3000/setup-team?teamId=t1"
 
         getSetupQr().andExpect {
             status { isOk() }

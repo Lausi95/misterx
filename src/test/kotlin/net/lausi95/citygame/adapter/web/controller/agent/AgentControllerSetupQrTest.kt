@@ -2,6 +2,7 @@ package net.lausi95.citygame.adapter.web.controller.agent
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.adapter.`in`.web.controller.agent.AgentController
 import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
@@ -53,6 +54,9 @@ class AgentControllerSetupQrTest {
     @MockkBean
     private lateinit var getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase
 
+    @MockkBean
+    private lateinit var frontendUriFactory: FrontendUriFactory
+
     private fun getSetupQr(agentId: String = "a1") =
         mockMvc.get("/games/g1/agents/$agentId/setup-qr") {
             requestAttr("tenant", Tenant("acme"))
@@ -62,6 +66,7 @@ class AgentControllerSetupQrTest {
     @Test
     fun `returns 200 with a PNG image for an existing agent`() {
         every { getAgentUseCase.getAgent(AgentId("a1"), Tenant("acme")) } returns anAgent()
+        every { frontendUriFactory.buildUrl(any(), any()) } returns "http://localhost:3000/setup-agent?agentId=a1"
 
         getSetupQr().andExpect {
             status { isOk() }

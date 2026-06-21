@@ -49,6 +49,14 @@ team" event: a team's _found agents_ and an agent's _finding teams_ are two view
 findings, and both carry the same found time.
 _Avoid_: Catch, capture, sighting, discovery
 
+**Finding QR**:
+The QR code an Agent presents so that a Team can trigger a **Finding** by scanning it. It
+encodes a frontend URL that opens the find page for that Agent. The code carries only the
+Agent's identity and a display label (its `alias`) — never the game, team, or member, because
+the scanning client already holds its own game/team/member identity from earlier team setup.
+Distinct from the **Setup QR**, which provisions an Agent or Team rather than recording a find.
+_Avoid_: Find code, catch code, scan code
+
 **Leaderboard**:
 The ranked standing of all of a Game's Teams by how many **MISTERX** Agents they have found.
 Only findings of agents that currently exist, are MISTERX, and are `active` are **counted** —
