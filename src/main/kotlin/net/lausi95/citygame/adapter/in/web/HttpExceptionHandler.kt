@@ -7,6 +7,7 @@ import net.lausi95.citygame.application.domain.NotFoundDomainException
 import net.lausi95.citygame.application.domain.UnprocessableDomainException
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.MissingRequestHeaderException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
@@ -23,6 +24,13 @@ class HttpExceptionHandler {
             details.setProperty(it.field, it.defaultMessage ?: "Invalid Value")
         }
         return details
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException::class)
+    fun handleMissingRequestHeaderException(ex: MissingRequestHeaderException): ProblemDetail {
+        val problemDetail = ProblemDetail.forStatus(400)
+        problemDetail.setProperty("details", ex.message)
+        return problemDetail
     }
 
     @ExceptionHandler(DomainException::class)

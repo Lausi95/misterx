@@ -1,0 +1,57 @@
+package net.lausi95.citygame.application.domain.service
+
+import io.github.oshai.kotlinlogging.KotlinLogging
+import net.lausi95.citygame.application.domain.model.agent.Agent
+import net.lausi95.citygame.application.domain.model.game.GameId
+import net.lausi95.citygame.application.domain.model.leaderboard.FoundMisterX
+import net.lausi95.citygame.application.domain.model.leaderboard.Leaderboard
+import net.lausi95.citygame.application.domain.model.leaderboard.LeaderboardEntry
+import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseCase
+import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
+import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
+import net.lausi95.citygame.application.port.out.game.GetGamePort
+import net.lausi95.citygame.application.port.out.team.GetTeamsPort
+import net.lausi95.citygame.common.Tenant
+import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+private val log = KotlinLogging.logger { }
+
+@Service
+class GetLeaderboardService(
+    private val getGamePort: GetGamePort,
+    private val getTeamsPort: GetTeamsPort,
+    private val getAgentsPort: GetAgentsPort,
+    private val getTeamFindingsPort: GetTeamFindingsPort,
+) : GetLeaderboardUseCase {
+
+    @Transactional(readOnly = true)
+    override fun getLeaderboard(gameId: GameId, tenant: Tenant): Leaderboard {
+        log.info { "Building leaderboard for game $gameId..." }
+
+        val game = getGamePort.getGame(gameId, tenant)
+
+        // Only currently-active MISTERX agents score (ADR 0005). Fetch them once and index by id
+        // so each team's findings resolve without an extra query per finding.
+        val scoringAgents = getAgentsPort.getAgents(Pageable.unpaged(), gameId, tenant).content
+            .filter { it.type == Agent.Type.MISTERX && it.active }
+            .associateBy { it.id }
+
+        val teams = getTeamsPort.getTeams(Pageable.unpaged(), gameId, tenant).content
+
+        val entries = teams.map { team ->
+            val foundAgents = getTeamFindingsPort.getFindingsByTeam(team.id, tenant)
+                .mapNotNull { finding ->
+                    scoringAgents[finding.agentId]?.let { agent ->
+                        FoundMisterX(agent.alias, finding.foundAt)
+                    }
+                }
+                .sortedBy { it.foundAt }
+            LeaderboardEntry(team, foundAgents)
+        }
+
+        log.info { "Leaderboard built: ${entries.size} teams ranked." }
+        return Leaderboard.of(game, entries)
+    }
+}

@@ -75,6 +75,17 @@ data class Grid(
     val columns: Int,
 )
 
+/**
+ * A single rectangle of a [Map]'s grid, identified by zero-based [row]/[column] indices.
+ *
+ * The origin `(0, 0)` is the south-west corner (cornerA): [column] increases eastward
+ * (longitude), [row] increases northward (latitude). See ADR 0004.
+ */
+data class Cell(
+    val row: Int,
+    val column: Int,
+)
+
 @JvmInline
 value class MapId(val value: String = UUID.randomUUID().toString()) {
     override fun toString(): String = value
@@ -106,5 +117,31 @@ class Map(
 
     fun updateGrid(newGrid: Grid) {
         _grid = newGrid
+    }
+
+    /**
+     * Resolves the grid [Cell] containing [location], or `null` when the location lies outside
+     * the cornerA–cornerB rectangle. Corners are treated as opposite corners regardless of which
+     * is stored as A/B; the NE corner resolves to cell `(rows - 1, columns - 1)`. See ADR 0004.
+     */
+    fun cellOf(location: GeoLocation): Cell? {
+        val minLatitude = minOf(_cornerA.latitude, _cornerB.latitude)
+        val maxLatitude = maxOf(_cornerA.latitude, _cornerB.latitude)
+        val minLongitude = minOf(_cornerA.longitude, _cornerB.longitude)
+        val maxLongitude = maxOf(_cornerA.longitude, _cornerB.longitude)
+
+        if (location.latitude < minLatitude || location.latitude > maxLatitude) return null
+        if (location.longitude < minLongitude || location.longitude > maxLongitude) return null
+
+        val latitudeSpan = maxLatitude - minLatitude
+        val longitudeSpan = maxLongitude - minLongitude
+        if (latitudeSpan <= 0.0 || longitudeSpan <= 0.0) return null
+
+        val row = ((location.latitude - minLatitude) / latitudeSpan * _grid.rows)
+            .toInt().coerceIn(0, _grid.rows - 1)
+        val column = ((location.longitude - minLongitude) / longitudeSpan * _grid.columns)
+            .toInt().coerceIn(0, _grid.columns - 1)
+
+        return Cell(row, column)
     }
 }
