@@ -1,6 +1,9 @@
 ---
 - name: Deploy
   hosts: all
+  vars_files:
+    # Vault-encrypted: defines `postgres_password`. See ansible/vault.yml.example.
+    - vault.yml
   vars:
     directory: ~/city-game-backend.lausi95.net
     docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
@@ -11,10 +14,16 @@
         path: "{{ directory }}"
         state: directory
 
-    - name: sync files
-      copy:
-        src: "files/"
-        dest: "{{ directory }}/"
+    - name: postgres data directory (bind mount, persistent)
+      file:
+        path: "{{ directory }}/pgdata"
+        state: directory
+
+    - name: render compose file (injects secrets from vault)
+      template:
+        src: "templates/docker-compose.yml.j2"
+        dest: "{{ directory }}/docker-compose.yml"
+        mode: "0640"
 
     - name: Login to Docker registry
       community.docker.docker_login:
@@ -32,7 +41,8 @@
         chdir: "{{ directory }}"
         cmd: docker compose up -d --remove-orphans
 
-    - name: cleanup docker
+    - name: cleanup unused images
+      # Images only — NEVER volumes. `system prune --all` would orphan the DB. See ADR 0008.
       shell:
         chdir: "{{ directory }}"
-        cmd: docker system prune --all -f
+        cmd: docker image prune -f

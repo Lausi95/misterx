@@ -22,6 +22,13 @@ tenant:
   override:
     enabled: false
 
+management:
+  endpoints:
+    web:
+      exposure:
+        # Only expose health publicly (Traefik healthcheck); never env/beans/mappings.
+        include: health
+
 logging:
   level:
     root: warn

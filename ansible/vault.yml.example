@@ -1,0 +1,19 @@
+# Template for ansible/vault.yml — the ENCRYPTED secrets file the deploy reads.
+#
+# Create the real, encrypted file (committed encrypted — that is the point of vault):
+#
+#   1. Generate a strong password:
+#        openssl rand -base64 32
+#   2. Create + encrypt the vars file (uses the same vault password the CI holds
+#      in the ANSIBLE_VAULT_PASSWORD secret):
+#        cd ansible
+#        ansible-vault create vault.yml
+#      ...and put the line below inside, with your generated value:
+#
+#        postgres_password: "<paste generated password>"
+#
+#   3. Commit ansible/vault.yml (it is encrypted ciphertext, safe to commit).
+#
+# To rotate later: `ansible-vault edit vault.yml`, redeploy. Note that changing the
+# password does NOT re-init an existing Postgres data dir — rotate the DB role too.
+postgres_password: "change-me"

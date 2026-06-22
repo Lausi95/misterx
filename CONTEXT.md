@@ -12,6 +12,14 @@ subdomain prefix and not the `Host` header. Every repository query is filtered b
 there is no row-level security fallback.
 _Avoid_: Customer, organisation, realm, client
 
+**Production profile (`prod`)**:
+The Spring profile active in the deployed, containerised environment (`application-prod.yml`,
+`SPRING_PROFILES_ACTIVE=prod`). It configures logstash-structured logging and production log
+levels. Despite the historical name, the deployment is **Docker Compose on a single private
+server behind Traefik — not Kubernetes**; the profile was renamed from `k8s` to remove that
+false implication (see ADR 0009/0010). There is no Kubernetes cluster.
+_Avoid_: k8s, kube, kubernetes (no cluster exists), staging (there is only production)
+
 **Tenant override**:
 A development/test-only mechanism for supplying the tenant explicitly instead of deriving
 it from the caller's host. Gated by `tenant.override.enabled`; sourced from the

@@ -1,0 +1,50 @@
+services:
+  city-game-api:
+    image: ghcr.io/lausi95/city-game/city-game-api:latest
+    restart: unless-stopped
+    networks: [ traefik, backend ]
+    mem_limit: 1g
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://city-game-api-postgres:5432/city-game
+      SPRING_DATASOURCE_USERNAME: city-game
+      SPRING_DATASOURCE_PASSWORD: "{{ postgres_password }}"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.cgb.rule=Host(`city-game-backend.lausi95.net`)
+      - traefik.http.routers.cgb.entrypoints=websecure
+      - traefik.http.routers.cgb.tls.certresolver=letsencrypt
+      - traefik.http.services.cgb.loadbalancer.server.port=8080
+      - traefik.http.services.cgb.loadbalancer.healthcheck.path=/actuator/health
+      - traefik.http.services.cgb.loadbalancer.healthcheck.interval=15s
+
+  city-game-api-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    networks: [ backend ]
+    mem_limit: 1g
+    environment:
+      POSTGRES_DB: city-game
+      POSTGRES_USER: city-game
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=512MB
+    volumes:
+      # Host bind mount (relative to this compose file) — survives deploys and
+      # `docker image prune`; trivially backed up. See ADR 0008.
+      - ./pgdata:/var/lib/postgresql/data
+
+networks:
+  # Public-facing proxy network (shared, pre-existing). API only.
+  traefik:
+    external: true
+    name: traefik
+  # Private network for API <-> Postgres. Postgres is reachable only here.
+  backend:
+    driver: bridge
