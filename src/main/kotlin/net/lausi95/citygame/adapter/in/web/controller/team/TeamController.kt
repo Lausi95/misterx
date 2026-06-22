@@ -50,7 +50,7 @@ class TeamController(
     )
     @GetMapping
     fun getTeams(
-        @PageableDefault pageable: Pageable,
+        @PageableDefault(sort = ["name"]) pageable: Pageable,
         @PathVariable gameId: String,
         tenant: Tenant,
     ): TeamCollection {
