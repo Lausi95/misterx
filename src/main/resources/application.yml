@@ -1,4 +1,4 @@
-keycloak-realm: ${KEYCLOAK_REALM:https://auth.tennislichtenberg.de/realms/city-game}
+keycloak-realm: ${KEYCLOAK_REALM:https://auth.lausi95.net/realms/city-game}
 
 spring:
   application:
