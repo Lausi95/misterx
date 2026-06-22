@@ -1,5 +1,7 @@
 package net.lausi95.citygame.adapter.web.controller.team
 
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
@@ -30,7 +32,7 @@ import org.springframework.test.web.servlet.get
 
 @WebMvcTest(TeamController::class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(TeamControllerSetupQrTest.ImageConverterConfig::class)
+@Import(TeamControllerSetupQrTest.ImageConverterConfig::class, TenantOriginExtractor::class, WebMvcConfig::class)
 class TeamControllerSetupQrTest {
 
     @TestConfiguration
@@ -68,14 +70,14 @@ class TeamControllerSetupQrTest {
 
     private fun getSetupQr(teamId: String = "t1") =
         mockMvc.get("/games/g1/teams/$teamId/setup-qr") {
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
             accept(MediaType.IMAGE_PNG)
         }
 
     @Test
     fun `returns 200 with a PNG image for an existing team`() {
-        every { getTeamUseCase.getTeam(TeamId("t1"), Tenant("acme")) } returns aTeam()
-        every { frontendUriFactory.buildUrl(any(), any()) } returns "http://localhost:3000/setup-team?teamId=t1"
+        every { getTeamUseCase.getTeam(TeamId("t1"), Tenant("https://acme.city-game.net")) } returns aTeam()
+        every { frontendUriFactory.buildUrl(any(), any(), any()) } returns "http://localhost:3000/setup-team?teamId=t1"
 
         getSetupQr().andExpect {
             status { isOk() }
@@ -85,7 +87,7 @@ class TeamControllerSetupQrTest {
 
     @Test
     fun `returns 404 when the team does not exist`() {
-        every { getTeamUseCase.getTeam(TeamId("missing"), Tenant("acme")) } throws
+        every { getTeamUseCase.getTeam(TeamId("missing"), Tenant("https://acme.city-game.net")) } throws
             TeamNotFoundException("Team not found: missing")
 
         getSetupQr(teamId = "missing").andExpect {

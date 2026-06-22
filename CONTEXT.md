@@ -7,10 +7,14 @@ location tracking across multiple tenants.
 
 **Tenant**:
 An isolated customer/deployment partition. The canonical tenant identifier is the
-**hostname of the caller** as resolved by `TenantFilter` (`request.remoteHost`), not a
-subdomain prefix and not the `Host` header. Every repository query is filtered by tenant;
-there is no row-level security fallback.
-_Avoid_: Customer, organisation, realm, client
+**frontend origin** — the `scheme://host[:port]` the calling frontend is served at, e.g.
+`https://foo.city-game.net` or `http://localhost:3000`. It is resolved from the request's
+`Origin` header (falling back to the origin of `Referer`), not from `request.remoteHost`, a
+subdomain prefix, or the API's own `Host` (see ADR 0011). The same origin is the base URL of
+that tenant's QR codes. Every repository query is filtered by tenant; there is no row-level
+security fallback.
+_Avoid_: Customer, organisation, realm, client; "host" / "hostname" (the tenant is a full
+origin, not a bare host)
 
 **Production profile (`prod`)**:
 The Spring profile active in the deployed, containerised environment (`application-prod.yml`,
@@ -21,10 +25,12 @@ false implication (see ADR 0009/0010). There is no Kubernetes cluster.
 _Avoid_: k8s, kube, kubernetes (no cluster exists), staging (there is only production)
 
 **Tenant override**:
-A development/test-only mechanism for supplying the tenant explicitly instead of deriving
-it from the caller's host. Gated by `tenant.override.enabled`; sourced from the
-`X-TENANT-OVERRIDE` header (preferred) or the configured `tenant.override.value` (used by
-the `local` profile). Inert in production.
+A test/tooling-only mechanism for supplying the tenant explicitly instead of deriving it from
+the browser's `Origin`/`Referer` headers — used by MockMvc/integration tests and curl/Postman,
+which carry no browser origin. Gated by `tenant.override.enabled`; sourced from the
+`X-TENANT-OVERRIDE` header, whose value is now a full origin (`http://localhost:3000`). Inert
+in production. The former configured `tenant.override.value` fixed default was removed once the
+browser began supplying its origin automatically (see ADR 0011).
 
 **Organizer**:
 The person who runs a Game: creates it and manages its Agents, Teams, and members. The only

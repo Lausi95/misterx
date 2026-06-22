@@ -68,7 +68,7 @@ internal class FindController(
         @RequestHeader(name = "X-MemberId") memberId: String,
         @Parameter(description = "Identifier of the agent being found", required = true)
         @RequestHeader(name = "X-AgentId") agentId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
         @RequestBody(required = false) request: FindRequest?,
     ): ResponseEntity<Unit> {
         val reportedLocation = request

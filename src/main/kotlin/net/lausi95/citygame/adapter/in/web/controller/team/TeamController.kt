@@ -52,7 +52,7 @@ class TeamController(
     fun getTeams(
         @PageableDefault pageable: Pageable,
         @PathVariable gameId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): TeamCollection {
         val teams = getTeamsUseCase.getTeams(GameId(gameId), pageable, tenant)
         return TeamCollection(teams) { team -> getTeamMembersUseCase.countTeamMembers(team.id, tenant) }
@@ -81,7 +81,7 @@ class TeamController(
     @PostMapping
     fun createTeam(
         @PathVariable gameId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
         @RequestBody @Valid request: CreateTeamRequest,
     ): ResponseEntity<Unit> {
         val command = CreateTeamUseCase.Command(
@@ -120,7 +120,7 @@ class TeamController(
     fun getTeam(
         @PathVariable gameId: String,
         @PathVariable teamId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): TeamResource {
         val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
         val memberCount = getTeamMembersUseCase.countTeamMembers(TeamId(teamId), tenant)
@@ -150,7 +150,7 @@ class TeamController(
         @PathVariable gameId: String,
         @PathVariable teamId: String,
         @Valid @RequestBody request: UpdateTeamRequest,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ) {
         val command = UpdateTeamUseCase.Command(
             teamId = TeamId(teamId),
@@ -176,7 +176,7 @@ class TeamController(
     fun deleteTeam(
         @PathVariable gameId: String,
         @PathVariable teamId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): ResponseEntity<Unit> {
         deleteTeamUseCase.deleteTeam(
             DeleteTeamUseCase.Command(GameId(gameId), TeamId(teamId)),
@@ -205,11 +205,12 @@ class TeamController(
     fun getSetupQr(
         @PathVariable gameId: String,
         @PathVariable teamId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): BufferedImage {
         val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
 
         val setupUrl = frontendUriFactory.buildUrl(
+            tenant,
             "/setup-team",
             mapOf(
                 "gameId" to team.gameId.value,

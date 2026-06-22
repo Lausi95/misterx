@@ -62,7 +62,7 @@ class FindAgentServiceTest {
         saveAgentFindingPort,
     )
 
-    private val tenant = Tenant("acme")
+    private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
     private val teamId = TeamId()
     private val memberId = TeamMemberId()

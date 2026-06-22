@@ -46,7 +46,7 @@ class AgentFindingEntityRepositoryTest {
     @Autowired
     private lateinit var agentFindingEntityRepository: AgentFindingEntityRepository
 
-    private val tenant = Tenant("acme")
+    private val tenant = Tenant("https://acme.city-game.net")
 
     private fun seedGame(): GameId {
         val game = Game(

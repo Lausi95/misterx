@@ -12,7 +12,6 @@ import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
@@ -49,7 +48,7 @@ internal class BoardController(
         @RequestHeader(name = "X-GameId") gameId: String,
         @Parameter(description = "Identifier of the viewing team; restricts MISTERX agents to the ones it has not found yet")
         @RequestHeader(name = "X-TeamId", required = false) teamId: String?,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): BoardResource {
         val query = GetBoardUseCase.Query(
             gameId = GameId(gameId),

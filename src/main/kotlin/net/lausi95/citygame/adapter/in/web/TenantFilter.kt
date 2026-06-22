@@ -4,45 +4,35 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import net.lausi95.citygame.common.Tenant
 import org.slf4j.MDC
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 private val log = KotlinLogging.logger { }
 
+/**
+ * Puts the caller's tenant origin into the logging MDC for request correlation. This is a
+ * best-effort logging concern only — it never validates or rejects. Tenant validation (and the
+ * 400 on a missing/malformed origin) happens in `TenantArgumentResolver`, inside the
+ * DispatcherServlet, so it flows through the standard `HttpExceptionHandler`. See ADR 0011.
+ */
 @Component
 class TenantFilter(
-    @Value($$"${tenant.override.enabled}") private val tenantOverrideEnabled: Boolean,
-    @Value($$"${tenant.override.value:#{null}}") private val tenantOverrideValue: String?
+    private val tenantOriginExtractor: TenantOriginExtractor,
 ) : OncePerRequestFilter() {
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val tenant = Tenant(determineTenant(request))
-
-        MDC.put("tenant", tenant.value)
-        request.setAttribute("tenant", tenant)
-
-        log.info { "Tenant determined: ${tenant.value}" }
-
-        filterChain.doFilter(request, response)
-    }
-
-    private fun determineTenant(request: HttpServletRequest): String {
-        if (tenantOverrideEnabled) {
-            val tenantFromHeader: String? = request.getHeader(Tenant.OVERRIDE_TENANT_HEADER_NAME)
-            if (tenantFromHeader != null) {
-                return tenantFromHeader
-            }
-            if (!tenantOverrideValue.isNullOrBlank()) {
-                return tenantOverrideValue
-            }
+        val origin = tenantOriginExtractor.extract(request)
+        MDC.put("tenant", origin ?: "unknown")
+        log.info { "Tenant origin: ${origin ?: "unknown"}" }
+        try {
+            filterChain.doFilter(request, response)
+        } finally {
+            MDC.remove("tenant")
         }
-
-        return request.remoteHost
     }
 }

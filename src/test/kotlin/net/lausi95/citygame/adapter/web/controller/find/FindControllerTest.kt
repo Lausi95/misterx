@@ -1,5 +1,8 @@
 package net.lausi95.citygame.adapter.web.controller.find
 
+import org.springframework.context.annotation.Import
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.slot
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.post
 
 @WebMvcTest(FindController::class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import(TenantOriginExtractor::class, WebMvcConfig::class)
 class FindControllerTest {
 
     @Autowired
@@ -35,7 +39,7 @@ class FindControllerTest {
         header("X-TeamId", "t1")
         header("X-MemberId", "m1")
         header("X-AgentId", "a1")
-        requestAttr("tenant", Tenant("acme"))
+        header("Origin", "https://acme.city-game.net")
         if (body != null) {
             contentType = MediaType.APPLICATION_JSON
             content = body
@@ -67,7 +71,7 @@ class FindControllerTest {
         assertThat(command.captured.agentId.value).isEqualTo("a1")
         assertThat(command.captured.reportedLocation?.latitude).isEqualTo(52.5)
         assertThat(command.captured.reportedLocation?.longitude).isEqualTo(13.4)
-        assertThat(tenant.captured).isEqualTo(Tenant("acme"))
+        assertThat(tenant.captured).isEqualTo(Tenant("https://acme.city-game.net"))
     }
 
     @Test

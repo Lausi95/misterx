@@ -11,7 +11,6 @@ import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseC
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
@@ -46,7 +45,7 @@ internal class LeaderboardController(
     fun getLeaderboard(
         @Parameter(description = "Identifier of the game", required = true)
         @RequestHeader(name = "X-GameId") gameId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): LeaderboardResource {
         return LeaderboardResource(getLeaderboardUseCase.getLeaderboard(GameId(gameId), tenant))
     }

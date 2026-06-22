@@ -1,5 +1,7 @@
 package net.lausi95.citygame.adapter.web.controller.find
 
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
@@ -24,7 +26,7 @@ import org.springframework.test.web.servlet.get
 
 @WebMvcTest(FindQrController::class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(FindQrControllerTest.ImageConverterConfig::class)
+@Import(FindQrControllerTest.ImageConverterConfig::class, TenantOriginExtractor::class, WebMvcConfig::class)
 class FindQrControllerTest {
 
     @TestConfiguration
@@ -46,17 +48,17 @@ class FindQrControllerTest {
         mockMvc.get("/find-qr") {
             header("X-GameId", gameId)
             header("X-AgentId", agentId)
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
             accept(MediaType.IMAGE_PNG)
         }
 
     @Test
     fun `returns 200 with a PNG image for an agent that belongs to the game`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), Tenant("acme"))
+            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), Tenant("https://acme.city-game.net"))
         } returns anAgent()
         every {
-            frontendUriFactory.buildUrl("/find", mapOf("agentId" to "a1", "alias" to "Shadow"))
+            frontendUriFactory.buildUrl(Tenant("https://acme.city-game.net"), "/find", mapOf("agentId" to "a1", "alias" to "Shadow"))
         } returns "https://foo.city-game.net/find?agentId=a1&alias=Shadow"
 
         getFindQr().andExpect {
@@ -66,9 +68,41 @@ class FindQrControllerTest {
     }
 
     @Test
+    fun `falls back to the Referer origin when no Origin header is present`() {
+        every {
+            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), Tenant("https://acme.city-game.net"))
+        } returns anAgent()
+        every {
+            frontendUriFactory.buildUrl(Tenant("https://acme.city-game.net"), "/find", mapOf("agentId" to "a1", "alias" to "Shadow"))
+        } returns "https://acme.city-game.net/find?agentId=a1&alias=Shadow"
+
+        // An <img>-loaded QR PNG sends no Origin, only a path-bearing Referer.
+        mockMvc.get("/find-qr") {
+            header("X-GameId", "g1")
+            header("X-AgentId", "a1")
+            header("Referer", "https://acme.city-game.net/scan/page")
+            accept(MediaType.IMAGE_PNG)
+        }.andExpect {
+            status { isOk() }
+            content { contentType(MediaType.IMAGE_PNG) }
+        }
+    }
+
+    @Test
+    fun `returns 400 when neither Origin nor Referer identifies a tenant`() {
+        mockMvc.get("/find-qr") {
+            header("X-GameId", "g1")
+            header("X-AgentId", "a1")
+            accept(MediaType.IMAGE_PNG)
+        }.andExpect {
+            status { isBadRequest() }
+        }
+    }
+
+    @Test
     fun `returns 404 when the agent does not belong to the game`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("missing")), Tenant("acme"))
+            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("missing")), Tenant("https://acme.city-game.net"))
         } answers { agentNotFound(AgentId("missing")) }
 
         getFindQr(agentId = "missing").andExpect {

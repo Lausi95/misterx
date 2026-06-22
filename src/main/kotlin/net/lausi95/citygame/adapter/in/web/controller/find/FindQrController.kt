@@ -15,7 +15,6 @@ import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -51,7 +50,7 @@ internal class FindQrController(
         @RequestHeader("X-GameId") gameId: String,
         @Parameter(description = "Identifier of the agent the QR code is for", required = true)
         @RequestHeader("X-AgentId") agentId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): BufferedImage {
         val agent = getMyAgentUseCase.getMyAgent(
             GetMyAgentUseCase.Query(GameId(gameId), AgentId(agentId)),
@@ -59,6 +58,7 @@ internal class FindQrController(
         )
 
         val findUrl = frontendUriFactory.buildUrl(
+            tenant,
             "/find",
             mapOf(
                 "agentId" to agent.id.value,

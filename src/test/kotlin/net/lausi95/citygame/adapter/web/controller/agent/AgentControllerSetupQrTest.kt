@@ -1,5 +1,7 @@
 package net.lausi95.citygame.adapter.web.controller.agent
 
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
@@ -27,7 +29,7 @@ import org.springframework.test.web.servlet.get
 
 @WebMvcTest(AgentController::class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(AgentControllerSetupQrTest.ImageConverterConfig::class)
+@Import(AgentControllerSetupQrTest.ImageConverterConfig::class, TenantOriginExtractor::class, WebMvcConfig::class)
 class AgentControllerSetupQrTest {
 
     @TestConfiguration
@@ -59,14 +61,14 @@ class AgentControllerSetupQrTest {
 
     private fun getSetupQr(agentId: String = "a1") =
         mockMvc.get("/games/g1/agents/$agentId/setup-qr") {
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
             accept(MediaType.IMAGE_PNG)
         }
 
     @Test
     fun `returns 200 with a PNG image for an existing agent`() {
-        every { getAgentUseCase.getAgent(AgentId("a1"), Tenant("acme")) } returns anAgent()
-        every { frontendUriFactory.buildUrl(any(), any()) } returns "http://localhost:3000/setup-agent?agentId=a1"
+        every { getAgentUseCase.getAgent(AgentId("a1"), Tenant("https://acme.city-game.net")) } returns anAgent()
+        every { frontendUriFactory.buildUrl(any(), any(), any()) } returns "http://localhost:3000/setup-agent?agentId=a1"
 
         getSetupQr().andExpect {
             status { isOk() }
@@ -76,7 +78,7 @@ class AgentControllerSetupQrTest {
 
     @Test
     fun `returns 404 when the agent does not exist`() {
-        every { getAgentUseCase.getAgent(AgentId("missing"), Tenant("acme")) } throws
+        every { getAgentUseCase.getAgent(AgentId("missing"), Tenant("https://acme.city-game.net")) } throws
             AgentNotFoundException("Agent not found: missing")
 
         getSetupQr(agentId = "missing").andExpect {

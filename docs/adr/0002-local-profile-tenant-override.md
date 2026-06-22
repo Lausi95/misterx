@@ -4,7 +4,14 @@ Date: 2026-06-19
 
 ## Status
 
-Accepted
+Superseded by [0011](0011-tenant-is-the-frontend-origin.md)
+
+> ADR 0011 stops resolving the tenant from `request.remoteHost` and removes the
+> `tenant.override.value` fixed default this ADR introduced. The browser now sends the
+> tenant (its own origin) automatically via the `Origin`/`Referer` headers even in local dev,
+> so no configured fallback is needed. The `X-TENANT-OVERRIDE` header and
+> `tenant.override.enabled` flag survive (for tests and tooling); only the fixed `value`
+> property is dropped.
 
 ## Context
 

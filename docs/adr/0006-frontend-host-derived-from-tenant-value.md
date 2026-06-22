@@ -4,7 +4,11 @@ Date: 2026-06-21
 
 ## Status
 
-Accepted
+Superseded by [0011](0011-tenant-is-the-frontend-origin.md)
+
+> The premise of this ADR — that `tenant.value` is *not* a routable frontend domain — no
+> longer holds. ADR 0011 redefines the tenant to **be** the frontend origin, so QR codes now
+> derive their URL directly from `tenant.value` and `frontend.base-url` is removed.
 
 ## Context
 

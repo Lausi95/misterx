@@ -46,7 +46,7 @@ class TeamRegistrationController(
     fun registerTeamMember(
         @RequestHeader("X-GameId") gameId: String,
         @RequestHeader("X-TeamId") teamId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): ResponseEntity<Unit> {
         val command = RegisterTeamMemberUseCase.Command(
             GameId(gameId),

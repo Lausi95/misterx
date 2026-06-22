@@ -43,7 +43,7 @@ internal class LocationController(
         @RequestHeader(name = "X-GameId") gameId: String,
         @Parameter(description = "Identifier of the agent reporting their location", required = true)
         @RequestHeader(name = "X-AgentId") agentId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
         @Valid @RequestBody request: UpdateLocationRequest,
     ): ResponseEntity<Unit> {
         val geoLocation = GeoLocation(

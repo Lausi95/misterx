@@ -1,5 +1,8 @@
 package net.lausi95.citygame.adapter.web.controller.board
 
+import org.springframework.context.annotation.Import
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.slot
@@ -32,6 +35,7 @@ import java.time.OffsetDateTime
 
 @WebMvcTest(BoardController::class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import(TenantOriginExtractor::class, WebMvcConfig::class)
 class BoardControllerTest {
 
     @Autowired
@@ -58,7 +62,7 @@ class BoardControllerTest {
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
         }.andExpect {
             status { isOk() }
             jsonPath("$.map.grid.rows") { value(10) }
@@ -83,7 +87,7 @@ class BoardControllerTest {
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
         }.andExpect {
             status { isOk() }
             jsonPath("$.utilityAgents[0].id") { value("u1") }
@@ -104,7 +108,7 @@ class BoardControllerTest {
     @Test
     fun `missing X-GameId header is a 400`() {
         mockMvc.get("/board") {
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
         }.andExpect {
             status { isBadRequest() }
         }
@@ -119,12 +123,12 @@ class BoardControllerTest {
         mockMvc.get("/board") {
             header("X-GameId", "g1")
             header("X-TeamId", "t1")
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
         }.andExpect { status { isOk() } }
 
         assertThat(query.captured.gameId).isEqualTo(GameId("g1"))
         assertThat(query.captured.teamId?.value).isEqualTo("t1")
-        assertThat(tenant.captured).isEqualTo(Tenant("acme"))
+        assertThat(tenant.captured).isEqualTo(Tenant("https://acme.city-game.net"))
     }
 
     @Test
@@ -134,7 +138,7 @@ class BoardControllerTest {
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
         }.andExpect { status { isOk() } }
 
         assertThat(query.captured.teamId).isNull()
@@ -147,7 +151,7 @@ class BoardControllerTest {
         mockMvc.get("/board") {
             header("X-GameId", "g1")
             header("X-TeamId", "t1")
-            requestAttr("tenant", Tenant("acme"))
+            header("Origin", "https://acme.city-game.net")
         }.andExpect {
             status { isNotFound() }
         }

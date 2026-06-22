@@ -12,7 +12,6 @@ import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUs
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -45,7 +44,7 @@ class MyAgentController(
     fun getMyAgent(
         @RequestHeader("X-GameId") gameId: String,
         @RequestHeader("X-AgentId") agentId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): AgentResource {
         val query = GetMyAgentUseCase.Query(GameId(gameId), AgentId(agentId))
 

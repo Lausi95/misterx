@@ -1,5 +1,7 @@
 package net.lausi95.citygame.adapter.web
 
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.WebSecurityConfiguration
@@ -27,7 +29,7 @@ import org.springframework.test.web.servlet.get
  * addFilters = false) so the security chain actually runs. See ADR 0007.
  */
 @WebMvcTest(GameController::class)
-@Import(WebSecurityConfiguration::class)
+@Import(WebSecurityConfiguration::class, TenantOriginExtractor::class, WebMvcConfig::class)
 class WebSecurityConfigurationTest {
 
     @Autowired
@@ -66,7 +68,7 @@ class WebSecurityConfigurationTest {
         mockMvc.get("/games") {
             with(jwt())
             // TenantFilter is not part of this slice; supply the attribute it would set.
-            requestAttr("tenant", Tenant("test"))
+            header("Origin", "https://test.city-game.net")
         }.andExpect { status { isOk() } }
     }
 

@@ -53,7 +53,7 @@ class AgentController(
     fun getAgents(
         @PageableDefault pageable: Pageable,
         @PathVariable gameId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): AgentCollection {
         val agents = getAgentsUseCase.getAgents(GameId(gameId), pageable, tenant)
         return AgentCollection(agents)
@@ -82,7 +82,7 @@ class AgentController(
     @PostMapping
     fun createAgent(
         @PathVariable gameId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
         @RequestBody @Valid request: CreateAgentRequest,
     ): ResponseEntity<Unit> {
         val command = CreateAgentUseCase.Command(
@@ -126,7 +126,7 @@ class AgentController(
     fun getAgent(
         @PathVariable gameId: String,
         @PathVariable agentId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): AgentResource {
         val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
         val foundByTeams = getAgentFindingTeamsUseCase.getFindingTeams(AgentId(agentId), tenant)
@@ -155,7 +155,7 @@ class AgentController(
         @PathVariable gameId: String,
         @PathVariable agentId: String,
         @Valid @RequestBody request: UpdateAgentRequest,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ) {
         val command = UpdateAgentUseCase.Command(
             agentId = AgentId(agentId),
@@ -191,11 +191,12 @@ class AgentController(
     fun getSetupQr(
         @PathVariable gameId: String,
         @PathVariable agentId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): BufferedImage {
         val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
 
         val setupUrl = frontendUriFactory.buildUrl(
+            tenant,
             "/setup-agent",
             mapOf(
                 "type" to agent.type.name,

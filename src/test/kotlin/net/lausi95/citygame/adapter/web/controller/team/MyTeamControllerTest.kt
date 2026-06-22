@@ -1,5 +1,8 @@
 package net.lausi95.citygame.adapter.web.controller.team
 
+import org.springframework.context.annotation.Import
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.controller.team.MyTeamController
@@ -25,6 +28,7 @@ import java.time.OffsetDateTime
 
 @WebMvcTest(MyTeamController::class)
 @AutoConfigureMockMvc(addFilters = false)
+@Import(TenantOriginExtractor::class, WebMvcConfig::class)
 class MyTeamControllerTest {
 
     @Autowired
@@ -39,11 +43,11 @@ class MyTeamControllerTest {
     @MockkBean
     private lateinit var getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase
 
-    private val tenant = Tenant("acme")
+    private val tenant = Tenant("https://acme.city-game.net")
 
     private fun getMyTeam(memberId: String? = null) =
         mockMvc.get("/my-team") {
-            requestAttr("tenant", tenant)
+            header("Origin", tenant.value)
             header("X-GameId", "g1")
             header("X-TeamId", "t1")
             memberId?.let { header("X-MemberId", it) }

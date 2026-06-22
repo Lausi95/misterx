@@ -14,7 +14,6 @@ import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -49,7 +48,7 @@ class MyTeamController(
         @RequestHeader("X-GameId") gameId: String,
         @RequestHeader("X-TeamId") teamId: String,
         @RequestHeader(value = "X-MemberId", required = false) memberId: String?,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): TeamResource {
         val query = GetMyTeamUseCase.Query(
             GameId(gameId),

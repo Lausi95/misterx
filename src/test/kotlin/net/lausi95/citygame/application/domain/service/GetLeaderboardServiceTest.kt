@@ -41,7 +41,7 @@ class GetLeaderboardServiceTest {
         getTeamFindingsPort,
     )
 
-    private val tenant = Tenant("acme")
+    private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
 
     private val game = Game(

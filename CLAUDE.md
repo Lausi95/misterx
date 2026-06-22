@@ -65,8 +65,12 @@ Integration tests require a running Docker daemon — Testcontainers spins up Po
 
 ### Multi-Tenancy
 
-- `TenantFilter` extracts the tenant from the request hostname (subdomain prefix) and stores it in MDC and request
-  attributes. It can be overridden in dev/test via the `X-TENANT-OVERRIDE` header when `tenant.override.enabled=true`.
+- The tenant **is the frontend origin** (`scheme://host[:port]`, e.g. `https://foo.city-game.net`). It is resolved from
+  the request by `TenantArgumentResolver` (via `TenantOriginExtractor`): `X-TENANT-OVERRIDE` header when
+  `tenant.override.enabled` → `Origin` header → origin of `Referer` → 400. The same origin is the base URL of the
+  tenant's QR codes (`FrontendUriFactory`). `TenantFilter` only puts the origin into the logging MDC. See ADR 0011/0012.
+- Validation lives in the `Tenant` type (`init {}` → `InvalidTenantOriginException`), so a `Tenant` can never hold an
+  invalid origin. Controllers declare a plain `tenant: Tenant` parameter (no `@RequestAttribute`).
 - Every service method receives an explicit `Tenant` argument. Never assume a default or fall back to a hardcoded tenant
   value.
 

@@ -54,7 +54,7 @@ class GameController(
     )
     fun postGame(
         @RequestBody @Valid request: CreateGameRequest,
-        @RequestAttribute tenant: Tenant
+        tenant: Tenant
     ): ResponseEntity<Unit> {
         val command = CreateGameUseCase.Command(
             title = GameTitle(requireNotNull(request.title)),
@@ -106,7 +106,7 @@ class GameController(
     @GetMapping("/{gameId}")
     fun getGame(
         @PathVariable gameId: String,
-        @RequestAttribute tenant: Tenant
+        tenant: Tenant
     ): GameResource {
         val game = getGameUseCase.getGame(GameId(gameId), tenant)
         return GameResource(game)
@@ -126,7 +126,7 @@ class GameController(
     @GetMapping
     fun getGames(
         @PageableDefault pageable: Pageable,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): GameCollection {
         val games = getGamesUseCase.getGames(pageable, tenant)
         return GameCollection(games)
@@ -151,7 +151,7 @@ class GameController(
     @GetMapping("/{gameId}/map")
     fun getMap(
         @PathVariable gameId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): MapResource {
         return MapResource(GameId(gameId), getMapUseCase.getMap(GameId(gameId), tenant))
     }
@@ -181,7 +181,7 @@ class GameController(
     fun updateGame(
         @PathVariable gameId: String,
         @RequestBody @Valid request: PatchGameRequest,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): ResponseEntity<Unit> {
         val command = UpdateGameUseCase.Command(
             gameId = GameId(gameId),

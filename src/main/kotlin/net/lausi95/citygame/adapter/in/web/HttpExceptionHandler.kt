@@ -5,6 +5,7 @@ import net.lausi95.citygame.application.domain.ConflictDomainException
 import net.lausi95.citygame.application.domain.DomainException
 import net.lausi95.citygame.application.domain.NotFoundDomainException
 import net.lausi95.citygame.application.domain.UnprocessableDomainException
+import net.lausi95.citygame.common.InvalidTenantOriginException
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingRequestHeaderException
@@ -35,6 +36,13 @@ class HttpExceptionHandler {
 
     @ExceptionHandler(DomainException::class)
     fun handleIllegalArgumentException(ex: DomainException): ProblemDetail {
+        val problemDetail = ProblemDetail.forStatus(400)
+        problemDetail.setProperty("details", ex.message)
+        return problemDetail
+    }
+
+    @ExceptionHandler(InvalidTenantOriginException::class)
+    fun handleInvalidTenantOriginException(ex: InvalidTenantOriginException): ProblemDetail {
         val problemDetail = ProblemDetail.forStatus(400)
         problemDetail.setProperty("details", ex.message)
         return problemDetail

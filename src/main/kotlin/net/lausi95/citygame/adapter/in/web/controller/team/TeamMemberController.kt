@@ -37,7 +37,7 @@ class TeamMemberController(
         @PageableDefault pageable: Pageable,
         @PathVariable gameId: String,
         @PathVariable teamId: String,
-        @RequestAttribute tenant: Tenant,
+        tenant: Tenant,
     ): TeamMemberCollection {
         val members = getTeamMembersUseCase.getTeamMembers(TeamId(teamId), GameId(gameId), pageable, tenant)
         return TeamMemberCollection(members)

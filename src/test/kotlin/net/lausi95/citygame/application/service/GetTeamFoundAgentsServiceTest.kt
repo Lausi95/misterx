@@ -22,7 +22,7 @@ class GetTeamFoundAgentsServiceTest {
     private val getAgentPort = mockk<GetAgentPort>()
     private val service = GetTeamFoundAgentsService(getTeamFindingsPort, getAgentPort)
 
-    private val tenant = Tenant("acme")
+    private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
     private val teamId = TeamId()
 

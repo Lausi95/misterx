@@ -25,7 +25,7 @@ class GetMyTeamServiceTest {
 
     private val service = GetMyTeamService(getTeamPort, getTeamMemberPort)
 
-    private val tenant = Tenant("acme")
+    private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId("g1")
     private val teamId = TeamId("t1")
     private val memberId = TeamMemberId("m1")
