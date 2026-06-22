@@ -11,7 +11,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.text.Collator
 import java.time.OffsetDateTime
+import java.util.Locale
 
 private val log = KotlinLogging.logger { }
 
@@ -22,6 +24,16 @@ class GetAgentsService(
 ) : GetAgentsUseCase {
 
     /**
+     * German, case-insensitive ordering of aliases: folds case and places umlauts next to
+     * their base letter, mirroring the `de-DE-x-icu` collation the teams list uses (ADR 0015).
+     * `SECONDARY` strength keeps accents significant but ignores case.
+     */
+    private val germanCollator: Collator =
+        Collator.getInstance(Locale.GERMAN).apply { strength = Collator.SECONDARY }
+
+    private val byAlias: Comparator<String> = Comparator { a, b -> germanCollator.compare(a, b) }
+
+    /**
      * Ordering is by **location staleness** (see ADR 0014): never-located agents first
      * (infinitely stale), then the oldest last-known location, ties broken by alias and
      * finally agent id for a stable total order. `now` is constant within a request, so
@@ -29,7 +41,7 @@ class GetAgentsService(
      */
     private val byLocationStaleness: Comparator<Agent> =
         compareBy<Agent, OffsetDateTime?>(nullsFirst()) { it.location?.timestamp }
-            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.alias }
+            .thenBy(byAlias) { it.alias }
             .thenBy { it.id.value }
 
     override fun getAgents(

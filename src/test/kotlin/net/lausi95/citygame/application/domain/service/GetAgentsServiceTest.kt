@@ -73,6 +73,19 @@ class GetAgentsServiceTest {
     }
 
     @Test
+    fun `aliases are ordered German-correct - umlauts sort next to their base letter`() {
+        // ASCII ordering would place "Ärger" (code point 0xC4) after "Zoo"; German collation
+        // folds it next to "A", so the expected order is Apfel, Ärger, Zoo.
+        val zoo = agent("Zoo")
+        val arger = agent("Ärger")
+        val apfel = agent("Apfel")
+        givenAgents(zoo, arger, apfel)
+        listOf(zoo, arger, apfel).forEach { withoutLocation(it) }
+
+        assertThat(getAgents()).containsExactly("Apfel", "Ärger", "Zoo")
+    }
+
+    @Test
     fun `agents are ordered by agent id when staleness and alias are equal`() {
         val first = agent("same", AgentId("00000000-0000-0000-0000-000000000001"))
         val second = agent("same", AgentId("00000000-0000-0000-0000-000000000002"))

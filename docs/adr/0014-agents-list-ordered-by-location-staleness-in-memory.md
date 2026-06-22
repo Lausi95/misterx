@@ -62,7 +62,10 @@ in memory:
    the full set by:
    - **location timestamp ascending, nulls first** — never-located agents first, then the
      oldest last-known location;
-   - then **`alias` ascending, case-insensitive**;
+   - then **`alias` ascending**, using a German, case-insensitive collation (`Collator`
+     for `Locale.GERMAN` at `SECONDARY` strength) so it folds case and orders umlauts next
+     to their base letter — the in-memory equivalent of the `de-DE-x-icu` column collation
+     the teams list uses (ADR 0015);
    - then **`agentId` ascending** as a final stable tiebreak.
 3. The service then slices the requested page itself and returns a `PageImpl(content,
    pageable, totalAgents)`. It honours the incoming `Pageable`'s page number and size but
