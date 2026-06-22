@@ -13,7 +13,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik
-      - traefik.http.routers.cgb.rule=Host(`city-game-backend.lausi95.net`)
+      - traefik.http.routers.cgb.rule=Host(`api.city-game.lausi95.net`)
       - traefik.http.routers.cgb.entrypoints=websecure
       - traefik.http.routers.cgb.tls.certresolver=letsencrypt
       - traefik.http.services.cgb.loadbalancer.server.port=8080
@@ -41,10 +41,8 @@ services:
       - ./pgdata:/var/lib/postgresql/data
 
 networks:
-  # Public-facing proxy network (shared, pre-existing). API only.
   traefik:
     external: true
     name: traefik
-  # Private network for API <-> Postgres. Postgres is reachable only here.
   backend:
     driver: bridge
