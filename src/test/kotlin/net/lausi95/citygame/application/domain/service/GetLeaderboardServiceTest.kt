@@ -67,7 +67,7 @@ class GetLeaderboardServiceTest {
         AgentFinding(FindingId(), gameId, teamId, agentId, foundAt, null, null)
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgents(any(), gameId, tenant) } returns PageImpl(agents.toList())
+        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
     }
 
     private fun givenTeams(vararg teams: Team) {

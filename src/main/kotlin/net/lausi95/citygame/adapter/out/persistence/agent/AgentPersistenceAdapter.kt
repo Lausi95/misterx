@@ -10,8 +10,6 @@ import net.lausi95.citygame.application.port.out.agent.GetAgentPort
 import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
 import net.lausi95.citygame.application.port.out.agent.SaveAgentPort
 import net.lausi95.citygame.common.Tenant
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,12 +35,11 @@ internal class AgentPersistenceAdapter(
         return agentEntityRepository.existsByIdAndTenant(agentId.value, tenant.value)
     }
 
-    override fun getAgents(
-        pageable: Pageable,
+    override fun getAgentsForGame(
         gameId: GameId,
         tenant: Tenant,
-    ): Page<Agent> {
-        return agentEntityRepository.findByGameIdAndTenant(gameId.value, tenant.value, pageable).map { it.toAgent() }
+    ): List<Agent> {
+        return agentEntityRepository.findByGameIdAndTenant(gameId.value, tenant.value).map { it.toAgent() }
     }
 
     override fun countAgentsByGame(gameId: GameId, tenant: Tenant): Int {

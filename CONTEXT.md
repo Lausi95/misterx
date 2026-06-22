@@ -59,6 +59,16 @@ already been found (see ADR 0013).
 _Avoid_: using "remove" without saying which — deactivation and deletion differ in
 reversibility and in whether findings survive.
 
+**Location staleness**:
+How out-of-date an Agent's last-known location is — conceptually the age of the most recent
+location report (`now` minus its timestamp). An Agent that has **never** reported a location is
+treated as *infinitely stale*. Staleness is the ordering key of the agents list
+(`GET /games/{gameId}/agents`): never-located agents first, then the oldest last-known
+location, ties broken by `alias` (see ADR 0014). Because `now` is constant within a request,
+ordering by staleness is just ordering by location timestamp ascending, nulls first — no age is
+ever computed.
+_Avoid_: Freshness (the inverse), last-seen age, location lag
+
 **Board**:
 The live, caller-specific view of a Game's playfield: the Map (corners + grid) overlaid with the
 currently-visible Agent positions. Distinct from the **Map**, which is static configuration (the

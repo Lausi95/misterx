@@ -27,7 +27,6 @@ import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.springframework.data.domain.PageImpl
 import org.junit.jupiter.api.Test
 import java.time.OffsetDateTime
 
@@ -70,7 +69,7 @@ class GetBoardServiceTest {
         AgentLocation(AgentLocationId(), agentId, OffsetDateTime.now(), GeoLocation(latitude, longitude))
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgents(any(), gameId, tenant) } returns PageImpl(agents.toList())
+        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
     }
 
     private fun givenLocations(vararg locations: Pair<AgentId, AgentLocation?>) {

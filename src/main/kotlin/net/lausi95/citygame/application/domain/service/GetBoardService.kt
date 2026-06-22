@@ -12,7 +12,6 @@ import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
 import net.lausi95.citygame.application.port.out.game.GetGamePort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.Tenant
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -44,7 +43,7 @@ class GetBoardService(
                 .toSet()
         } ?: emptySet()
 
-        val agents = getAgentsPort.getAgents(Pageable.unpaged(), query.gameId, tenant).content
+        val agents = getAgentsPort.getAgentsForGame(query.gameId, tenant)
             .onEach { agent ->
                 getAgentLocationPort.getAgentLocation(agent.id)?.also { agent.setLocation(it) }
             }

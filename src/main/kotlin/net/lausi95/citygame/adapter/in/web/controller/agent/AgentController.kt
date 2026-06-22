@@ -40,7 +40,12 @@ class AgentController(
     private val frontendUriFactory: FrontendUriFactory,
 ) {
 
-    @Operation(summary = "Returns a paginated collection of agents for a game")
+    @Operation(
+        summary = "Returns a paginated collection of agents for a game",
+        description = "Agents are ordered by location staleness: never-located agents first, then the " +
+            "oldest last-known location, ties broken by alias. This ordering is fixed; any client-supplied " +
+            "sort is ignored (see ADR 0014).",
+    )
     @ApiResponse(
         responseCode = "200",
         description = "Collection of agents",

@@ -34,7 +34,7 @@ class GetLeaderboardService(
 
         // Only currently-active MISTERX agents score (ADR 0005). Fetch them once and index by id
         // so each team's findings resolve without an extra query per finding.
-        val scoringAgents = getAgentsPort.getAgents(Pageable.unpaged(), gameId, tenant).content
+        val scoringAgents = getAgentsPort.getAgentsForGame(gameId, tenant)
             .filter { it.type == Agent.Type.MISTERX && it.active }
             .associateBy { it.id }
 
