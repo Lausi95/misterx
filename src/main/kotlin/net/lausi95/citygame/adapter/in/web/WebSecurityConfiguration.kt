@@ -1,32 +1,27 @@
 package net.lausi95.citygame.adapter.`in`.web
 
-/*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
-import org.springframework.security.web.DefaultSecurityFilterChain
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.web.SecurityFilterChain
 
+/**
+ * OAuth2 resource server protecting only the organizer/management tree under "/games".
+ * Every other endpoint is intentionally public — participant clients are identified by
+ * request headers, not a security principal. See ADR 0007.
+ */
 @Configuration
-@EnableMethodSecurity
 class WebSecurityConfiguration {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): DefaultSecurityFilterChain? = http
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http
         .authorizeHttpRequests {
-            it.requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/v3/api-docs/**").permitAll()
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .anyRequest().authenticated()
+            it.requestMatchers("/games/**").authenticated()
+                .anyRequest().permitAll()
         }
-        .oauth2ResourceServer { resourceServer ->
-            resourceServer.jwt { jwt ->
-                jwt.jwtAuthenticationConverter(
-                    JwtAuthenticationConverter()
-                )
-            }
-        }
+        .oauth2ResourceServer { it.jwt {} }
+        .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+        .csrf { it.disable() }
         .build()
 }
- */

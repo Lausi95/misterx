@@ -18,6 +18,14 @@ it from the caller's host. Gated by `tenant.override.enabled`; sourced from the
 `X-TENANT-OVERRIDE` header (preferred) or the configured `tenant.override.value` (used by
 the `local` profile). Inert in production.
 
+**Organizer**:
+The person who runs a Game: creates it and manages its Agents, Teams, and members. The only
+actor that holds an account and authenticates; acts solely through the `/games/**` management
+surface. Distinct from **participants** (Teams, team members, and the people operating Agents),
+who hold no account and are identified by request headers from their QR/registration flow (see
+ADR 0007).
+_Avoid_: Admin, owner, host, user
+
 **Agent**:
 A non-team game character that teams try to locate. An agent belongs to exactly one Game,
 has a `Type` (`MISTERX` or `UTILITY`), and may carry a last-known location. Teams that have
