@@ -5,6 +5,7 @@ import net.lausi95.citygame.application.domain.model.finding.AgentFinding
 import net.lausi95.citygame.application.domain.model.finding.agentAlreadyFound
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
+import net.lausi95.citygame.application.port.out.finding.DeleteAgentFindingsPort
 import net.lausi95.citygame.application.port.out.finding.DeleteTeamFindingsPort
 import net.lausi95.citygame.application.port.out.finding.GetAgentFindingsPort
 import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Component
 @Component
 internal class AgentFindingPersistenceAdapter(
     private val agentFindingEntityRepository: AgentFindingEntityRepository,
-) : SaveAgentFindingPort, CheckAgentFoundByTeamPort, GetTeamFindingsPort, GetAgentFindingsPort, DeleteTeamFindingsPort {
+) : SaveAgentFindingPort, CheckAgentFoundByTeamPort, GetTeamFindingsPort, GetAgentFindingsPort, DeleteTeamFindingsPort,
+    DeleteAgentFindingsPort {
 
     override fun saveAgentFinding(agentFinding: AgentFinding, tenant: Tenant) {
         try {
@@ -44,5 +46,9 @@ internal class AgentFindingPersistenceAdapter(
 
     override fun deleteTeamFindings(teamId: TeamId, tenant: Tenant) {
         agentFindingEntityRepository.deleteByTeamIdAndTenant(teamId.value, tenant.value)
+    }
+
+    override fun deleteAgentFindings(agentId: AgentId, tenant: Tenant) {
+        agentFindingEntityRepository.deleteByAgentIdAndTenant(agentId.value, tenant.value)
     }
 }

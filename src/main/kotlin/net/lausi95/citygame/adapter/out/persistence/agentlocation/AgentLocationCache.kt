@@ -18,6 +18,10 @@ class AgentLocationCache {
         agentLocations[agentId] = agentLocation
     }
 
+    fun evict(agentId: AgentId) {
+        agentLocations.remove(agentId)
+    }
+
     fun resolve(agentId: AgentId, resolver: (agentId: AgentId) -> AgentLocation?): AgentLocation? {
         var agentLocation = getAgentLocation(agentId)
         if (agentLocation == null) {

@@ -1,0 +1,77 @@
+package net.lausi95.citygame.application.domain.service
+
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import io.mockk.verifyOrder
+import net.lausi95.citygame.application.domain.model.agent.Agent
+import net.lausi95.citygame.application.domain.model.agent.AgentId
+import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundException
+import net.lausi95.citygame.application.domain.model.game.GameId
+import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
+import net.lausi95.citygame.application.port.out.agent.DeleteAgentPort
+import net.lausi95.citygame.application.port.out.agent.GetAgentPort
+import net.lausi95.citygame.application.port.out.agentlocation.DeleteAgentLocationsPort
+import net.lausi95.citygame.application.port.out.finding.DeleteAgentFindingsPort
+import net.lausi95.citygame.common.Tenant
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
+
+class DeleteAgentServiceTest {
+
+    private val getAgentPort = mockk<GetAgentPort>()
+    private val deleteAgentFindingsPort = mockk<DeleteAgentFindingsPort>(relaxed = true)
+    private val deleteAgentLocationsPort = mockk<DeleteAgentLocationsPort>(relaxed = true)
+    private val deleteAgentPort = mockk<DeleteAgentPort>(relaxed = true)
+    private val service = DeleteAgentService(
+        getAgentPort,
+        deleteAgentFindingsPort,
+        deleteAgentLocationsPort,
+        deleteAgentPort,
+    )
+
+    private val tenant = Tenant("https://acme.city-game.net")
+    private val gameId = GameId()
+    private val agentId = AgentId()
+
+    private fun agent(gameId: GameId = this.gameId) =
+        Agent(agentId, gameId, Agent.Type.MISTERX, "phone", "first", "last", "alias", true)
+
+    private fun command() = DeleteAgentUseCase.Command(gameId, agentId)
+
+    @Test
+    fun `cascades findings, locations and the agent in order`() {
+        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent()
+
+        service.deleteAgent(command(), tenant)
+
+        verifyOrder {
+            deleteAgentFindingsPort.deleteAgentFindings(agentId, tenant)
+            deleteAgentLocationsPort.deleteAgentLocations(agentId, tenant)
+            deleteAgentPort.deleteAgent(agentId, tenant)
+        }
+    }
+
+    @Test
+    fun `is idempotent - does nothing when the agent does not exist`() {
+        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns null
+
+        service.deleteAgent(command(), tenant)
+
+        verify(exactly = 0) { deleteAgentFindingsPort.deleteAgentFindings(any(), any()) }
+        verify(exactly = 0) { deleteAgentLocationsPort.deleteAgentLocations(any(), any()) }
+        verify(exactly = 0) { deleteAgentPort.deleteAgent(any(), any()) }
+    }
+
+    @Test
+    fun `rejects deletion when the agent belongs to a different game`() {
+        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent(gameId = GameId())
+
+        assertThatThrownBy { service.deleteAgent(command(), tenant) }
+            .isInstanceOf(AgentNotFoundException::class.java)
+
+        verify(exactly = 0) { deleteAgentFindingsPort.deleteAgentFindings(any(), any()) }
+        verify(exactly = 0) { deleteAgentLocationsPort.deleteAgentLocations(any(), any()) }
+        verify(exactly = 0) { deleteAgentPort.deleteAgent(any(), any()) }
+    }
+}

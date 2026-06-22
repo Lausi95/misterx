@@ -47,6 +47,18 @@ located an agent are its _finding teams_; the reverse view (agents a team has lo
 the team's _found agents_.
 _Avoid_: Player, target, NPC
 
+**Deactivate vs. delete an agent**:
+Two distinct ways to remove an agent from a Game — not synonyms.
+_Deactivate_ (`active = false`) is the reversible, non-destructive way to take a *played*
+agent out of the game: it keeps all data, drops the agent from the Board and from Leaderboard
+scoring (see ADR 0005), and can be undone by reactivating.
+_Delete_ permanently removes the agent together with its locations and findings. It exists
+only for cleaning up agents **outside active play** (a no-show before kickoff, a mistake, test
+setup); it is unconditional and irreversible, and is *not* the way to retire an agent that has
+already been found (see ADR 0013).
+_Avoid_: using "remove" without saying which — deactivation and deletion differ in
+reversibility and in whether findings survive.
+
 **Board**:
 The live, caller-specific view of a Game's playfield: the Map (corners + grid) overlaid with the
 currently-visible Agent positions. Distinct from the **Map**, which is static configuration (the
@@ -82,7 +94,9 @@ _Avoid_: Find code, catch code, scan code
 **Leaderboard**:
 The ranked standing of all of a Game's Teams by how many **MISTERX** Agents they have found.
 Only findings of agents that currently exist, are MISTERX, and are `active` are **counted** —
-deactivating a MISTERX retroactively removes it from every Team's score (see ADR 0005). Teams
+deactivating a MISTERX retroactively removes it from every Team's score (see ADR 0005), and
+deleting an agent removes its findings outright (see ADR 0013); both drop it from scoring,
+but only deactivation is reversible. Teams
 rank by counted-find count descending, then by the time of their most-recent counted finding
 ascending (earlier "got there first" wins). Teams with no counted finds sit unordered at the
 bottom. Served by `GET /leaderboard` with the Game supplied via the `X-GameId` header — the

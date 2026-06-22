@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
+import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
@@ -34,6 +35,7 @@ class AgentController(
     private val createAgentUseCase: CreateAgentUseCase,
     private val getAgentUseCase: GetAgentUseCase,
     private val updateAgentUseCase: UpdateAgentUseCase,
+    private val deleteAgentUseCase: DeleteAgentUseCase,
     private val getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase,
     private val frontendUriFactory: FrontendUriFactory,
 ) {
@@ -169,6 +171,31 @@ class AgentController(
         )
 
         updateAgentUseCase.updateAgent(command, tenant)
+    }
+
+    @Operation(summary = "Deletes an agent and all its locations and findings")
+    @ApiResponse(responseCode = "204", description = "Agent was deleted successfully", content = [])
+    @ApiResponse(
+        responseCode = "404",
+        description = "Agent exists but does not belong to the given game",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Internal server error",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ProblemDetail::class))],
+    )
+    @DeleteMapping("/{agentId}")
+    fun deleteAgent(
+        @PathVariable gameId: String,
+        @PathVariable agentId: String,
+        tenant: Tenant,
+    ): ResponseEntity<Unit> {
+        deleteAgentUseCase.deleteAgent(
+            DeleteAgentUseCase.Command(GameId(gameId), AgentId(agentId)),
+            tenant,
+        )
+        return ResponseEntity.noContent().build()
     }
 
     @Operation(summary = "Generates a setup QR code for an agent")

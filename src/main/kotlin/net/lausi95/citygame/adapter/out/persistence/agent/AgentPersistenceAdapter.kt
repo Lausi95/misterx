@@ -5,6 +5,7 @@ import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.out.agent.CheckAgentExistsPort
 import net.lausi95.citygame.application.port.out.agent.CountAgentsByGamePort
+import net.lausi95.citygame.application.port.out.agent.DeleteAgentPort
 import net.lausi95.citygame.application.port.out.agent.GetAgentPort
 import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
 import net.lausi95.citygame.application.port.out.agent.SaveAgentPort
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component
 @Component
 internal class AgentPersistenceAdapter(
     private val agentEntityRepository: AgentEntityRepository,
-) : SaveAgentPort, GetAgentPort, GetAgentsPort, CheckAgentExistsPort, CountAgentsByGamePort {
+) : SaveAgentPort, GetAgentPort, GetAgentsPort, CheckAgentExistsPort, CountAgentsByGamePort, DeleteAgentPort {
 
     override fun saveAgent(agent: Agent, tenant: Tenant) {
         agentEntityRepository.save(AgentEntity(agent, tenant))
@@ -46,5 +47,9 @@ internal class AgentPersistenceAdapter(
 
     override fun countAgentsByGame(gameId: GameId, tenant: Tenant): Int {
         return agentEntityRepository.countByGameIdAndTenant(gameId.value, tenant.value)
+    }
+
+    override fun deleteAgent(agentId: AgentId, tenant: Tenant) {
+        agentEntityRepository.deleteByIdAndTenant(agentId.value, tenant.value)
     }
 }

@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 internal interface AgentLocationEntityRepository : JpaRepository<AgentLocationEntity, String> {
 
     fun findFirstByAgentIdOrderByTimestampDesc(agentId: String): AgentLocationEntity?
+
+    fun deleteByAgentIdAndTenant(agentId: String, tenant: String)
 }

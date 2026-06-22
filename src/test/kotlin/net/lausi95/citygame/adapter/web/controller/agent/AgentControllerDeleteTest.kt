@@ -1,12 +1,13 @@
 package net.lausi95.citygame.adapter.web.controller.agent
 
-import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
-import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
+import io.mockk.just
+import io.mockk.runs
+import io.mockk.verify
+import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
+import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
 import net.lausi95.citygame.adapter.`in`.web.controller.agent.AgentController
-import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundException
 import net.lausi95.citygame.application.domain.model.game.GameId
@@ -16,30 +17,22 @@ import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
 import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.http.MediaType
-import org.springframework.http.converter.BufferedImageHttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.delete
 
 @WebMvcTest(AgentController::class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(AgentControllerSetupQrTest.ImageConverterConfig::class, TenantOriginExtractor::class, WebMvcConfig::class)
-class AgentControllerSetupQrTest {
+@Import(TenantOriginExtractor::class, WebMvcConfig::class)
+class AgentControllerDeleteTest {
 
-    @TestConfiguration
-    class ImageConverterConfig {
-        @Bean
-        fun bufferedImageHttpMessageConverter() = BufferedImageHttpMessageConverter()
-    }
-
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
@@ -63,41 +56,36 @@ class AgentControllerSetupQrTest {
     @MockkBean
     private lateinit var frontendUriFactory: FrontendUriFactory
 
-    private fun getSetupQr(agentId: String = "a1") =
-        mockMvc.get("/games/g1/agents/$agentId/setup-qr") {
+    private val tenant = Tenant("https://acme.city-game.net")
+
+    private fun deleteAgent(agentId: String = "a1") =
+        mockMvc.delete("/games/g1/agents/$agentId") {
             header("Origin", "https://acme.city-game.net")
-            accept(MediaType.IMAGE_PNG)
         }
 
     @Test
-    fun `returns 200 with a PNG image for an existing agent`() {
-        every { getAgentUseCase.getAgent(AgentId("a1"), Tenant("https://acme.city-game.net")) } returns anAgent()
-        every { frontendUriFactory.buildUrl(any(), any(), any()) } returns "http://localhost:3000/setup-agent?agentId=a1"
+    fun `returns 204 and delegates the delete to the use case`() {
+        every { deleteAgentUseCase.deleteAgent(any(), tenant) } just runs
 
-        getSetupQr().andExpect {
-            status { isOk() }
-            content { contentType(MediaType.IMAGE_PNG) }
+        deleteAgent().andExpect {
+            status { isNoContent() }
+        }
+
+        verify {
+            deleteAgentUseCase.deleteAgent(
+                DeleteAgentUseCase.Command(GameId("g1"), AgentId("a1")),
+                tenant,
+            )
         }
     }
 
     @Test
-    fun `returns 404 when the agent does not exist`() {
-        every { getAgentUseCase.getAgent(AgentId("missing"), Tenant("https://acme.city-game.net")) } throws
-            AgentNotFoundException("Agent not found: missing")
+    fun `returns 404 when the agent belongs to a different game`() {
+        every { deleteAgentUseCase.deleteAgent(any(), tenant) } throws
+            AgentNotFoundException("Agent not found: a1")
 
-        getSetupQr(agentId = "missing").andExpect {
+        deleteAgent().andExpect {
             status { isNotFound() }
         }
     }
-
-    private fun anAgent() = Agent(
-        id = AgentId("a1"),
-        _gameId = GameId("g1"),
-        _type = Agent.Type.MISTERX,
-        _phoneNumber = "+49123456789",
-        _firstName = "Jane",
-        _lastName = "Doe",
-        _alias = "Shadow",
-        _active = true,
-    )
 }

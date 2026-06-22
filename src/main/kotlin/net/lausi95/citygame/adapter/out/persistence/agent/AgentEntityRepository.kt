@@ -13,4 +13,6 @@ internal interface AgentEntityRepository : JpaRepository<AgentEntity, String> {
     fun findByGameIdAndTenant(gameId: String, tenant: String, pageable: Pageable): Page<AgentEntity>
 
     fun countByGameIdAndTenant(gameId: String, tenant: String): Int
+
+    fun deleteByIdAndTenant(id: String, tenant: String)
 }

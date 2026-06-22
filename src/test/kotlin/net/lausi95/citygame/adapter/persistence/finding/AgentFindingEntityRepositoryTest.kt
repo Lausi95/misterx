@@ -185,4 +185,40 @@ class AgentFindingEntityRepositoryTest {
 
         assertThat(ordered).containsExactly(newerTeam, olderTeam)
     }
+
+    @Test
+    fun `deletes an agent's findings without touching another agent's`() {
+        val gameId = seedGame()
+        val teamId = seedTeam(gameId)
+        val deleted = seedAgent(gameId)
+        val kept = seedAgent(gameId)
+
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, teamId, deleted, OffsetDateTime.now(), null, null), tenant)
+        )
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, teamId, kept, OffsetDateTime.now(), null, null), tenant)
+        )
+
+        agentFindingEntityRepository.deleteByAgentIdAndTenant(deleted.value, tenant.value)
+
+        assertThat(agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(deleted.value, tenant.value)).isEmpty()
+        assertThat(agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(kept.value, tenant.value)).hasSize(1)
+    }
+
+    @Test
+    fun `does not delete another tenant's findings for the same agent id`() {
+        val otherTenant = Tenant("https://other.city-game.net")
+        val gameId = seedGame()
+        val teamId = seedTeam(gameId)
+        val agentId = seedAgent(gameId)
+
+        agentFindingEntityRepository.saveAndFlush(
+            AgentFindingEntity(AgentFinding(FindingId(), gameId, teamId, agentId, OffsetDateTime.now(), null, null), tenant)
+        )
+
+        agentFindingEntityRepository.deleteByAgentIdAndTenant(agentId.value, otherTenant.value)
+
+        assertThat(agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(agentId.value, tenant.value)).hasSize(1)
+    }
 }
