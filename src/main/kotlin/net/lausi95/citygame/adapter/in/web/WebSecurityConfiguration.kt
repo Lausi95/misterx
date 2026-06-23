@@ -4,6 +4,7 @@ import net.lausi95.citygame.common.InvalidTenantOriginException
 import net.lausi95.citygame.common.Tenant
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -25,6 +26,7 @@ import org.springframework.web.cors.CorsConfigurationSource
 class WebSecurityConfiguration {
 
     @Bean
+    @Profile("!local")
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http
         .authorizeHttpRequests {
             it.requestMatchers("/games/**").authenticated()
@@ -32,6 +34,23 @@ class WebSecurityConfiguration {
         }
         .cors(Customizer.withDefaults())
         .oauth2ResourceServer { it.jwt {} }
+        .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+        .csrf { it.disable() }
+        .build()
+
+    /**
+     * Local development chain: authentication is intentionally OFF so the frontend and backend can
+     * be exercised without running Keycloak. Every request is public — including the `/games`
+     * organizer tree that ADR 0007 protects in `prod`/`test`. CORS, stateless sessions and disabled
+     * CSRF mirror the default chain so cross-origin behaviour is unchanged. `application-local.yml`
+     * also excludes `OAuth2ResourceServerAutoConfiguration` so no `JwtDecoder` is built and the app
+     * boots with Keycloak down. See ADR 0016.
+     */
+    @Bean
+    @Profile("local")
+    fun localSecurityFilterChain(http: HttpSecurity): SecurityFilterChain = http
+        .authorizeHttpRequests { it.anyRequest().permitAll() }
+        .cors(Customizer.withDefaults())
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .csrf { it.disable() }
         .build()

@@ -1,3 +1,11 @@
+# Authentication is OFF locally so the frontend/backend can be tested without Keycloak. Excluding
+# the OAuth2 resource-server auto-config stops Spring from building an eager JwtDecoder that would
+# otherwise fetch OIDC metadata from Keycloak at startup (issuer-uri stays in application.yml for
+# prod/test). The @Profile("local") security chain makes every request public. See ADR 0016.
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration
+
 # The override header (X-TENANT-OVERRIDE) stays available locally for curl/Postman; the browser
 # supplies its own origin automatically (frontend :3000 → API :8080 is cross-origin), so no
 # configured fallback or frontend.base-url is needed. See ADR 0011.
