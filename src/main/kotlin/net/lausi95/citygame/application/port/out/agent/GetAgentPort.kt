@@ -11,4 +11,6 @@ interface GetAgentPort {
     fun getAgent(agentId: AgentId, tenant: Tenant): Agent {
         return getAgentOrNull(agentId, tenant) ?: error("Agent not found")
     }
+
+    fun getAgentsByIds(agentIds: Collection<AgentId>, tenant: Tenant): List<Agent>
 }

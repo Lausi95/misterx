@@ -55,7 +55,8 @@ class TeamController(
         tenant: Tenant,
     ): TeamCollection {
         val teams = getTeamsUseCase.getTeams(GameId(gameId), pageable, tenant)
-        return TeamCollection(teams) { team -> getTeamMembersUseCase.countTeamMembers(team.id, tenant) }
+        val foundAgentsByTeam = getTeamFoundAgentsUseCase.getFoundAgentsByTeams(teams.content.map { it.id }, tenant)
+        return TeamCollection(teams, { team -> getTeamMembersUseCase.countTeamMembers(team.id, tenant) }, foundAgentsByTeam)
     }
 
     @Operation(summary = "Creates a new team in a game")

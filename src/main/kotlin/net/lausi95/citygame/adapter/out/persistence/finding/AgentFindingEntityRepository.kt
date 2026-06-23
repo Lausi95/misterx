@@ -8,6 +8,8 @@ internal interface AgentFindingEntityRepository : JpaRepository<AgentFindingEnti
 
     fun findByTeamIdAndTenantOrderByFoundAtDesc(teamId: String, tenant: String): List<AgentFindingEntity>
 
+    fun findByTeamIdInAndTenantOrderByFoundAtDesc(teamIds: Collection<String>, tenant: String): List<AgentFindingEntity>
+
     fun findByAgentIdAndTenantOrderByFoundAtDesc(agentId: String, tenant: String): List<AgentFindingEntity>
 
     fun deleteByTeamIdAndTenant(teamId: String, tenant: String)

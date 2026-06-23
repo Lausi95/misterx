@@ -21,4 +21,13 @@ class GetTeamFoundAgentsService(
             }
         }
     }
+
+    override fun getFoundAgentsByTeams(teamIds: Collection<TeamId>, tenant: Tenant): Map<TeamId, List<FoundAgent>> {
+        val findings = getTeamFindingsPort.getFindingsByTeams(teamIds, tenant)
+        val agentsById = getAgentPort.getAgentsByIds(findings.map { it.agentId }.toSet(), tenant)
+            .associateBy { it.id }
+        return findings
+            .mapNotNull { finding -> agentsById[finding.agentId]?.let { agent -> finding.teamId to FoundAgent(agent.id, agent.alias, finding.foundAt) } }
+            .groupBy({ it.first }, { it.second })
+    }
 }

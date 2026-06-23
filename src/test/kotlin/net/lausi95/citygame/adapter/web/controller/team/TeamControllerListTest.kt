@@ -63,6 +63,7 @@ class TeamControllerListTest {
     fun `defaults to sorting by name ascending when the client sends no sort`() {
         val pageable = slot<Pageable>()
         every { getTeamsUseCase.getTeams(any(), capture(pageable), any()) } returns PageImpl(emptyList<Team>())
+        every { getTeamFoundAgentsUseCase.getFoundAgentsByTeams(any(), any()) } returns emptyMap()
 
         mockMvc.get("/games/g1/teams") {
             header("Origin", "https://acme.city-game.net")

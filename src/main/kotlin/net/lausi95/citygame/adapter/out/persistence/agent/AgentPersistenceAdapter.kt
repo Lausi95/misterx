@@ -28,6 +28,10 @@ internal class AgentPersistenceAdapter(
         return agentEntityRepository.findByIdAndTenant(agentId.value, tenant.value)?.toAgent()
     }
 
+    override fun getAgentsByIds(agentIds: Collection<AgentId>, tenant: Tenant): List<Agent> {
+        return agentEntityRepository.findByIdInAndTenant(agentIds.map { it.value }, tenant.value).map { it.toAgent() }
+    }
+
     override fun agentExists(
         agentId: AgentId,
         tenant: Tenant

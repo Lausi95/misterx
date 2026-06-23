@@ -7,4 +7,6 @@ import net.lausi95.citygame.common.Tenant
 interface GetTeamFindingsPort {
 
     fun getFindingsByTeam(teamId: TeamId, tenant: Tenant): List<AgentFinding>
+
+    fun getFindingsByTeams(teamIds: Collection<TeamId>, tenant: Tenant): List<AgentFinding>
 }

@@ -7,4 +7,6 @@ import net.lausi95.citygame.common.Tenant
 interface GetTeamFoundAgentsUseCase {
 
     fun getFoundAgents(teamId: TeamId, tenant: Tenant): List<FoundAgent>
+
+    fun getFoundAgentsByTeams(teamIds: Collection<TeamId>, tenant: Tenant): Map<TeamId, List<FoundAgent>>
 }

@@ -6,6 +6,8 @@ internal interface AgentEntityRepository : JpaRepository<AgentEntity, String> {
 
     fun findByIdAndTenant(id: String, tenant: String): AgentEntity?
 
+    fun findByIdInAndTenant(ids: Collection<String>, tenant: String): List<AgentEntity>
+
     fun existsByIdAndTenant(id: String, tenant: String): Boolean
 
     fun findByGameIdAndTenant(gameId: String, tenant: String): List<AgentEntity>
