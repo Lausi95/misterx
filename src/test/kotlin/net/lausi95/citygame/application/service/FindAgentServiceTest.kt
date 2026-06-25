@@ -31,7 +31,7 @@ import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
+import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
@@ -46,7 +46,7 @@ class FindAgentServiceTest {
     private val gameRepository = mockk<GameRepository>()
     private val agentRepository = mockk<AgentRepository>()
     private val teamRepository = mockk<TeamRepository>()
-    private val getTeamMemberPort = mockk<GetTeamMemberPort>()
+    private val teamMemberRepository = mockk<TeamMemberRepository>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
     private val findingRepository = mockk<FindingRepository>(relaxed = true)
 
@@ -54,7 +54,7 @@ class FindAgentServiceTest {
         gameRepository,
         agentRepository,
         teamRepository,
-        getTeamMemberPort,
+        teamMemberRepository,
         getAgentLocationPort,
         findingRepository,
     )
@@ -95,7 +95,7 @@ class FindAgentServiceTest {
         every { gameRepository.get(gameId, tenant) } returns game()
         every { agentRepository.getOrNull(agentId, tenant) } returns agent()
         every { teamRepository.getOrNull(teamId, tenant) } returns team()
-        every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns member()
+        every { teamMemberRepository.getOrNull(memberId, tenant) } returns member()
         every { findingRepository.existsByTeamAndAgent(teamId, agentId, tenant) } returns false
         every { getAgentLocationPort.getAgentLocation(agentId) } returns null
     }
@@ -162,7 +162,7 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the member belongs to a different team`() {
-        every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns member(team = TeamId())
+        every { teamMemberRepository.getOrNull(memberId, tenant) } returns member(team = TeamId())
 
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(TeamMemberNotFoundException::class.java)

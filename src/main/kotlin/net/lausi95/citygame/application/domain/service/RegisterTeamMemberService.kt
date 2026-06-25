@@ -8,7 +8,7 @@ import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.team.RegisterTeamMemberUseCase
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
-import net.lausi95.citygame.application.port.out.team.SaveTeamMemberPort
+import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,7 +21,7 @@ private val log = KotlinLogging.logger { }
 class RegisterTeamMemberService(
     private val gameRepository: GameRepository,
     private val teamRepository: TeamRepository,
-    private val saveTeamMemberPort: SaveTeamMemberPort,
+    private val teamMemberRepository: TeamMemberRepository,
 ) : RegisterTeamMemberUseCase {
 
     @Transactional
@@ -38,7 +38,7 @@ class RegisterTeamMemberService(
             OffsetDateTime.now(ZoneOffset.UTC),
         )
 
-        saveTeamMemberPort.saveTeamMember(member, tenant)
+        teamMemberRepository.save(member, tenant)
 
         log.info { "Team member registered." }
 

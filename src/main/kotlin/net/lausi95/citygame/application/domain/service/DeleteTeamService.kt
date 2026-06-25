@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.team.DeleteTeamUseCase
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
-import net.lausi95.citygame.application.port.out.team.DeleteTeamMembersPort
+import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger { }
 class DeleteTeamService(
     private val teamRepository: TeamRepository,
     private val findingRepository: FindingRepository,
-    private val deleteTeamMembersPort: DeleteTeamMembersPort,
+    private val teamMemberRepository: TeamMemberRepository,
 ) : DeleteTeamUseCase {
 
     @Transactional
@@ -30,7 +30,7 @@ class DeleteTeamService(
         }
 
         findingRepository.deleteByTeam(command.teamId, tenant)
-        deleteTeamMembersPort.deleteTeamMembers(command.teamId, tenant)
+        teamMemberRepository.deleteByTeam(command.teamId, tenant)
         teamRepository.delete(command.teamId, tenant)
 
         log.info { "Team ${command.teamId.value} deleted." }

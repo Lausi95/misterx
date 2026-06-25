@@ -15,7 +15,7 @@ import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
+import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
@@ -30,7 +30,7 @@ class FindAgentService(
     private val gameRepository: GameRepository,
     private val agentRepository: AgentRepository,
     private val teamRepository: TeamRepository,
-    private val getTeamMemberPort: GetTeamMemberPort,
+    private val teamMemberRepository: TeamMemberRepository,
     private val getAgentLocationPort: GetAgentLocationPort,
     private val findingRepository: FindingRepository,
 ) : FindAgentUseCase {
@@ -57,7 +57,7 @@ class FindAgentService(
             ?: teamNotFound(command.teamId)
 
         // 4. Member must exist and belong to both the team and the game.
-        val member = getTeamMemberPort.getTeamMemberOrNull(command.memberId, tenant)
+        val member = teamMemberRepository.getOrNull(command.memberId, tenant)
         if (member == null || member.teamId != team.id || member.gameId != command.gameId) {
             teamMemberNotFound(command.memberId)
         }

@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamMemberId
 import net.lausi95.citygame.application.domain.model.team.TeamMemberNotFoundException
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.port.`in`.team.GetMyTeamUseCase
-import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
+import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -21,9 +21,9 @@ import java.time.OffsetDateTime
 class GetMyTeamServiceTest {
 
     private val teamRepository = mockk<TeamRepository>()
-    private val getTeamMemberPort = mockk<GetTeamMemberPort>()
+    private val teamMemberRepository = mockk<TeamMemberRepository>()
 
-    private val service = GetMyTeamService(teamRepository, getTeamMemberPort)
+    private val service = GetMyTeamService(teamRepository, teamMemberRepository)
 
     private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId("g1")
@@ -65,7 +65,7 @@ class GetMyTeamServiceTest {
     @Test
     fun `returns the team when the member exists and belongs to this team and game`() {
         every { teamRepository.getOrNull(teamId, tenant) } returns aTeam()
-        every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns aMember()
+        every { teamMemberRepository.getOrNull(memberId, tenant) } returns aMember()
 
         val result = service.getMyTeam(GetMyTeamUseCase.Query(gameId, teamId, memberId), tenant)
 
@@ -75,7 +75,7 @@ class GetMyTeamServiceTest {
     @Test
     fun `throws when the supplied member does not exist`() {
         every { teamRepository.getOrNull(teamId, tenant) } returns aTeam()
-        every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns null
+        every { teamMemberRepository.getOrNull(memberId, tenant) } returns null
 
         assertThatThrownBy {
             service.getMyTeam(GetMyTeamUseCase.Query(gameId, teamId, memberId), tenant)
@@ -85,7 +85,7 @@ class GetMyTeamServiceTest {
     @Test
     fun `throws when the supplied member belongs to a different team`() {
         every { teamRepository.getOrNull(teamId, tenant) } returns aTeam()
-        every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns aMember(team = TeamId("other"))
+        every { teamMemberRepository.getOrNull(memberId, tenant) } returns aMember(team = TeamId("other"))
 
         assertThatThrownBy {
             service.getMyTeam(GetMyTeamUseCase.Query(gameId, teamId, memberId), tenant)
@@ -95,7 +95,7 @@ class GetMyTeamServiceTest {
     @Test
     fun `throws when the supplied member belongs to a different game`() {
         every { teamRepository.getOrNull(teamId, tenant) } returns aTeam()
-        every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns aMember(game = GameId("other"))
+        every { teamMemberRepository.getOrNull(memberId, tenant) } returns aMember(game = GameId("other"))
 
         assertThatThrownBy {
             service.getMyTeam(GetMyTeamUseCase.Query(gameId, teamId, memberId), tenant)
