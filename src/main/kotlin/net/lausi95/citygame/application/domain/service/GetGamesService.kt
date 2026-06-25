@@ -5,7 +5,7 @@ import net.lausi95.citygame.application.domain.model.game.GameSummary
 import net.lausi95.citygame.application.port.`in`.game.GetGamesUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.CountTeamsByGamePort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class GetGamesService(
     private val gameRepository: GameRepository,
-    private val countTeamsByGamePort: CountTeamsByGamePort,
+    private val teamRepository: TeamRepository,
     private val agentRepository: AgentRepository,
 ) : GetGamesUseCase {
 
@@ -30,7 +30,7 @@ class GetGamesService(
         return games.map { game ->
             GameSummary(
                 game = game,
-                teamsCount = countTeamsByGamePort.countTeamsByGame(game.id, tenant),
+                teamsCount = teamRepository.countByGame(game.id, tenant),
                 agentsCount = agentRepository.countByGame(game.id, tenant),
             )
         }

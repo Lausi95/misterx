@@ -7,7 +7,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamMemberId
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.team.RegisterTeamMemberUseCase
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.CheckTeamExistsPort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.application.port.out.team.SaveTeamMemberPort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class RegisterTeamMemberService(
     private val gameRepository: GameRepository,
-    private val checkTeamExistsPort: CheckTeamExistsPort,
+    private val teamRepository: TeamRepository,
     private val saveTeamMemberPort: SaveTeamMemberPort,
 ) : RegisterTeamMemberUseCase {
 
@@ -29,7 +29,7 @@ class RegisterTeamMemberService(
         log.info { "Registering team member..." }
 
         if (!gameRepository.exists(command.gameId, tenant)) gameNotFound(command.gameId)
-        if (!checkTeamExistsPort.teamExists(command.teamId, tenant)) teamNotFound(command.teamId)
+        if (!teamRepository.exists(command.teamId, tenant)) teamNotFound(command.teamId)
 
         val member = TeamMember(
             TeamMemberId(),

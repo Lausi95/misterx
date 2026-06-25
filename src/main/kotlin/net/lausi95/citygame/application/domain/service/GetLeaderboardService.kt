@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseC
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.GetTeamsPort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class GetLeaderboardService(
     private val gameRepository: GameRepository,
-    private val getTeamsPort: GetTeamsPort,
+    private val teamRepository: TeamRepository,
     private val agentRepository: AgentRepository,
     private val findingRepository: FindingRepository,
 ) : GetLeaderboardUseCase {
@@ -38,7 +38,7 @@ class GetLeaderboardService(
             .filter { it.type == Agent.Type.MISTERX && it.active }
             .associateBy { it.id }
 
-        val teams = getTeamsPort.getTeams(Pageable.unpaged(), gameId, tenant).content
+        val teams = teamRepository.forGame(gameId, Pageable.unpaged(), tenant).content
 
         val entries = teams.map { team ->
             val foundAgents = findingRepository.byTeam(team.id, tenant)

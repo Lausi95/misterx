@@ -16,7 +16,7 @@ import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationP
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
-import net.lausi95.citygame.application.port.out.team.GetTeamPort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +29,7 @@ private val log = KotlinLogging.logger { }
 class FindAgentService(
     private val gameRepository: GameRepository,
     private val agentRepository: AgentRepository,
-    private val getTeamPort: GetTeamPort,
+    private val teamRepository: TeamRepository,
     private val getTeamMemberPort: GetTeamMemberPort,
     private val getAgentLocationPort: GetAgentLocationPort,
     private val findingRepository: FindingRepository,
@@ -52,7 +52,7 @@ class FindAgentService(
             ?: agentNotFound(command.agentId)
 
         // 3. Team must exist and belong to the game.
-        val team = getTeamPort.getTeamOrNull(command.teamId, tenant)
+        val team = teamRepository.getOrNull(command.teamId, tenant)
             ?.takeIf { it.gameId == command.gameId }
             ?: teamNotFound(command.teamId)
 

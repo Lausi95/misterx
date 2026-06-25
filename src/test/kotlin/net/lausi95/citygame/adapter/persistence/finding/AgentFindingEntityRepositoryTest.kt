@@ -8,7 +8,7 @@ import net.lausi95.citygame.adapter.out.persistence.finding.AgentFindingEntityJp
 import net.lausi95.citygame.adapter.out.persistence.game.GameEntity
 import net.lausi95.citygame.adapter.out.persistence.game.GameEntityJpaRepository
 import net.lausi95.citygame.adapter.out.persistence.team.TeamEntity
-import net.lausi95.citygame.adapter.out.persistence.team.TeamEntityRepository
+import net.lausi95.citygame.adapter.out.persistence.team.TeamEntityJpaRepository
 import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.finding.AgentFinding
@@ -38,7 +38,7 @@ class AgentFindingEntityRepositoryTest {
     private lateinit var gameEntityJpaRepository: GameEntityJpaRepository
 
     @Autowired
-    private lateinit var teamEntityRepository: TeamEntityRepository
+    private lateinit var teamEntityJpaRepository: TeamEntityJpaRepository
 
     @Autowired
     private lateinit var agentEntityJpaRepository: AgentEntityJpaRepository
@@ -62,7 +62,7 @@ class AgentFindingEntityRepositoryTest {
 
     private fun seedTeam(gameId: GameId): TeamId {
         val team = Team(TeamId(), gameId, "Team A")
-        teamEntityRepository.saveAndFlush(TeamEntity(team, tenant))
+        teamEntityJpaRepository.saveAndFlush(TeamEntity(team, tenant))
         return team.id
     }
 

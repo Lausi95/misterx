@@ -32,7 +32,7 @@ import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationP
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
-import net.lausi95.citygame.application.port.out.team.GetTeamPort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -45,7 +45,7 @@ class FindAgentServiceTest {
 
     private val gameRepository = mockk<GameRepository>()
     private val agentRepository = mockk<AgentRepository>()
-    private val getTeamPort = mockk<GetTeamPort>()
+    private val teamRepository = mockk<TeamRepository>()
     private val getTeamMemberPort = mockk<GetTeamMemberPort>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
     private val findingRepository = mockk<FindingRepository>(relaxed = true)
@@ -53,7 +53,7 @@ class FindAgentServiceTest {
     private val service = FindAgentService(
         gameRepository,
         agentRepository,
-        getTeamPort,
+        teamRepository,
         getTeamMemberPort,
         getAgentLocationPort,
         findingRepository,
@@ -94,7 +94,7 @@ class FindAgentServiceTest {
     fun happyPathStubs() {
         every { gameRepository.get(gameId, tenant) } returns game()
         every { agentRepository.getOrNull(agentId, tenant) } returns agent()
-        every { getTeamPort.getTeamOrNull(teamId, tenant) } returns team()
+        every { teamRepository.getOrNull(teamId, tenant) } returns team()
         every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns member()
         every { findingRepository.existsByTeamAndAgent(teamId, agentId, tenant) } returns false
         every { getAgentLocationPort.getAgentLocation(agentId) } returns null
@@ -154,7 +154,7 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the team belongs to a different game`() {
-        every { getTeamPort.getTeamOrNull(teamId, tenant) } returns team(game = GameId())
+        every { teamRepository.getOrNull(teamId, tenant) } returns team(game = GameId())
 
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(TeamNotFoundException::class.java)

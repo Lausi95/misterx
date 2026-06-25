@@ -18,7 +18,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.GetTeamsPort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -30,13 +30,13 @@ import java.time.OffsetDateTime
 class GetLeaderboardServiceTest {
 
     private val gameRepository = mockk<GameRepository>()
-    private val getTeamsPort = mockk<GetTeamsPort>()
+    private val teamRepository = mockk<TeamRepository>()
     private val agentRepository = mockk<AgentRepository>()
     private val findingRepository = mockk<FindingRepository>()
 
     private val service = GetLeaderboardService(
         gameRepository,
-        getTeamsPort,
+        teamRepository,
         agentRepository,
         findingRepository,
     )
@@ -71,7 +71,7 @@ class GetLeaderboardServiceTest {
     }
 
     private fun givenTeams(vararg teams: Team) {
-        every { getTeamsPort.getTeams(any(), gameId, tenant) } returns PageImpl(teams.toList())
+        every { teamRepository.forGame(gameId, any(), tenant) } returns PageImpl(teams.toList())
     }
 
     private fun givenFindings(teamId: TeamId, vararg findings: AgentFinding) {

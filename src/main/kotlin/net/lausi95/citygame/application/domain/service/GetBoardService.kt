@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
-import net.lausi95.citygame.application.port.out.team.GetTeamPort
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class GetBoardService(
     private val gameRepository: GameRepository,
-    private val getTeamPort: GetTeamPort,
+    private val teamRepository: TeamRepository,
     private val agentRepository: AgentRepository,
     private val getAgentLocationPort: GetAgentLocationPort,
     private val findingRepository: FindingRepository,
@@ -35,7 +35,7 @@ class GetBoardService(
         // When a team is viewing, it must belong to the game; collect the agents it has found so
         // they can be hidden from its board.
         val foundAgentIds = query.teamId?.let { teamId ->
-            getTeamPort.getTeamOrNull(teamId, tenant)
+            teamRepository.getOrNull(teamId, tenant)
                 ?.takeIf { it.gameId == query.gameId }
                 ?: teamNotFound(teamId)
             findingRepository.byTeam(teamId, tenant)

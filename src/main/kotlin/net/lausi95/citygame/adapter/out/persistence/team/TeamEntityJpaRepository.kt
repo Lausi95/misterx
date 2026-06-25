@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 
-internal interface TeamEntityRepository : JpaRepository<TeamEntity, String> {
+internal interface TeamEntityJpaRepository : JpaRepository<TeamEntity, String> {
 
     fun findByIdAndTenant(id: String, tenant: String): TeamEntity?
 
