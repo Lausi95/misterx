@@ -5,7 +5,7 @@ import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class GetAgentsService(
     private val agentRepository: AgentRepository,
-    private val getAgentLocationPort: GetAgentLocationPort
+    private val agentLocationRepository: AgentLocationRepository
 ) : GetAgentsUseCase {
 
     /**
@@ -56,7 +56,7 @@ class GetAgentsService(
         // small and bounded (~20, ADR 0014), so we fetch all, enrich, order and page in memory.
         val agents = agentRepository.forGame(gameId, tenant)
             .onEach { agent ->
-                getAgentLocationPort.getAgentLocation(agent.id)?.also { agent.setLocation(it) }
+                agentLocationRepository.latest(agent.id)?.also { agent.setLocation(it) }
             }
             .sortedWith(byLocationStaleness)
 

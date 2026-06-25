@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundExceptio
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.DeleteAgentLocationsPort
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -20,11 +20,11 @@ class DeleteAgentServiceTest {
 
     private val agentRepository = mockk<AgentRepository>(relaxed = true)
     private val findingRepository = mockk<FindingRepository>(relaxed = true)
-    private val deleteAgentLocationsPort = mockk<DeleteAgentLocationsPort>(relaxed = true)
+    private val agentLocationRepository = mockk<AgentLocationRepository>(relaxed = true)
     private val service = DeleteAgentService(
         agentRepository,
         findingRepository,
-        deleteAgentLocationsPort,
+        agentLocationRepository,
     )
 
     private val tenant = Tenant("https://acme.city-game.net")
@@ -44,7 +44,7 @@ class DeleteAgentServiceTest {
 
         verifyOrder {
             findingRepository.deleteByAgent(agentId, tenant)
-            deleteAgentLocationsPort.deleteAgentLocations(agentId, tenant)
+            agentLocationRepository.deleteByAgent(agentId, tenant)
             agentRepository.delete(agentId, tenant)
         }
     }
@@ -56,7 +56,7 @@ class DeleteAgentServiceTest {
         service.deleteAgent(command(), tenant)
 
         verify(exactly = 0) { findingRepository.deleteByAgent(any(), any()) }
-        verify(exactly = 0) { deleteAgentLocationsPort.deleteAgentLocations(any(), any()) }
+        verify(exactly = 0) { agentLocationRepository.deleteByAgent(any(), any()) }
         verify(exactly = 0) { agentRepository.delete(any(), any()) }
     }
 
@@ -68,7 +68,7 @@ class DeleteAgentServiceTest {
             .isInstanceOf(AgentNotFoundException::class.java)
 
         verify(exactly = 0) { findingRepository.deleteByAgent(any(), any()) }
-        verify(exactly = 0) { deleteAgentLocationsPort.deleteAgentLocations(any(), any()) }
+        verify(exactly = 0) { agentLocationRepository.deleteByAgent(any(), any()) }
         verify(exactly = 0) { agentRepository.delete(any(), any()) }
     }
 }

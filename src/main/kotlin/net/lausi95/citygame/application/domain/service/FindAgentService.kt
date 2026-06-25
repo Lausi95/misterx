@@ -12,7 +12,7 @@ import net.lausi95.citygame.application.domain.model.team.teamMemberNotFound
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
@@ -31,7 +31,7 @@ class FindAgentService(
     private val agentRepository: AgentRepository,
     private val teamRepository: TeamRepository,
     private val teamMemberRepository: TeamMemberRepository,
-    private val getAgentLocationPort: GetAgentLocationPort,
+    private val agentLocationRepository: AgentLocationRepository,
     private val findingRepository: FindingRepository,
 ) : FindAgentUseCase {
 
@@ -72,7 +72,7 @@ class FindAgentService(
             agentAlreadyFound(command.teamId, command.agentId)
         }
 
-        val agentLocation = getAgentLocationPort.getAgentLocation(command.agentId)?.geoLocation
+        val agentLocation = agentLocationRepository.latest(command.agentId)?.geoLocation
 
         val finding = AgentFinding(
             FindingId(),

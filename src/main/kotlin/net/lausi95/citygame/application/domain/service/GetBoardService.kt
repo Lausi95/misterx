@@ -7,7 +7,7 @@ import net.lausi95.citygame.application.domain.model.board.MisterXOnBoard
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
@@ -22,7 +22,7 @@ class GetBoardService(
     private val gameRepository: GameRepository,
     private val teamRepository: TeamRepository,
     private val agentRepository: AgentRepository,
-    private val getAgentLocationPort: GetAgentLocationPort,
+    private val agentLocationRepository: AgentLocationRepository,
     private val findingRepository: FindingRepository,
 ) : GetBoardUseCase {
 
@@ -45,7 +45,7 @@ class GetBoardService(
 
         val agents = agentRepository.forGame(query.gameId, tenant)
             .onEach { agent ->
-                getAgentLocationPort.getAgentLocation(agent.id)?.also { agent.setLocation(it) }
+                agentLocationRepository.latest(agent.id)?.also { agent.setLocation(it) }
             }
             .filter { it.active && it.location != null }
 

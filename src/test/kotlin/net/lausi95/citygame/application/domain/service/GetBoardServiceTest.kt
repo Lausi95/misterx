@@ -19,7 +19,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
@@ -35,14 +35,14 @@ class GetBoardServiceTest {
     private val gameRepository = mockk<GameRepository>()
     private val teamRepository = mockk<TeamRepository>()
     private val agentRepository = mockk<AgentRepository>()
-    private val getAgentLocationPort = mockk<GetAgentLocationPort>()
+    private val agentLocationRepository = mockk<AgentLocationRepository>()
     private val findingRepository = mockk<FindingRepository>()
 
     private val service = GetBoardService(
         gameRepository,
         teamRepository,
         agentRepository,
-        getAgentLocationPort,
+        agentLocationRepository,
         findingRepository,
     )
 
@@ -74,7 +74,7 @@ class GetBoardServiceTest {
 
     private fun givenLocations(vararg locations: Pair<AgentId, AgentLocation?>) {
         locations.forEach { (agentId, location) ->
-            every { getAgentLocationPort.getAgentLocation(agentId) } returns location
+            every { agentLocationRepository.latest(agentId) } returns location
         }
     }
 

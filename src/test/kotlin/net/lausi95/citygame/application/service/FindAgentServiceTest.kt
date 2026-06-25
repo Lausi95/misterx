@@ -28,7 +28,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.domain.service.FindAgentService
 import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
@@ -47,7 +47,7 @@ class FindAgentServiceTest {
     private val agentRepository = mockk<AgentRepository>()
     private val teamRepository = mockk<TeamRepository>()
     private val teamMemberRepository = mockk<TeamMemberRepository>()
-    private val getAgentLocationPort = mockk<GetAgentLocationPort>()
+    private val agentLocationRepository = mockk<AgentLocationRepository>()
     private val findingRepository = mockk<FindingRepository>(relaxed = true)
 
     private val service = FindAgentService(
@@ -55,7 +55,7 @@ class FindAgentServiceTest {
         agentRepository,
         teamRepository,
         teamMemberRepository,
-        getAgentLocationPort,
+        agentLocationRepository,
         findingRepository,
     )
 
@@ -97,14 +97,14 @@ class FindAgentServiceTest {
         every { teamRepository.getOrNull(teamId, tenant) } returns team()
         every { teamMemberRepository.getOrNull(memberId, tenant) } returns member()
         every { findingRepository.existsByTeamAndAgent(teamId, agentId, tenant) } returns false
-        every { getAgentLocationPort.getAgentLocation(agentId) } returns null
+        every { agentLocationRepository.latest(agentId) } returns null
     }
 
     @Test
     fun `records a find and snapshots both the reported and the agent location`() {
         val reported = GeoLocation(52.5, 13.4)
         val agentLoc = GeoLocation(52.6, 13.5)
-        every { getAgentLocationPort.getAgentLocation(agentId) } returns
+        every { agentLocationRepository.latest(agentId) } returns
             AgentLocation(AgentLocationId(), agentId, OffsetDateTime.now(), agentLoc)
 
         val saved = slot<AgentFinding>()
