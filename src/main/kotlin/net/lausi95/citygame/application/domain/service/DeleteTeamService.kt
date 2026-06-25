@@ -3,7 +3,7 @@ package net.lausi95.citygame.application.domain.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.team.DeleteTeamUseCase
-import net.lausi95.citygame.application.port.out.finding.DeleteTeamFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.team.DeleteTeamMembersPort
 import net.lausi95.citygame.application.port.out.team.DeleteTeamPort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class DeleteTeamService(
     private val getTeamPort: GetTeamPort,
-    private val deleteTeamFindingsPort: DeleteTeamFindingsPort,
+    private val findingRepository: FindingRepository,
     private val deleteTeamMembersPort: DeleteTeamMembersPort,
     private val deleteTeamPort: DeleteTeamPort,
 ) : DeleteTeamUseCase {
@@ -31,7 +31,7 @@ class DeleteTeamService(
             teamNotFound(command.teamId)
         }
 
-        deleteTeamFindingsPort.deleteTeamFindings(command.teamId, tenant)
+        findingRepository.deleteByTeam(command.teamId, tenant)
         deleteTeamMembersPort.deleteTeamMembers(command.teamId, tenant)
         deleteTeamPort.deleteTeam(command.teamId, tenant)
 

@@ -29,8 +29,7 @@ import net.lausi95.citygame.application.domain.service.FindAgentService
 import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
-import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
-import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
@@ -49,8 +48,7 @@ class FindAgentServiceTest {
     private val getTeamPort = mockk<GetTeamPort>()
     private val getTeamMemberPort = mockk<GetTeamMemberPort>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
-    private val checkAgentFoundByTeamPort = mockk<CheckAgentFoundByTeamPort>()
-    private val saveAgentFindingPort = mockk<SaveAgentFindingPort>(relaxed = true)
+    private val findingRepository = mockk<FindingRepository>(relaxed = true)
 
     private val service = FindAgentService(
         gameRepository,
@@ -58,8 +56,7 @@ class FindAgentServiceTest {
         getTeamPort,
         getTeamMemberPort,
         getAgentLocationPort,
-        checkAgentFoundByTeamPort,
-        saveAgentFindingPort,
+        findingRepository,
     )
 
     private val tenant = Tenant("https://acme.city-game.net")
@@ -99,7 +96,7 @@ class FindAgentServiceTest {
         every { agentRepository.getOrNull(agentId, tenant) } returns agent()
         every { getTeamPort.getTeamOrNull(teamId, tenant) } returns team()
         every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns member()
-        every { checkAgentFoundByTeamPort.teamHasFoundAgent(teamId, agentId, tenant) } returns false
+        every { findingRepository.existsByTeamAndAgent(teamId, agentId, tenant) } returns false
         every { getAgentLocationPort.getAgentLocation(agentId) } returns null
     }
 
@@ -111,7 +108,7 @@ class FindAgentServiceTest {
             AgentLocation(AgentLocationId(), agentId, OffsetDateTime.now(), agentLoc)
 
         val saved = slot<AgentFinding>()
-        every { saveAgentFindingPort.saveAgentFinding(capture(saved), tenant) } returns Unit
+        every { findingRepository.save(capture(saved), tenant) } returns Unit
 
         val findingId = service.findAgent(command(reported), tenant)
 
@@ -120,13 +117,13 @@ class FindAgentServiceTest {
         assertThat(saved.captured.agentId).isEqualTo(agentId)
         assertThat(saved.captured.reportedLocation).isEqualTo(reported)
         assertThat(saved.captured.agentLocation).isEqualTo(agentLoc)
-        verify(exactly = 1) { saveAgentFindingPort.saveAgentFinding(any(), tenant) }
+        verify(exactly = 1) { findingRepository.save(any(), tenant) }
     }
 
     @Test
     fun `records a find with null locations when nothing reported and agent never located`() {
         val saved = slot<AgentFinding>()
-        every { saveAgentFindingPort.saveAgentFinding(capture(saved), tenant) } returns Unit
+        every { findingRepository.save(capture(saved), tenant) } returns Unit
 
         service.findAgent(command(reportedLocation = null), tenant)
 
@@ -144,7 +141,7 @@ class FindAgentServiceTest {
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(GameNotActiveException::class.java)
 
-        verify(exactly = 0) { saveAgentFindingPort.saveAgentFinding(any(), any()) }
+        verify(exactly = 0) { findingRepository.save(any(), any()) }
     }
 
     @Test
@@ -189,11 +186,11 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the team has already found the agent`() {
-        every { checkAgentFoundByTeamPort.teamHasFoundAgent(teamId, agentId, tenant) } returns true
+        every { findingRepository.existsByTeamAndAgent(teamId, agentId, tenant) } returns true
 
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(AgentAlreadyFoundException::class.java)
 
-        verify(exactly = 0) { saveAgentFindingPort.saveAgentFinding(any(), any()) }
+        verify(exactly = 0) { findingRepository.save(any(), any()) }
     }
 }

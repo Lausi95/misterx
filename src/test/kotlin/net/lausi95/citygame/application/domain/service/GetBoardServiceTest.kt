@@ -20,7 +20,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.GeoLocation
@@ -36,14 +36,14 @@ class GetBoardServiceTest {
     private val getTeamPort = mockk<GetTeamPort>()
     private val agentRepository = mockk<AgentRepository>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
-    private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
+    private val findingRepository = mockk<FindingRepository>()
 
     private val service = GetBoardService(
         gameRepository,
         getTeamPort,
         agentRepository,
         getAgentLocationPort,
-        getTeamFindingsPort,
+        findingRepository,
     )
 
     private val tenant = Tenant("https://acme.city-game.net")
@@ -175,7 +175,7 @@ class GetBoardServiceTest {
             utility.id to locationOf(utility.id, 4.5, 4.5),
         )
         every { getTeamPort.getTeamOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns listOf(
+        every { findingRepository.byTeam(teamId, tenant) } returns listOf(
             AgentFinding(FindingId(), gameId, teamId, found.id, OffsetDateTime.now(), null, null),
         )
 

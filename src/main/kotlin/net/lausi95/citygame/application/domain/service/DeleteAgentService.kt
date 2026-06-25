@@ -5,7 +5,7 @@ import net.lausi95.citygame.application.domain.model.agent.agentNotFound
 import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.DeleteAgentLocationsPort
-import net.lausi95.citygame.application.port.out.finding.DeleteAgentFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class DeleteAgentService(
     private val agentRepository: AgentRepository,
-    private val deleteAgentFindingsPort: DeleteAgentFindingsPort,
+    private val findingRepository: FindingRepository,
     private val deleteAgentLocationsPort: DeleteAgentLocationsPort,
 ) : DeleteAgentUseCase {
 
@@ -29,7 +29,7 @@ class DeleteAgentService(
             agentNotFound(command.agentId)
         }
 
-        deleteAgentFindingsPort.deleteAgentFindings(command.agentId, tenant)
+        findingRepository.deleteByAgent(command.agentId, tenant)
         deleteAgentLocationsPort.deleteAgentLocations(command.agentId, tenant)
         agentRepository.delete(command.agentId, tenant)
 

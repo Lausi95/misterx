@@ -8,7 +8,7 @@ import net.lausi95.citygame.application.domain.model.leaderboard.Leaderboard
 import net.lausi95.citygame.application.domain.model.leaderboard.LeaderboardEntry
 import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamsPort
 import net.lausi95.citygame.common.Tenant
@@ -23,7 +23,7 @@ class GetLeaderboardService(
     private val gameRepository: GameRepository,
     private val getTeamsPort: GetTeamsPort,
     private val agentRepository: AgentRepository,
-    private val getTeamFindingsPort: GetTeamFindingsPort,
+    private val findingRepository: FindingRepository,
 ) : GetLeaderboardUseCase {
 
     @Transactional(readOnly = true)
@@ -41,7 +41,7 @@ class GetLeaderboardService(
         val teams = getTeamsPort.getTeams(Pageable.unpaged(), gameId, tenant).content
 
         val entries = teams.map { team ->
-            val foundAgents = getTeamFindingsPort.getFindingsByTeam(team.id, tenant)
+            val foundAgents = findingRepository.byTeam(team.id, tenant)
                 .mapNotNull { finding ->
                     scoringAgents[finding.agentId]?.let { agent ->
                         FoundMisterX(agent.alias, finding.foundAt)

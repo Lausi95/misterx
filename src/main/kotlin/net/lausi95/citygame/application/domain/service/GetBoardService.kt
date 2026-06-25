@@ -8,7 +8,7 @@ import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.Tenant
@@ -23,7 +23,7 @@ class GetBoardService(
     private val getTeamPort: GetTeamPort,
     private val agentRepository: AgentRepository,
     private val getAgentLocationPort: GetAgentLocationPort,
-    private val getTeamFindingsPort: GetTeamFindingsPort,
+    private val findingRepository: FindingRepository,
 ) : GetBoardUseCase {
 
     @Transactional(readOnly = true)
@@ -38,7 +38,7 @@ class GetBoardService(
             getTeamPort.getTeamOrNull(teamId, tenant)
                 ?.takeIf { it.gameId == query.gameId }
                 ?: teamNotFound(teamId)
-            getTeamFindingsPort.getFindingsByTeam(teamId, tenant)
+            findingRepository.byTeam(teamId, tenant)
                 .map { it.agentId }
                 .toSet()
         } ?: emptySet()

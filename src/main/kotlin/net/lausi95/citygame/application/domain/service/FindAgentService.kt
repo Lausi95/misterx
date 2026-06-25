@@ -13,8 +13,7 @@ import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
-import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
-import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
@@ -33,8 +32,7 @@ class FindAgentService(
     private val getTeamPort: GetTeamPort,
     private val getTeamMemberPort: GetTeamMemberPort,
     private val getAgentLocationPort: GetAgentLocationPort,
-    private val checkAgentFoundByTeamPort: CheckAgentFoundByTeamPort,
-    private val saveAgentFindingPort: SaveAgentFindingPort,
+    private val findingRepository: FindingRepository,
 ) : FindAgentUseCase {
 
     @Transactional
@@ -70,7 +68,7 @@ class FindAgentService(
         }
 
         // 6. A team can find a given agent only once.
-        if (checkAgentFoundByTeamPort.teamHasFoundAgent(command.teamId, command.agentId, tenant)) {
+        if (findingRepository.existsByTeamAndAgent(command.teamId, command.agentId, tenant)) {
             agentAlreadyFound(command.teamId, command.agentId)
         }
 
@@ -86,7 +84,7 @@ class FindAgentService(
             agentLocation,
         )
 
-        saveAgentFindingPort.saveAgentFinding(finding, tenant)
+        findingRepository.save(finding, tenant)
 
         log.info { "Agent ${command.agentId} found by team ${command.teamId} (finding ${finding.id})." }
 

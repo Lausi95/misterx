@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.service.GetTeamFoundAgentsService
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,9 +18,9 @@ import java.time.OffsetDateTime
 
 class GetTeamFoundAgentsServiceTest {
 
-    private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
+    private val findingRepository = mockk<FindingRepository>()
     private val agentRepository = mockk<AgentRepository>()
-    private val service = GetTeamFoundAgentsService(getTeamFindingsPort, agentRepository)
+    private val service = GetTeamFoundAgentsService(findingRepository, agentRepository)
 
     private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
@@ -36,7 +36,7 @@ class GetTeamFoundAgentsServiceTest {
     fun `exposes found agents as id, alias and found time`() {
         val agentId = AgentId()
         val foundAt = OffsetDateTime.now()
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns listOf(finding(agentId, foundAt))
+        every { findingRepository.byTeam(teamId, tenant) } returns listOf(finding(agentId, foundAt))
         every { agentRepository.getOrNull(agentId, tenant) } returns agent(agentId, "Shadow")
 
         val foundAgents = service.getFoundAgents(teamId, tenant)
@@ -52,7 +52,7 @@ class GetTeamFoundAgentsServiceTest {
     fun `drops findings whose agent can no longer be resolved`() {
         val present = AgentId()
         val missing = AgentId()
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns
+        every { findingRepository.byTeam(teamId, tenant) } returns
             listOf(finding(present), finding(missing))
         every { agentRepository.getOrNull(present, tenant) } returns agent(present, "Shadow")
         every { agentRepository.getOrNull(missing, tenant) } returns null

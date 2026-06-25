@@ -16,7 +16,7 @@ import net.lausi95.citygame.application.domain.model.game.MapId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamsPort
 import net.lausi95.citygame.common.GeoLocation
@@ -32,13 +32,13 @@ class GetLeaderboardServiceTest {
     private val gameRepository = mockk<GameRepository>()
     private val getTeamsPort = mockk<GetTeamsPort>()
     private val agentRepository = mockk<AgentRepository>()
-    private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
+    private val findingRepository = mockk<FindingRepository>()
 
     private val service = GetLeaderboardService(
         gameRepository,
         getTeamsPort,
         agentRepository,
-        getTeamFindingsPort,
+        findingRepository,
     )
 
     private val tenant = Tenant("https://acme.city-game.net")
@@ -75,7 +75,7 @@ class GetLeaderboardServiceTest {
     }
 
     private fun givenFindings(teamId: TeamId, vararg findings: AgentFinding) {
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns findings.toList()
+        every { findingRepository.byTeam(teamId, tenant) } returns findings.toList()
     }
 
     init {

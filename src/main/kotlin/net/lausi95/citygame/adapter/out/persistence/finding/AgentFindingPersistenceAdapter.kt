@@ -4,56 +4,50 @@ import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.finding.AgentFinding
 import net.lausi95.citygame.application.domain.model.finding.agentAlreadyFound
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
-import net.lausi95.citygame.application.port.out.finding.DeleteAgentFindingsPort
-import net.lausi95.citygame.application.port.out.finding.DeleteTeamFindingsPort
-import net.lausi95.citygame.application.port.out.finding.GetAgentFindingsPort
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
-import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Component
 
 @Component
 internal class AgentFindingPersistenceAdapter(
-    private val agentFindingEntityRepository: AgentFindingEntityRepository,
-) : SaveAgentFindingPort, CheckAgentFoundByTeamPort, GetTeamFindingsPort, GetAgentFindingsPort, DeleteTeamFindingsPort,
-    DeleteAgentFindingsPort {
+    private val agentFindingEntityJpaRepository: AgentFindingEntityJpaRepository,
+) : FindingRepository {
 
-    override fun saveAgentFinding(agentFinding: AgentFinding, tenant: Tenant) {
+    override fun save(agentFinding: AgentFinding, tenant: Tenant) {
         try {
             // saveAndFlush so a concurrent duplicate that slipped past the pre-check surfaces here,
             // where it can be translated to the same 409 instead of a 500 at commit time.
-            agentFindingEntityRepository.saveAndFlush(AgentFindingEntity(agentFinding, tenant))
+            agentFindingEntityJpaRepository.saveAndFlush(AgentFindingEntity(agentFinding, tenant))
         } catch (_: DataIntegrityViolationException) {
             agentAlreadyFound(agentFinding.teamId, agentFinding.agentId)
         }
     }
 
-    override fun teamHasFoundAgent(teamId: TeamId, agentId: AgentId, tenant: Tenant): Boolean {
-        return agentFindingEntityRepository.existsByTeamIdAndAgentIdAndTenant(teamId.value, agentId.value, tenant.value)
+    override fun existsByTeamAndAgent(teamId: TeamId, agentId: AgentId, tenant: Tenant): Boolean {
+        return agentFindingEntityJpaRepository.existsByTeamIdAndAgentIdAndTenant(teamId.value, agentId.value, tenant.value)
     }
 
-    override fun getFindingsByTeam(teamId: TeamId, tenant: Tenant): List<AgentFinding> {
-        return agentFindingEntityRepository.findByTeamIdAndTenantOrderByFoundAtDesc(teamId.value, tenant.value)
+    override fun byTeam(teamId: TeamId, tenant: Tenant): List<AgentFinding> {
+        return agentFindingEntityJpaRepository.findByTeamIdAndTenantOrderByFoundAtDesc(teamId.value, tenant.value)
             .map { it.toAgentFinding() }
     }
 
-    override fun getFindingsByTeams(teamIds: Collection<TeamId>, tenant: Tenant): List<AgentFinding> {
-        return agentFindingEntityRepository.findByTeamIdInAndTenantOrderByFoundAtDesc(teamIds.map { it.value }, tenant.value)
+    override fun byTeams(teamIds: Collection<TeamId>, tenant: Tenant): List<AgentFinding> {
+        return agentFindingEntityJpaRepository.findByTeamIdInAndTenantOrderByFoundAtDesc(teamIds.map { it.value }, tenant.value)
             .map { it.toAgentFinding() }
     }
 
-    override fun getFindingsByAgent(agentId: AgentId, tenant: Tenant): List<AgentFinding> {
-        return agentFindingEntityRepository.findByAgentIdAndTenantOrderByFoundAtDesc(agentId.value, tenant.value)
+    override fun byAgent(agentId: AgentId, tenant: Tenant): List<AgentFinding> {
+        return agentFindingEntityJpaRepository.findByAgentIdAndTenantOrderByFoundAtDesc(agentId.value, tenant.value)
             .map { it.toAgentFinding() }
     }
 
-    override fun deleteTeamFindings(teamId: TeamId, tenant: Tenant) {
-        agentFindingEntityRepository.deleteByTeamIdAndTenant(teamId.value, tenant.value)
+    override fun deleteByTeam(teamId: TeamId, tenant: Tenant) {
+        agentFindingEntityJpaRepository.deleteByTeamIdAndTenant(teamId.value, tenant.value)
     }
 
-    override fun deleteAgentFindings(agentId: AgentId, tenant: Tenant) {
-        agentFindingEntityRepository.deleteByAgentIdAndTenant(agentId.value, tenant.value)
+    override fun deleteByAgent(agentId: AgentId, tenant: Tenant) {
+        agentFindingEntityJpaRepository.deleteByAgentIdAndTenant(agentId.value, tenant.value)
     }
 }
