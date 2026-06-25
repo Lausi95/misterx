@@ -7,7 +7,7 @@ import net.lausi95.citygame.application.domain.model.leaderboard.FoundMisterX
 import net.lausi95.citygame.application.domain.model.leaderboard.Leaderboard
 import net.lausi95.citygame.application.domain.model.leaderboard.LeaderboardEntry
 import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseCase
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
 import net.lausi95.citygame.application.port.out.game.GetGamePort
 import net.lausi95.citygame.application.port.out.team.GetTeamsPort
@@ -22,7 +22,7 @@ private val log = KotlinLogging.logger { }
 class GetLeaderboardService(
     private val getGamePort: GetGamePort,
     private val getTeamsPort: GetTeamsPort,
-    private val getAgentsPort: GetAgentsPort,
+    private val agentRepository: AgentRepository,
     private val getTeamFindingsPort: GetTeamFindingsPort,
 ) : GetLeaderboardUseCase {
 
@@ -34,7 +34,7 @@ class GetLeaderboardService(
 
         // Only currently-active MISTERX agents score (ADR 0005). Fetch them once and index by id
         // so each team's findings resolve without an extra query per finding.
-        val scoringAgents = getAgentsPort.getAgentsForGame(gameId, tenant)
+        val scoringAgents = agentRepository.forGame(gameId, tenant)
             .filter { it.type == Agent.Type.MISTERX && it.active }
             .associateBy { it.id }
 

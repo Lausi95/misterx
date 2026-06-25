@@ -7,7 +7,7 @@ import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocationId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
@@ -20,9 +20,9 @@ import java.time.OffsetDateTime
 
 class GetAgentsServiceTest {
 
-    private val getAgentsPort = mockk<GetAgentsPort>()
+    private val agentRepository = mockk<AgentRepository>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
-    private val service = GetAgentsService(getAgentsPort, getAgentLocationPort)
+    private val service = GetAgentsService(agentRepository, getAgentLocationPort)
 
     private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
@@ -32,7 +32,7 @@ class GetAgentsServiceTest {
         Agent(id, gameId, Agent.Type.UTILITY, "phone", "first", "last", alias, true)
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
+        every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
     }
 
     /** No location at all → infinitely stale. */

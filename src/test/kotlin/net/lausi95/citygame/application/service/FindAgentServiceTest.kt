@@ -27,7 +27,7 @@ import net.lausi95.citygame.application.domain.model.team.TeamMemberNotFoundExce
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.domain.service.FindAgentService
 import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
-import net.lausi95.citygame.application.port.out.agent.GetAgentPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
 import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
@@ -45,7 +45,7 @@ import java.time.OffsetDateTime
 class FindAgentServiceTest {
 
     private val getGamePort = mockk<GetGamePort>()
-    private val getAgentPort = mockk<GetAgentPort>()
+    private val agentRepository = mockk<AgentRepository>()
     private val getTeamPort = mockk<GetTeamPort>()
     private val getTeamMemberPort = mockk<GetTeamMemberPort>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
@@ -54,7 +54,7 @@ class FindAgentServiceTest {
 
     private val service = FindAgentService(
         getGamePort,
-        getAgentPort,
+        agentRepository,
         getTeamPort,
         getTeamMemberPort,
         getAgentLocationPort,
@@ -96,7 +96,7 @@ class FindAgentServiceTest {
     @BeforeEach
     fun happyPathStubs() {
         every { getGamePort.getGame(gameId, tenant) } returns game()
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent()
+        every { agentRepository.getOrNull(agentId, tenant) } returns agent()
         every { getTeamPort.getTeamOrNull(teamId, tenant) } returns team()
         every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns member()
         every { checkAgentFoundByTeamPort.teamHasFoundAgent(teamId, agentId, tenant) } returns false
@@ -149,7 +149,7 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the agent belongs to a different game`() {
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent(game = GameId())
+        every { agentRepository.getOrNull(agentId, tenant) } returns agent(game = GameId())
 
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(AgentNotFoundException::class.java)
@@ -173,7 +173,7 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the agent is not a MISTERX`() {
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent(type = Agent.Type.UTILITY)
+        every { agentRepository.getOrNull(agentId, tenant) } returns agent(type = Agent.Type.UTILITY)
 
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(AgentNotFindableException::class.java)
@@ -181,7 +181,7 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the agent is inactive`() {
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns agent(active = false)
+        every { agentRepository.getOrNull(agentId, tenant) } returns agent(active = false)
 
         assertThatThrownBy { service.findAgent(command(), tenant) }
             .isInstanceOf(AgentNotFindableException::class.java)

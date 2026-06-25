@@ -6,7 +6,7 @@ import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocationId
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.`in`.agentlocation.UpdateAgentLocationUseCase
-import net.lausi95.citygame.application.port.out.agent.CheckAgentExistsPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.SaveAgentLocationPort
 import net.lausi95.citygame.application.port.out.game.CheckGameExistsPort
 import net.lausi95.citygame.common.GeoLocation
@@ -19,7 +19,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class UpdateAgentLocationService(
-    private val checkAgentExistsPort: CheckAgentExistsPort,
+    private val agentRepository: AgentRepository,
     private val saveAgentLocationPort: SaveAgentLocationPort,
     private val checkGameExistsPort: CheckGameExistsPort,
 ) : UpdateAgentLocationUseCase {
@@ -33,7 +33,7 @@ class UpdateAgentLocationService(
         log.info { "Updating agent location..." }
 
         checkGameExistsPort.requireGameExists(gameId, tenant)
-        checkAgentExistsPort.requireAgentExists(agentId, tenant)
+        agentRepository.requireExists(agentId, tenant)
 
         val agentLocation = AgentLocation(
             AgentLocationId(),

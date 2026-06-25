@@ -11,7 +11,7 @@ import net.lausi95.citygame.application.domain.model.game.gameNotActive
 import net.lausi95.citygame.application.domain.model.team.teamMemberNotFound
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
-import net.lausi95.citygame.application.port.out.agent.GetAgentPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
 import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
@@ -29,7 +29,7 @@ private val log = KotlinLogging.logger { }
 @Service
 class FindAgentService(
     private val getGamePort: GetGamePort,
-    private val getAgentPort: GetAgentPort,
+    private val agentRepository: AgentRepository,
     private val getTeamPort: GetTeamPort,
     private val getTeamMemberPort: GetTeamMemberPort,
     private val getAgentLocationPort: GetAgentLocationPort,
@@ -49,7 +49,7 @@ class FindAgentService(
         }
 
         // 2. Agent must exist and belong to the game.
-        val agent = getAgentPort.getAgentOrNull(command.agentId, tenant)
+        val agent = agentRepository.getOrNull(command.agentId, tenant)
             ?.takeIf { it.gameId == command.gameId }
             ?: agentNotFound(command.agentId)
 

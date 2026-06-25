@@ -15,7 +15,7 @@ import net.lausi95.citygame.application.domain.model.game.GameNotFoundException
 import net.lausi95.citygame.application.domain.model.game.MapId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
 import net.lausi95.citygame.application.port.out.game.GetGamePort
 import net.lausi95.citygame.application.port.out.team.GetTeamsPort
@@ -31,13 +31,13 @@ class GetLeaderboardServiceTest {
 
     private val getGamePort = mockk<GetGamePort>()
     private val getTeamsPort = mockk<GetTeamsPort>()
-    private val getAgentsPort = mockk<GetAgentsPort>()
+    private val agentRepository = mockk<AgentRepository>()
     private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
 
     private val service = GetLeaderboardService(
         getGamePort,
         getTeamsPort,
-        getAgentsPort,
+        agentRepository,
         getTeamFindingsPort,
     )
 
@@ -67,7 +67,7 @@ class GetLeaderboardServiceTest {
         AgentFinding(FindingId(), gameId, teamId, agentId, foundAt, null, null)
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
+        every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
     }
 
     private fun givenTeams(vararg teams: Team) {

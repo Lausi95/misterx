@@ -2,7 +2,7 @@ package net.lausi95.citygame.adapter.persistence.finding
 
 import net.lausi95.citygame.DatabaseIntegrationTest
 import net.lausi95.citygame.adapter.out.persistence.agent.AgentEntity
-import net.lausi95.citygame.adapter.out.persistence.agent.AgentEntityRepository
+import net.lausi95.citygame.adapter.out.persistence.agent.AgentEntityJpaRepository
 import net.lausi95.citygame.adapter.out.persistence.finding.AgentFindingEntity
 import net.lausi95.citygame.adapter.out.persistence.finding.AgentFindingEntityRepository
 import net.lausi95.citygame.adapter.out.persistence.game.GameEntity
@@ -41,7 +41,7 @@ class AgentFindingEntityRepositoryTest {
     private lateinit var teamEntityRepository: TeamEntityRepository
 
     @Autowired
-    private lateinit var agentEntityRepository: AgentEntityRepository
+    private lateinit var agentEntityJpaRepository: AgentEntityJpaRepository
 
     @Autowired
     private lateinit var agentFindingEntityRepository: AgentFindingEntityRepository
@@ -68,7 +68,7 @@ class AgentFindingEntityRepositoryTest {
 
     private fun seedAgent(gameId: GameId): AgentId {
         val agent = Agent(AgentId(), gameId, Agent.Type.MISTERX, "phone", "first", "last", "alias", true)
-        agentEntityRepository.saveAndFlush(AgentEntity(agent, tenant))
+        agentEntityJpaRepository.saveAndFlush(AgentEntity(agent, tenant))
         return agent.id
     }
 

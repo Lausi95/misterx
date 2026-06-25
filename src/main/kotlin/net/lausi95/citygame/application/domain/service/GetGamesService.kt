@@ -3,7 +3,7 @@ package net.lausi95.citygame.application.domain.service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.lausi95.citygame.application.domain.model.game.GameSummary
 import net.lausi95.citygame.application.port.`in`.game.GetGamesUseCase
-import net.lausi95.citygame.application.port.out.agent.CountAgentsByGamePort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.game.GetGamesPort
 import net.lausi95.citygame.application.port.out.team.CountTeamsByGamePort
 import net.lausi95.citygame.common.Tenant
@@ -17,7 +17,7 @@ private val log = KotlinLogging.logger { }
 class GetGamesService(
     private val getGamesPort: GetGamesPort,
     private val countTeamsByGamePort: CountTeamsByGamePort,
-    private val countAgentsByGamePort: CountAgentsByGamePort,
+    private val agentRepository: AgentRepository,
 ) : GetGamesUseCase {
 
     override fun getGames(
@@ -31,7 +31,7 @@ class GetGamesService(
             GameSummary(
                 game = game,
                 teamsCount = countTeamsByGamePort.countTeamsByGame(game.id, tenant),
-                agentsCount = countAgentsByGamePort.countAgentsByGame(game.id, tenant),
+                agentsCount = agentRepository.countByGame(game.id, tenant),
             )
         }
     }

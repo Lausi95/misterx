@@ -3,54 +3,49 @@ package net.lausi95.citygame.adapter.out.persistence.agent
 import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.out.agent.CheckAgentExistsPort
-import net.lausi95.citygame.application.port.out.agent.CountAgentsByGamePort
-import net.lausi95.citygame.application.port.out.agent.DeleteAgentPort
-import net.lausi95.citygame.application.port.out.agent.GetAgentPort
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
-import net.lausi95.citygame.application.port.out.agent.SaveAgentPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Component
 
 @Component
 internal class AgentPersistenceAdapter(
-    private val agentEntityRepository: AgentEntityRepository,
-) : SaveAgentPort, GetAgentPort, GetAgentsPort, CheckAgentExistsPort, CountAgentsByGamePort, DeleteAgentPort {
+    private val agentEntityJpaRepository: AgentEntityJpaRepository,
+) : AgentRepository {
 
-    override fun saveAgent(agent: Agent, tenant: Tenant) {
-        agentEntityRepository.save(AgentEntity(agent, tenant))
+    override fun save(agent: Agent, tenant: Tenant) {
+        agentEntityJpaRepository.save(AgentEntity(agent, tenant))
     }
 
-    override fun getAgentOrNull(
+    override fun getOrNull(
         agentId: AgentId,
         tenant: Tenant
     ): Agent? {
-        return agentEntityRepository.findByIdAndTenant(agentId.value, tenant.value)?.toAgent()
+        return agentEntityJpaRepository.findByIdAndTenant(agentId.value, tenant.value)?.toAgent()
     }
 
-    override fun getAgentsByIds(agentIds: Collection<AgentId>, tenant: Tenant): List<Agent> {
-        return agentEntityRepository.findByIdInAndTenant(agentIds.map { it.value }, tenant.value).map { it.toAgent() }
+    override fun byIds(agentIds: Collection<AgentId>, tenant: Tenant): List<Agent> {
+        return agentEntityJpaRepository.findByIdInAndTenant(agentIds.map { it.value }, tenant.value).map { it.toAgent() }
     }
 
-    override fun agentExists(
+    override fun exists(
         agentId: AgentId,
         tenant: Tenant
     ): Boolean {
-        return agentEntityRepository.existsByIdAndTenant(agentId.value, tenant.value)
+        return agentEntityJpaRepository.existsByIdAndTenant(agentId.value, tenant.value)
     }
 
-    override fun getAgentsForGame(
+    override fun forGame(
         gameId: GameId,
         tenant: Tenant,
     ): List<Agent> {
-        return agentEntityRepository.findByGameIdAndTenant(gameId.value, tenant.value).map { it.toAgent() }
+        return agentEntityJpaRepository.findByGameIdAndTenant(gameId.value, tenant.value).map { it.toAgent() }
     }
 
-    override fun countAgentsByGame(gameId: GameId, tenant: Tenant): Int {
-        return agentEntityRepository.countByGameIdAndTenant(gameId.value, tenant.value)
+    override fun countByGame(gameId: GameId, tenant: Tenant): Int {
+        return agentEntityJpaRepository.countByGameIdAndTenant(gameId.value, tenant.value)
     }
 
-    override fun deleteAgent(agentId: AgentId, tenant: Tenant) {
-        agentEntityRepository.deleteByIdAndTenant(agentId.value, tenant.value)
+    override fun delete(agentId: AgentId, tenant: Tenant) {
+        agentEntityJpaRepository.deleteByIdAndTenant(agentId.value, tenant.value)
     }
 }
