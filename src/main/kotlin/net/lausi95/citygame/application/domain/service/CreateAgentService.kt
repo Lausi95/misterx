@@ -5,7 +5,7 @@ import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.game.CheckGameExistsPort
+import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +14,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class CreateAgentService(
-    val checkGameExistsPort: CheckGameExistsPort,
+    val gameRepository: GameRepository,
     val agentRepository: AgentRepository,
 ) : CreateAgentUseCase {
 
@@ -25,7 +25,7 @@ class CreateAgentService(
     ): AgentId {
         log.info { "Creating new agent..." }
 
-        checkGameExistsPort.requireGameExists(command.gameId, tenant)
+        gameRepository.requireExists(command.gameId, tenant)
 
         val agent = Agent(
             AgentId(),

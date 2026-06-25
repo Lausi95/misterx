@@ -9,7 +9,7 @@ import net.lausi95.citygame.application.domain.model.leaderboard.LeaderboardEntr
 import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
+import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamsPort
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class GetLeaderboardService(
-    private val getGamePort: GetGamePort,
+    private val gameRepository: GameRepository,
     private val getTeamsPort: GetTeamsPort,
     private val agentRepository: AgentRepository,
     private val getTeamFindingsPort: GetTeamFindingsPort,
@@ -30,7 +30,7 @@ class GetLeaderboardService(
     override fun getLeaderboard(gameId: GameId, tenant: Tenant): Leaderboard {
         log.info { "Building leaderboard for game $gameId..." }
 
-        val game = getGamePort.getGame(gameId, tenant)
+        val game = gameRepository.get(gameId, tenant)
 
         // Only currently-active MISTERX agents score (ADR 0005). Fetch them once and index by id
         // so each team's findings resolve without an extra query per finding.

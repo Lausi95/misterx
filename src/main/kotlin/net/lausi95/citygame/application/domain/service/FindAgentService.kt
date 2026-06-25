@@ -15,7 +15,7 @@ import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
 import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
+import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.Tenant
@@ -28,7 +28,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class FindAgentService(
-    private val getGamePort: GetGamePort,
+    private val gameRepository: GameRepository,
     private val agentRepository: AgentRepository,
     private val getTeamPort: GetTeamPort,
     private val getTeamMemberPort: GetTeamMemberPort,
@@ -42,7 +42,7 @@ class FindAgentService(
         log.info { "Team ${command.teamId} attempting to find agent ${command.agentId}..." }
 
         // 1. Game must exist and be currently active.
-        val game = getGamePort.getGame(command.gameId, tenant)
+        val game = gameRepository.get(command.gameId, tenant)
         val now = OffsetDateTime.now(ZoneOffset.UTC)
         if (now.isBefore(game.startTime) || now.isAfter(game.endTime)) {
             gameNotActive(command.gameId)

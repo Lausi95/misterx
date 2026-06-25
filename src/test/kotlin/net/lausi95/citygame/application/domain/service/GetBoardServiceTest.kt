@@ -21,7 +21,7 @@ import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
+import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
@@ -32,14 +32,14 @@ import java.time.OffsetDateTime
 
 class GetBoardServiceTest {
 
-    private val getGamePort = mockk<GetGamePort>()
+    private val gameRepository = mockk<GameRepository>()
     private val getTeamPort = mockk<GetTeamPort>()
     private val agentRepository = mockk<AgentRepository>()
     private val getAgentLocationPort = mockk<GetAgentLocationPort>()
     private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
 
     private val service = GetBoardService(
-        getGamePort,
+        gameRepository,
         getTeamPort,
         agentRepository,
         getAgentLocationPort,
@@ -79,7 +79,7 @@ class GetBoardServiceTest {
     }
 
     init {
-        every { getGamePort.getGame(gameId, tenant) } returns game
+        every { gameRepository.get(gameId, tenant) } returns game
     }
 
     @Test

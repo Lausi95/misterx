@@ -31,7 +31,7 @@ import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
 import net.lausi95.citygame.application.port.out.finding.CheckAgentFoundByTeamPort
 import net.lausi95.citygame.application.port.out.finding.SaveAgentFindingPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
+import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.GetTeamMemberPort
 import net.lausi95.citygame.application.port.out.team.GetTeamPort
 import net.lausi95.citygame.common.GeoLocation
@@ -44,7 +44,7 @@ import java.time.OffsetDateTime
 
 class FindAgentServiceTest {
 
-    private val getGamePort = mockk<GetGamePort>()
+    private val gameRepository = mockk<GameRepository>()
     private val agentRepository = mockk<AgentRepository>()
     private val getTeamPort = mockk<GetTeamPort>()
     private val getTeamMemberPort = mockk<GetTeamMemberPort>()
@@ -53,7 +53,7 @@ class FindAgentServiceTest {
     private val saveAgentFindingPort = mockk<SaveAgentFindingPort>(relaxed = true)
 
     private val service = FindAgentService(
-        getGamePort,
+        gameRepository,
         agentRepository,
         getTeamPort,
         getTeamMemberPort,
@@ -95,7 +95,7 @@ class FindAgentServiceTest {
 
     @BeforeEach
     fun happyPathStubs() {
-        every { getGamePort.getGame(gameId, tenant) } returns game()
+        every { gameRepository.get(gameId, tenant) } returns game()
         every { agentRepository.getOrNull(agentId, tenant) } returns agent()
         every { getTeamPort.getTeamOrNull(teamId, tenant) } returns team()
         every { getTeamMemberPort.getTeamMemberOrNull(memberId, tenant) } returns member()
@@ -136,7 +136,7 @@ class FindAgentServiceTest {
 
     @Test
     fun `rejects when the game is not currently active`() {
-        every { getGamePort.getGame(gameId, tenant) } returns game(
+        every { gameRepository.get(gameId, tenant) } returns game(
             start = OffsetDateTime.now().plusHours(1),
             end = OffsetDateTime.now().plusHours(2),
         )

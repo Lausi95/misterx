@@ -8,7 +8,7 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.`in`.agentlocation.UpdateAgentLocationUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
 import net.lausi95.citygame.application.port.out.agentlocation.SaveAgentLocationPort
-import net.lausi95.citygame.application.port.out.game.CheckGameExistsPort
+import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Component
@@ -21,7 +21,7 @@ private val log = KotlinLogging.logger { }
 class UpdateAgentLocationService(
     private val agentRepository: AgentRepository,
     private val saveAgentLocationPort: SaveAgentLocationPort,
-    private val checkGameExistsPort: CheckGameExistsPort,
+    private val gameRepository: GameRepository,
 ) : UpdateAgentLocationUseCase {
 
     override fun updateAgentLocation(
@@ -32,7 +32,7 @@ class UpdateAgentLocationService(
     ) {
         log.info { "Updating agent location..." }
 
-        checkGameExistsPort.requireGameExists(gameId, tenant)
+        gameRepository.requireExists(gameId, tenant)
         agentRepository.requireExists(agentId, tenant)
 
         val agentLocation = AgentLocation(
