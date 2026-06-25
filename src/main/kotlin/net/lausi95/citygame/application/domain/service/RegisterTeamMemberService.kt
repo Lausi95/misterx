@@ -6,9 +6,9 @@ import net.lausi95.citygame.application.domain.model.team.TeamMember
 import net.lausi95.citygame.application.domain.model.team.TeamMemberId
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.team.RegisterTeamMemberUseCase
-import net.lausi95.citygame.application.port.out.game.CheckGameExistsPort
-import net.lausi95.citygame.application.port.out.team.CheckTeamExistsPort
-import net.lausi95.citygame.application.port.out.team.SaveTeamMemberPort
+import net.lausi95.citygame.application.port.out.game.GameRepository
+import net.lausi95.citygame.application.port.out.team.TeamRepository
+import net.lausi95.citygame.application.port.out.team.TeamMemberRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,17 +19,17 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class RegisterTeamMemberService(
-    private val checkGameExistsPort: CheckGameExistsPort,
-    private val checkTeamExistsPort: CheckTeamExistsPort,
-    private val saveTeamMemberPort: SaveTeamMemberPort,
+    private val gameRepository: GameRepository,
+    private val teamRepository: TeamRepository,
+    private val teamMemberRepository: TeamMemberRepository,
 ) : RegisterTeamMemberUseCase {
 
     @Transactional
     override fun registerTeamMember(command: RegisterTeamMemberUseCase.Command, tenant: Tenant): TeamMemberId {
         log.info { "Registering team member..." }
 
-        if (!checkGameExistsPort.gameExists(command.gameId, tenant)) gameNotFound(command.gameId)
-        if (!checkTeamExistsPort.teamExists(command.teamId, tenant)) teamNotFound(command.teamId)
+        if (!gameRepository.exists(command.gameId, tenant)) gameNotFound(command.gameId)
+        if (!teamRepository.exists(command.teamId, tenant)) teamNotFound(command.teamId)
 
         val member = TeamMember(
             TeamMemberId(),
@@ -38,7 +38,7 @@ class RegisterTeamMemberService(
             OffsetDateTime.now(ZoneOffset.UTC),
         )
 
-        saveTeamMemberPort.saveTeamMember(member, tenant)
+        teamMemberRepository.save(member, tenant)
 
         log.info { "Team member registered." }
 

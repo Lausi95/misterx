@@ -8,8 +8,8 @@ import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundExceptio
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.port.`in`.agent.GetMyAgentUseCase
-import net.lausi95.citygame.application.port.out.agent.GetAgentPort
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test
 
 class GetMyAgentServiceTest {
 
-    private val getAgentPort = mockk<GetAgentPort>()
-    private val getAgentLocationPort = mockk<GetAgentLocationPort>()
+    private val agentRepository = mockk<AgentRepository>()
+    private val agentLocationRepository = mockk<AgentLocationRepository>()
 
-    private val service = GetMyAgentService(getAgentPort, getAgentLocationPort)
+    private val service = GetMyAgentService(agentRepository, agentLocationRepository)
 
     private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId("g1")
@@ -39,8 +39,8 @@ class GetMyAgentServiceTest {
 
     @Test
     fun `returns the agent for a valid game and agent`() {
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns anAgent()
-        every { getAgentLocationPort.getAgentLocation(agentId) } returns null
+        every { agentRepository.getOrNull(agentId, tenant) } returns anAgent()
+        every { agentLocationRepository.latest(agentId) } returns null
 
         val result = service.getMyAgent(GetMyAgentUseCase.Query(gameId, agentId), tenant)
 
@@ -50,8 +50,8 @@ class GetMyAgentServiceTest {
     @Test
     fun `populates the last known location when present`() {
         val location = mockk<AgentLocation>()
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns anAgent()
-        every { getAgentLocationPort.getAgentLocation(agentId) } returns location
+        every { agentRepository.getOrNull(agentId, tenant) } returns anAgent()
+        every { agentLocationRepository.latest(agentId) } returns location
 
         val result = service.getMyAgent(GetMyAgentUseCase.Query(gameId, agentId), tenant)
 
@@ -60,7 +60,7 @@ class GetMyAgentServiceTest {
 
     @Test
     fun `throws when the agent does not exist`() {
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns null
+        every { agentRepository.getOrNull(agentId, tenant) } returns null
 
         assertThatThrownBy {
             service.getMyAgent(GetMyAgentUseCase.Query(gameId, agentId), tenant)
@@ -69,7 +69,7 @@ class GetMyAgentServiceTest {
 
     @Test
     fun `throws when the agent belongs to a different game`() {
-        every { getAgentPort.getAgentOrNull(agentId, tenant) } returns anAgent(game = GameId("other"))
+        every { agentRepository.getOrNull(agentId, tenant) } returns anAgent(game = GameId("other"))
 
         assertThatThrownBy {
             service.getMyAgent(GetMyAgentUseCase.Query(gameId, agentId), tenant)

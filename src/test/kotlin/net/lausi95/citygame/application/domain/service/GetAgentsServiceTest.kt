@@ -7,8 +7,8 @@ import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocation
 import net.lausi95.citygame.application.domain.model.agentlocation.AgentLocationId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -20,9 +20,9 @@ import java.time.OffsetDateTime
 
 class GetAgentsServiceTest {
 
-    private val getAgentsPort = mockk<GetAgentsPort>()
-    private val getAgentLocationPort = mockk<GetAgentLocationPort>()
-    private val service = GetAgentsService(getAgentsPort, getAgentLocationPort)
+    private val agentRepository = mockk<AgentRepository>()
+    private val agentLocationRepository = mockk<AgentLocationRepository>()
+    private val service = GetAgentsService(agentRepository, agentLocationRepository)
 
     private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
@@ -32,16 +32,16 @@ class GetAgentsServiceTest {
         Agent(id, gameId, Agent.Type.UTILITY, "phone", "first", "last", alias, true)
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
+        every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
     }
 
     /** No location at all → infinitely stale. */
     private fun withoutLocation(agent: Agent) {
-        every { getAgentLocationPort.getAgentLocation(agent.id) } returns null
+        every { agentLocationRepository.latest(agent.id) } returns null
     }
 
     private fun locatedAt(agent: Agent, timestamp: OffsetDateTime) {
-        every { getAgentLocationPort.getAgentLocation(agent.id) } returns
+        every { agentLocationRepository.latest(agent.id) } returns
             AgentLocation(AgentLocationId(), agent.id, timestamp, GeoLocation(0.0, 0.0))
     }
 

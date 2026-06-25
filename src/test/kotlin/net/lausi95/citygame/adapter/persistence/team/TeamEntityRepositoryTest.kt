@@ -2,9 +2,9 @@ package net.lausi95.citygame.adapter.persistence.team
 
 import net.lausi95.citygame.DatabaseIntegrationTest
 import net.lausi95.citygame.adapter.out.persistence.game.GameEntity
-import net.lausi95.citygame.adapter.out.persistence.game.GameEntityRepository
+import net.lausi95.citygame.adapter.out.persistence.game.GameEntityJpaRepository
 import net.lausi95.citygame.adapter.out.persistence.team.TeamEntity
-import net.lausi95.citygame.adapter.out.persistence.team.TeamEntityRepository
+import net.lausi95.citygame.adapter.out.persistence.team.TeamEntityJpaRepository
 import net.lausi95.citygame.application.domain.model.game.Game
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.game.GameTitle
@@ -26,10 +26,10 @@ import java.time.OffsetDateTime
 class TeamEntityRepositoryTest {
 
     @Autowired
-    private lateinit var gameEntityRepository: GameEntityRepository
+    private lateinit var gameEntityJpaRepository: GameEntityJpaRepository
 
     @Autowired
-    private lateinit var teamEntityRepository: TeamEntityRepository
+    private lateinit var teamEntityJpaRepository: TeamEntityJpaRepository
 
     private val tenant = Tenant("https://acme.city-game.net")
 
@@ -41,12 +41,12 @@ class TeamEntityRepositoryTest {
             OffsetDateTime.now().plusHours(1),
             Map(MapId(), GeoLocation(0.0, 0.0), GeoLocation(1.0, 1.0), Grid(10, 10)),
         )
-        gameEntityRepository.saveAndFlush(GameEntity(game, tenant))
+        gameEntityJpaRepository.saveAndFlush(GameEntity(game, tenant))
         return game.id
     }
 
     private fun seedTeam(gameId: GameId, name: String) {
-        teamEntityRepository.saveAndFlush(TeamEntity(Team(TeamId(), gameId, name), tenant))
+        teamEntityJpaRepository.saveAndFlush(TeamEntity(Team(TeamId(), gameId, name), tenant))
     }
 
     @Test
@@ -61,7 +61,7 @@ class TeamEntityRepositoryTest {
         seedTeam(gameId, "Apfel")
         seedTeam(gameId, "apple")
 
-        val ordered = teamEntityRepository
+        val ordered = teamEntityJpaRepository
             .findByGameIdAndTenant(gameId.value, tenant.value, PageRequest.of(0, 10, Sort.by("name")))
             .map { it.toTeam().name }
             .content
@@ -77,9 +77,9 @@ class TeamEntityRepositoryTest {
 
         seedTeam(gameId, "Red")
         seedTeam(otherGameId, "Blue")
-        teamEntityRepository.saveAndFlush(TeamEntity(Team(TeamId(), gameId, "Green"), otherTenant))
+        teamEntityJpaRepository.saveAndFlush(TeamEntity(Team(TeamId(), gameId, "Green"), otherTenant))
 
-        val names = teamEntityRepository
+        val names = teamEntityJpaRepository
             .findByGameIdAndTenant(gameId.value, tenant.value, PageRequest.of(0, 10, Sort.by("name")))
             .map { it.toTeam().name }
             .content

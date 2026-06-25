@@ -2,7 +2,7 @@ package net.lausi95.citygame.adapter.out.persistence.agent
 
 import org.springframework.data.jpa.repository.JpaRepository
 
-internal interface AgentEntityRepository : JpaRepository<AgentEntity, String> {
+internal interface AgentEntityJpaRepository : JpaRepository<AgentEntity, String> {
 
     fun findByIdAndTenant(id: String, tenant: String): AgentEntity?
 

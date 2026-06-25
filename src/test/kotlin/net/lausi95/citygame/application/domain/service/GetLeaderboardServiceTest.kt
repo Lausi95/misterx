@@ -15,10 +15,10 @@ import net.lausi95.citygame.application.domain.model.game.GameNotFoundException
 import net.lausi95.citygame.application.domain.model.game.MapId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
-import net.lausi95.citygame.application.port.out.team.GetTeamsPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
+import net.lausi95.citygame.application.port.out.game.GameRepository
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -29,16 +29,16 @@ import java.time.OffsetDateTime
 
 class GetLeaderboardServiceTest {
 
-    private val getGamePort = mockk<GetGamePort>()
-    private val getTeamsPort = mockk<GetTeamsPort>()
-    private val getAgentsPort = mockk<GetAgentsPort>()
-    private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
+    private val gameRepository = mockk<GameRepository>()
+    private val teamRepository = mockk<TeamRepository>()
+    private val agentRepository = mockk<AgentRepository>()
+    private val findingRepository = mockk<FindingRepository>()
 
     private val service = GetLeaderboardService(
-        getGamePort,
-        getTeamsPort,
-        getAgentsPort,
-        getTeamFindingsPort,
+        gameRepository,
+        teamRepository,
+        agentRepository,
+        findingRepository,
     )
 
     private val tenant = Tenant("https://acme.city-game.net")
@@ -67,19 +67,19 @@ class GetLeaderboardServiceTest {
         AgentFinding(FindingId(), gameId, teamId, agentId, foundAt, null, null)
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
+        every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
     }
 
     private fun givenTeams(vararg teams: Team) {
-        every { getTeamsPort.getTeams(any(), gameId, tenant) } returns PageImpl(teams.toList())
+        every { teamRepository.forGame(gameId, any(), tenant) } returns PageImpl(teams.toList())
     }
 
     private fun givenFindings(teamId: TeamId, vararg findings: AgentFinding) {
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns findings.toList()
+        every { findingRepository.byTeam(teamId, tenant) } returns findings.toList()
     }
 
     init {
-        every { getGamePort.getGame(gameId, tenant) } returns game
+        every { gameRepository.get(gameId, tenant) } returns game
     }
 
     @Test
@@ -194,8 +194,8 @@ class GetLeaderboardServiceTest {
     @Test
     fun `an unknown game is not found`() {
         val unknown = GameId()
-        every { getGamePort.getGameOrNull(unknown, tenant) } returns null
-        every { getGamePort.getGame(unknown, tenant) } answers { callOriginal() }
+        every { gameRepository.getOrNull(unknown, tenant) } returns null
+        every { gameRepository.get(unknown, tenant) } answers { callOriginal() }
 
         assertThatThrownBy { service.getLeaderboard(unknown, tenant) }
             .isInstanceOf(GameNotFoundException::class.java)

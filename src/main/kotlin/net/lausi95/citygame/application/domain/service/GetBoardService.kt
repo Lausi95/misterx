@@ -6,11 +6,11 @@ import net.lausi95.citygame.application.domain.model.board.Board
 import net.lausi95.citygame.application.domain.model.board.MisterXOnBoard
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
-import net.lausi95.citygame.application.port.out.team.GetTeamPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
+import net.lausi95.citygame.application.port.out.game.GameRepository
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,33 +19,33 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class GetBoardService(
-    private val getGamePort: GetGamePort,
-    private val getTeamPort: GetTeamPort,
-    private val getAgentsPort: GetAgentsPort,
-    private val getAgentLocationPort: GetAgentLocationPort,
-    private val getTeamFindingsPort: GetTeamFindingsPort,
+    private val gameRepository: GameRepository,
+    private val teamRepository: TeamRepository,
+    private val agentRepository: AgentRepository,
+    private val agentLocationRepository: AgentLocationRepository,
+    private val findingRepository: FindingRepository,
 ) : GetBoardUseCase {
 
     @Transactional(readOnly = true)
     override fun getBoard(query: GetBoardUseCase.Query, tenant: Tenant): Board {
         log.info { "Building board for game ${query.gameId} (team ${query.teamId})..." }
 
-        val game = getGamePort.getGame(query.gameId, tenant)
+        val game = gameRepository.get(query.gameId, tenant)
 
         // When a team is viewing, it must belong to the game; collect the agents it has found so
         // they can be hidden from its board.
         val foundAgentIds = query.teamId?.let { teamId ->
-            getTeamPort.getTeamOrNull(teamId, tenant)
+            teamRepository.getOrNull(teamId, tenant)
                 ?.takeIf { it.gameId == query.gameId }
                 ?: teamNotFound(teamId)
-            getTeamFindingsPort.getFindingsByTeam(teamId, tenant)
+            findingRepository.byTeam(teamId, tenant)
                 .map { it.agentId }
                 .toSet()
         } ?: emptySet()
 
-        val agents = getAgentsPort.getAgentsForGame(query.gameId, tenant)
+        val agents = agentRepository.forGame(query.gameId, tenant)
             .onEach { agent ->
-                getAgentLocationPort.getAgentLocation(agent.id)?.also { agent.setLocation(it) }
+                agentLocationRepository.latest(agent.id)?.also { agent.setLocation(it) }
             }
             .filter { it.active && it.location != null }
 

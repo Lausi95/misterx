@@ -9,8 +9,8 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.service.GetAgentFindingTeamsService
-import net.lausi95.citygame.application.port.out.finding.GetAgentFindingsPort
-import net.lausi95.citygame.application.port.out.team.GetTeamPort
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,9 +18,9 @@ import java.time.OffsetDateTime
 
 class GetAgentFindingTeamsServiceTest {
 
-    private val getAgentFindingsPort = mockk<GetAgentFindingsPort>()
-    private val getTeamPort = mockk<GetTeamPort>()
-    private val service = GetAgentFindingTeamsService(getAgentFindingsPort, getTeamPort)
+    private val findingRepository = mockk<FindingRepository>()
+    private val teamRepository = mockk<TeamRepository>()
+    private val service = GetAgentFindingTeamsService(findingRepository, teamRepository)
 
     private val tenant = Tenant("https://acme.city-game.net")
     private val gameId = GameId()
@@ -33,8 +33,8 @@ class GetAgentFindingTeamsServiceTest {
     fun `exposes finding teams as id, name and found time`() {
         val teamId = TeamId()
         val foundAt = OffsetDateTime.now()
-        every { getAgentFindingsPort.getFindingsByAgent(agentId, tenant) } returns listOf(finding(teamId, foundAt))
-        every { getTeamPort.getTeamOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
+        every { findingRepository.byAgent(agentId, tenant) } returns listOf(finding(teamId, foundAt))
+        every { teamRepository.getOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
 
         val teams = service.getFindingTeams(agentId, tenant)
 
@@ -49,10 +49,10 @@ class GetAgentFindingTeamsServiceTest {
     fun `drops findings whose team can no longer be resolved`() {
         val present = TeamId()
         val missing = TeamId()
-        every { getAgentFindingsPort.getFindingsByAgent(agentId, tenant) } returns
+        every { findingRepository.byAgent(agentId, tenant) } returns
             listOf(finding(present), finding(missing))
-        every { getTeamPort.getTeamOrNull(present, tenant) } returns Team(present, gameId, "Team A")
-        every { getTeamPort.getTeamOrNull(missing, tenant) } returns null
+        every { teamRepository.getOrNull(present, tenant) } returns Team(present, gameId, "Team A")
+        every { teamRepository.getOrNull(missing, tenant) } returns null
 
         val teams = service.getFindingTeams(agentId, tenant)
 

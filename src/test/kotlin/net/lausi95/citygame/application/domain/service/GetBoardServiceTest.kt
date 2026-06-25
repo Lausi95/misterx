@@ -18,11 +18,11 @@ import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
-import net.lausi95.citygame.application.port.out.agent.GetAgentsPort
-import net.lausi95.citygame.application.port.out.agentlocation.GetAgentLocationPort
-import net.lausi95.citygame.application.port.out.finding.GetTeamFindingsPort
-import net.lausi95.citygame.application.port.out.game.GetGamePort
-import net.lausi95.citygame.application.port.out.team.GetTeamPort
+import net.lausi95.citygame.application.port.out.agent.AgentRepository
+import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
+import net.lausi95.citygame.application.port.out.finding.FindingRepository
+import net.lausi95.citygame.application.port.out.game.GameRepository
+import net.lausi95.citygame.application.port.out.team.TeamRepository
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -32,18 +32,18 @@ import java.time.OffsetDateTime
 
 class GetBoardServiceTest {
 
-    private val getGamePort = mockk<GetGamePort>()
-    private val getTeamPort = mockk<GetTeamPort>()
-    private val getAgentsPort = mockk<GetAgentsPort>()
-    private val getAgentLocationPort = mockk<GetAgentLocationPort>()
-    private val getTeamFindingsPort = mockk<GetTeamFindingsPort>()
+    private val gameRepository = mockk<GameRepository>()
+    private val teamRepository = mockk<TeamRepository>()
+    private val agentRepository = mockk<AgentRepository>()
+    private val agentLocationRepository = mockk<AgentLocationRepository>()
+    private val findingRepository = mockk<FindingRepository>()
 
     private val service = GetBoardService(
-        getGamePort,
-        getTeamPort,
-        getAgentsPort,
-        getAgentLocationPort,
-        getTeamFindingsPort,
+        gameRepository,
+        teamRepository,
+        agentRepository,
+        agentLocationRepository,
+        findingRepository,
     )
 
     private val tenant = Tenant("https://acme.city-game.net")
@@ -69,17 +69,17 @@ class GetBoardServiceTest {
         AgentLocation(AgentLocationId(), agentId, OffsetDateTime.now(), GeoLocation(latitude, longitude))
 
     private fun givenAgents(vararg agents: Agent) {
-        every { getAgentsPort.getAgentsForGame(gameId, tenant) } returns agents.toList()
+        every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
     }
 
     private fun givenLocations(vararg locations: Pair<AgentId, AgentLocation?>) {
         locations.forEach { (agentId, location) ->
-            every { getAgentLocationPort.getAgentLocation(agentId) } returns location
+            every { agentLocationRepository.latest(agentId) } returns location
         }
     }
 
     init {
-        every { getGamePort.getGame(gameId, tenant) } returns game
+        every { gameRepository.get(gameId, tenant) } returns game
     }
 
     @Test
@@ -174,8 +174,8 @@ class GetBoardServiceTest {
             unfound.id to locationOf(unfound.id, 6.5, 6.5),
             utility.id to locationOf(utility.id, 4.5, 4.5),
         )
-        every { getTeamPort.getTeamOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
-        every { getTeamFindingsPort.getFindingsByTeam(teamId, tenant) } returns listOf(
+        every { teamRepository.getOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
+        every { findingRepository.byTeam(teamId, tenant) } returns listOf(
             AgentFinding(FindingId(), gameId, teamId, found.id, OffsetDateTime.now(), null, null),
         )
 
@@ -189,7 +189,7 @@ class GetBoardServiceTest {
 
     @Test
     fun `a team that does not belong to the game is not found`() {
-        every { getTeamPort.getTeamOrNull(teamId, tenant) } returns Team(teamId, GameId(), "Other game")
+        every { teamRepository.getOrNull(teamId, tenant) } returns Team(teamId, GameId(), "Other game")
 
         assertThatThrownBy { service.getBoard(GetBoardUseCase.Query(gameId, teamId), tenant) }
             .isInstanceOf(TeamNotFoundException::class.java)
@@ -197,7 +197,7 @@ class GetBoardServiceTest {
 
     @Test
     fun `an unknown team is not found`() {
-        every { getTeamPort.getTeamOrNull(teamId, tenant) } returns null
+        every { teamRepository.getOrNull(teamId, tenant) } returns null
 
         assertThatThrownBy { service.getBoard(GetBoardUseCase.Query(gameId, teamId), tenant) }
             .isInstanceOf(TeamNotFoundException::class.java)
