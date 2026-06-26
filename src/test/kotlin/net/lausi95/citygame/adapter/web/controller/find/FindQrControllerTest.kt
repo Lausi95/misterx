@@ -10,7 +10,7 @@ import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agent.agentNotFound
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.GetMyAgentUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,7 +39,7 @@ class FindQrControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getMyAgentUseCase: GetMyAgentUseCase
+    private lateinit var agentUseCase: AgentUseCase
 
     @MockkBean
     private lateinit var frontendUriFactory: FrontendUriFactory
@@ -55,7 +55,7 @@ class FindQrControllerTest {
     @Test
     fun `returns 200 with a PNG image for an agent that belongs to the game`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), Tenant("https://acme.city-game.net"))
+            agentUseCase.getMyAgent(AgentUseCase.GetMyAgentQuery(GameId("g1"), AgentId("a1")), Tenant("https://acme.city-game.net"))
         } returns anAgent()
         every {
             frontendUriFactory.buildUrl(Tenant("https://acme.city-game.net"), "/find", mapOf("agentId" to "a1", "alias" to "Shadow"))
@@ -70,7 +70,7 @@ class FindQrControllerTest {
     @Test
     fun `falls back to the Referer origin when no Origin header is present`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), Tenant("https://acme.city-game.net"))
+            agentUseCase.getMyAgent(AgentUseCase.GetMyAgentQuery(GameId("g1"), AgentId("a1")), Tenant("https://acme.city-game.net"))
         } returns anAgent()
         every {
             frontendUriFactory.buildUrl(Tenant("https://acme.city-game.net"), "/find", mapOf("agentId" to "a1", "alias" to "Shadow"))
@@ -102,7 +102,7 @@ class FindQrControllerTest {
     @Test
     fun `returns 404 when the agent does not belong to the game`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("missing")), Tenant("https://acme.city-game.net"))
+            agentUseCase.getMyAgent(AgentUseCase.GetMyAgentQuery(GameId("g1"), AgentId("missing")), Tenant("https://acme.city-game.net"))
         } answers { agentNotFound(AgentId("missing")) }
 
         getFindQr(agentId = "missing").andExpect {

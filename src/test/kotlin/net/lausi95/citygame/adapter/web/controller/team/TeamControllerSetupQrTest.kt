@@ -10,13 +10,8 @@ import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
-import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.team.CreateTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.DeleteTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamsUseCase
-import net.lausi95.citygame.application.port.`in`.team.UpdateTeamUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
+import net.lausi95.citygame.application.port.`in`.team.TeamUseCase
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,25 +40,10 @@ class TeamControllerSetupQrTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var deleteTeamUseCase: DeleteTeamUseCase
+    private lateinit var teamUseCase: TeamUseCase
 
     @MockkBean
-    private lateinit var getTeamsUseCase: GetTeamsUseCase
-
-    @MockkBean
-    private lateinit var createTeamUseCase: CreateTeamUseCase
-
-    @MockkBean
-    private lateinit var getTeamUseCase: GetTeamUseCase
-
-    @MockkBean
-    private lateinit var updateTeamUseCase: UpdateTeamUseCase
-
-    @MockkBean
-    private lateinit var getTeamMembersUseCase: GetTeamMembersUseCase
-
-    @MockkBean
-    private lateinit var getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase
+    private lateinit var findingUseCase: FindingUseCase
 
     @MockkBean
     private lateinit var frontendUriFactory: FrontendUriFactory
@@ -76,7 +56,7 @@ class TeamControllerSetupQrTest {
 
     @Test
     fun `returns 200 with a PNG image for an existing team`() {
-        every { getTeamUseCase.getTeam(TeamId("t1"), Tenant("https://acme.city-game.net")) } returns aTeam()
+        every { teamUseCase.getTeam(TeamId("t1"), Tenant("https://acme.city-game.net")) } returns aTeam()
         every { frontendUriFactory.buildUrl(any(), any(), any()) } returns "http://localhost:3000/setup-team?teamId=t1"
 
         getSetupQr().andExpect {
@@ -87,7 +67,7 @@ class TeamControllerSetupQrTest {
 
     @Test
     fun `returns 404 when the team does not exist`() {
-        every { getTeamUseCase.getTeam(TeamId("missing"), Tenant("https://acme.city-game.net")) } throws
+        every { teamUseCase.getTeam(TeamId("missing"), Tenant("https://acme.city-game.net")) } throws
             TeamNotFoundException("Team not found: missing")
 
         getSetupQr(teamId = "missing").andExpect {

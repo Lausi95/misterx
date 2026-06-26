@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
+import net.lausi95.citygame.application.port.`in`.team.TeamUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/games/{gameId}/teams/{teamId}/members")
 class TeamMemberController(
-    private val getTeamMembersUseCase: GetTeamMembersUseCase,
+    private val teamUseCase: TeamUseCase,
 ) {
 
     @Operation(summary = "Returns a paginated collection of members for a team")
@@ -39,7 +39,7 @@ class TeamMemberController(
         @PathVariable teamId: String,
         tenant: Tenant,
     ): TeamMemberCollection {
-        val members = getTeamMembersUseCase.getTeamMembers(TeamId(teamId), GameId(gameId), pageable, tenant)
+        val members = teamUseCase.getTeamMembers(TeamId(teamId), GameId(gameId), pageable, tenant)
         return TeamMemberCollection(members)
     }
 }

@@ -12,7 +12,7 @@ import net.lausi95.citygame.application.domain.model.finding.AgentNotFindableExc
 import net.lausi95.citygame.application.domain.model.finding.FindingId
 import net.lausi95.citygame.application.domain.model.game.GameNotActiveException
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
-import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -32,7 +32,7 @@ class FindControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var findAgentUseCase: FindAgentUseCase
+    private lateinit var findingUseCase: FindingUseCase
 
     private fun post(body: String? = null) = mockMvc.post("/find") {
         header("X-GameId", "g1")
@@ -48,7 +48,7 @@ class FindControllerTest {
 
     @Test
     fun `returns 201 with X-FindId and a Location pointing at the team`() {
-        every { findAgentUseCase.findAgent(any(), any()) } returns FindingId("find-1")
+        every { findingUseCase.findAgent(any(), any()) } returns FindingId("find-1")
 
         post().andExpect {
             status { isCreated() }
@@ -59,9 +59,9 @@ class FindControllerTest {
 
     @Test
     fun `passes the reported location from the body and the tenant to the use case`() {
-        val command = slot<FindAgentUseCase.Command>()
+        val command = slot<FindingUseCase.FindAgentCommand>()
         val tenant = slot<Tenant>()
-        every { findAgentUseCase.findAgent(capture(command), capture(tenant)) } returns FindingId("find-1")
+        every { findingUseCase.findAgent(capture(command), capture(tenant)) } returns FindingId("find-1")
 
         post("""{"latitude":52.5,"longitude":13.4}""").andExpect { status { isCreated() } }
 
@@ -76,8 +76,8 @@ class FindControllerTest {
 
     @Test
     fun `sends no reported location when the body is omitted`() {
-        val command = slot<FindAgentUseCase.Command>()
-        every { findAgentUseCase.findAgent(capture(command), any()) } returns FindingId("find-1")
+        val command = slot<FindingUseCase.FindAgentCommand>()
+        every { findingUseCase.findAgent(capture(command), any()) } returns FindingId("find-1")
 
         post().andExpect { status { isCreated() } }
 
@@ -86,28 +86,28 @@ class FindControllerTest {
 
     @Test
     fun `maps AgentNotFindableException to 422`() {
-        every { findAgentUseCase.findAgent(any(), any()) } throws AgentNotFindableException("nope")
+        every { findingUseCase.findAgent(any(), any()) } throws AgentNotFindableException("nope")
 
         post().andExpect { status { isUnprocessableContent() } }
     }
 
     @Test
     fun `maps GameNotActiveException to 422`() {
-        every { findAgentUseCase.findAgent(any(), any()) } throws GameNotActiveException("nope")
+        every { findingUseCase.findAgent(any(), any()) } throws GameNotActiveException("nope")
 
         post().andExpect { status { isUnprocessableContent() } }
     }
 
     @Test
     fun `maps AgentAlreadyFoundException to 409`() {
-        every { findAgentUseCase.findAgent(any(), any()) } throws AgentAlreadyFoundException("dup")
+        every { findingUseCase.findAgent(any(), any()) } throws AgentAlreadyFoundException("dup")
 
         post().andExpect { status { isConflict() } }
     }
 
     @Test
     fun `maps not-found domain exceptions to 404`() {
-        every { findAgentUseCase.findAgent(any(), any()) } throws TeamNotFoundException("missing")
+        every { findingUseCase.findAgent(any(), any()) } throws TeamNotFoundException("missing")
 
         post().andExpect { status { isNotFound() } }
     }

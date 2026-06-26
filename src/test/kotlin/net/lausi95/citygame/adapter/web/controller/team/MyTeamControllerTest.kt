@@ -14,9 +14,8 @@ import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamMemberId
 import net.lausi95.citygame.application.domain.model.team.TeamMemberNotFoundException
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
-import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetMyTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
+import net.lausi95.citygame.application.port.`in`.team.TeamUseCase
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,13 +34,10 @@ class MyTeamControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getMyTeamUseCase: GetMyTeamUseCase
+    private lateinit var teamUseCase: TeamUseCase
 
     @MockkBean
-    private lateinit var getTeamMembersUseCase: GetTeamMembersUseCase
-
-    @MockkBean
-    private lateinit var getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase
+    private lateinit var findingUseCase: FindingUseCase
 
     private val tenant = Tenant("https://acme.city-game.net")
 
@@ -58,10 +54,10 @@ class MyTeamControllerTest {
     @Test
     fun `returns 200 with the team for a valid game and team`() {
         every {
-            getMyTeamUseCase.getMyTeam(GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), null), tenant)
+            teamUseCase.getMyTeam(TeamUseCase.GetMyTeamQuery(GameId("g1"), TeamId("t1"), null), tenant)
         } returns aTeam()
-        every { getTeamMembersUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 3L
-        every { getTeamFoundAgentsUseCase.getFoundAgents(TeamId("t1"), tenant) } returns emptyList()
+        every { teamUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 3L
+        every { findingUseCase.getFoundAgents(TeamId("t1"), tenant) } returns emptyList()
 
         getMyTeam().andExpect {
             status { isOk() }
@@ -75,10 +71,10 @@ class MyTeamControllerTest {
     fun `serialises foundAt for each found agent in the response body`() {
         val foundAt = OffsetDateTime.parse("2026-06-19T10:15:30+02:00")
         every {
-            getMyTeamUseCase.getMyTeam(GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), null), tenant)
+            teamUseCase.getMyTeam(TeamUseCase.GetMyTeamQuery(GameId("g1"), TeamId("t1"), null), tenant)
         } returns aTeam()
-        every { getTeamMembersUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 3L
-        every { getTeamFoundAgentsUseCase.getFoundAgents(TeamId("t1"), tenant) } returns
+        every { teamUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 3L
+        every { findingUseCase.getFoundAgents(TeamId("t1"), tenant) } returns
             listOf(FoundAgent(AgentId("a1"), "Shadow", foundAt))
 
         getMyTeam().andExpect {
@@ -92,13 +88,13 @@ class MyTeamControllerTest {
     @Test
     fun `passes the member id through when supplied`() {
         every {
-            getMyTeamUseCase.getMyTeam(
-                GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), TeamMemberId("m1")),
+            teamUseCase.getMyTeam(
+                TeamUseCase.GetMyTeamQuery(GameId("g1"), TeamId("t1"), TeamMemberId("m1")),
                 tenant,
             )
         } returns aTeam()
-        every { getTeamMembersUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 1L
-        every { getTeamFoundAgentsUseCase.getFoundAgents(TeamId("t1"), tenant) } returns emptyList()
+        every { teamUseCase.countTeamMembers(TeamId("t1"), tenant) } returns 1L
+        every { findingUseCase.getFoundAgents(TeamId("t1"), tenant) } returns emptyList()
 
         getMyTeam(memberId = "m1").andExpect {
             status { isOk() }
@@ -108,7 +104,7 @@ class MyTeamControllerTest {
     @Test
     fun `returns 404 when the team is not found`() {
         every {
-            getMyTeamUseCase.getMyTeam(GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), null), tenant)
+            teamUseCase.getMyTeam(TeamUseCase.GetMyTeamQuery(GameId("g1"), TeamId("t1"), null), tenant)
         } throws TeamNotFoundException("Team not found: t1")
 
         getMyTeam().andExpect {
@@ -119,8 +115,8 @@ class MyTeamControllerTest {
     @Test
     fun `returns 404 when the supplied member is invalid`() {
         every {
-            getMyTeamUseCase.getMyTeam(
-                GetMyTeamUseCase.Query(GameId("g1"), TeamId("t1"), TeamMemberId("m1")),
+            teamUseCase.getMyTeam(
+                TeamUseCase.GetMyTeamQuery(GameId("g1"), TeamId("t1"), TeamMemberId("m1")),
                 tenant,
             )
         } throws TeamMemberNotFoundException("Team member not found: m1")

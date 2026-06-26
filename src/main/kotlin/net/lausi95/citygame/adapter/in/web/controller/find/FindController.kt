@@ -11,7 +11,7 @@ import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamMemberId
-import net.lausi95.citygame.application.port.`in`.finding.FindAgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
@@ -23,7 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 @RestController
 @RequestMapping("/find")
 internal class FindController(
-    private val findAgentUseCase: FindAgentUseCase,
+    private val findingUseCase: FindingUseCase,
 ) {
 
     @Operation(summary = "Records that a team has found an agent")
@@ -75,7 +75,7 @@ internal class FindController(
             ?.takeIf { it.latitude != null && it.longitude != null }
             ?.let { GeoLocation(it.latitude!!, it.longitude!!) }
 
-        val command = FindAgentUseCase.Command(
+        val command = FindingUseCase.FindAgentCommand(
             gameId = GameId(gameId),
             teamId = TeamId(teamId),
             memberId = TeamMemberId(memberId),
@@ -83,7 +83,7 @@ internal class FindController(
             reportedLocation = reportedLocation,
         )
 
-        val findingId = findAgentUseCase.findAgent(command, tenant)
+        val findingId = findingUseCase.findAgent(command, tenant)
 
         val uri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/games/${gameId}/teams/${teamId}")

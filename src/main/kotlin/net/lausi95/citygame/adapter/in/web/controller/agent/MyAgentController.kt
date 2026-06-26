@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.GetMyAgentUseCase
-import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/my-agent")
 class MyAgentController(
-    private val getMyAgentUseCase: GetMyAgentUseCase,
-    private val getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase,
+    private val agentUseCase: AgentUseCase,
+    private val findingUseCase: FindingUseCase,
 ) {
 
     @Operation(summary = "Returns the agent the caller is, identified by request headers")
@@ -46,10 +46,10 @@ class MyAgentController(
         @RequestHeader("X-AgentId") agentId: String,
         tenant: Tenant,
     ): AgentResource {
-        val query = GetMyAgentUseCase.Query(GameId(gameId), AgentId(agentId))
+        val query = AgentUseCase.GetMyAgentQuery(GameId(gameId), AgentId(agentId))
 
-        val agent = getMyAgentUseCase.getMyAgent(query, tenant)
-        val foundByTeams = getAgentFindingTeamsUseCase.getFindingTeams(agent.id, tenant)
+        val agent = agentUseCase.getMyAgent(query, tenant)
+        val foundByTeams = findingUseCase.getFindingTeams(agent.id, tenant)
 
         return AgentResource(agent, foundByTeams)
     }

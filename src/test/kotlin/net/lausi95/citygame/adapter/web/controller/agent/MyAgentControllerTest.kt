@@ -10,8 +10,8 @@ import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundException
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.GetMyAgentUseCase
-import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,10 +29,10 @@ class MyAgentControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getMyAgentUseCase: GetMyAgentUseCase
+    private lateinit var agentUseCase: AgentUseCase
 
     @MockkBean
-    private lateinit var getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase
+    private lateinit var findingUseCase: FindingUseCase
 
     private val tenant = Tenant("https://acme.city-game.net")
 
@@ -57,9 +57,9 @@ class MyAgentControllerTest {
     @Test
     fun `returns 200 with the agent for a valid game and agent`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), tenant)
+            agentUseCase.getMyAgent(AgentUseCase.GetMyAgentQuery(GameId("g1"), AgentId("a1")), tenant)
         } returns anAgent()
-        every { getAgentFindingTeamsUseCase.getFindingTeams(AgentId("a1"), tenant) } returns emptyList()
+        every { findingUseCase.getFindingTeams(AgentId("a1"), tenant) } returns emptyList()
 
         getMyAgent().andExpect {
             status { isOk() }
@@ -72,7 +72,7 @@ class MyAgentControllerTest {
     @Test
     fun `returns 404 when the agent is not found`() {
         every {
-            getMyAgentUseCase.getMyAgent(GetMyAgentUseCase.Query(GameId("g1"), AgentId("a1")), tenant)
+            agentUseCase.getMyAgent(AgentUseCase.GetMyAgentQuery(GameId("g1"), AgentId("a1")), tenant)
         } throws AgentNotFoundException("Agent not found: a1")
 
         getMyAgent().andExpect {

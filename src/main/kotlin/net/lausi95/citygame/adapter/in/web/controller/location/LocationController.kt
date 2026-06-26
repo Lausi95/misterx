@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agentlocation.UpdateAgentLocationUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/location")
 internal class LocationController(
-    private val updateAgentLocationUseCase: UpdateAgentLocationUseCase
+    private val agentUseCase: AgentUseCase,
 ) {
 
     @Operation(summary = "Updates the current location of an agent")
@@ -50,7 +50,7 @@ internal class LocationController(
             latitude = requireNotNull(request.latitude),
             longitude = requireNotNull(request.longitude),
         )
-        updateAgentLocationUseCase.updateAgentLocation(
+        agentUseCase.updateLocation(
             gameId = GameId(gameId),
             agentId = AgentId(agentId),
             geoLocation = geoLocation,

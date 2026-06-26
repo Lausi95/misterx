@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.`in`.team.RegisterTeamMemberUseCase
+import net.lausi95.citygame.application.port.`in`.team.TeamUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
@@ -19,7 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 @RestController
 @RequestMapping("/team-register")
 class TeamRegistrationController(
-    private val registerTeamMemberUseCase: RegisterTeamMemberUseCase,
+    private val teamUseCase: TeamUseCase,
 ) {
 
     @Operation(summary = "Register as a member of a team")
@@ -48,12 +48,12 @@ class TeamRegistrationController(
         @RequestHeader("X-TeamId") teamId: String,
         tenant: Tenant,
     ): ResponseEntity<Unit> {
-        val command = RegisterTeamMemberUseCase.Command(
+        val command = TeamUseCase.RegisterTeamMemberCommand(
             GameId(gameId),
             TeamId(teamId),
         )
 
-        val memberId = registerTeamMemberUseCase.registerTeamMember(command, tenant)
+        val memberId = teamUseCase.registerTeamMember(command, tenant)
 
         val uri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/games/${gameId}/teams/${teamId}/members/${memberId.value}")

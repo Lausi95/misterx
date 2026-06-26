@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.team.*
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
+import net.lausi95.citygame.application.port.`in`.team.TeamUseCase
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.common.Tenant
 import net.lausi95.citygame.common.qrCodeImage
@@ -27,13 +27,8 @@ import java.awt.image.BufferedImage
 @RestController
 @RequestMapping("/games/{gameId}/teams")
 class TeamController(
-    private val getTeamsUseCase: GetTeamsUseCase,
-    private val createTeamUseCase: CreateTeamUseCase,
-    private val getTeamUseCase: GetTeamUseCase,
-    private val updateTeamUseCase: UpdateTeamUseCase,
-    private val deleteTeamUseCase: DeleteTeamUseCase,
-    private val getTeamMembersUseCase: GetTeamMembersUseCase,
-    private val getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase,
+    private val teamUseCase: TeamUseCase,
+    private val findingUseCase: FindingUseCase,
     private val frontendUriFactory: FrontendUriFactory,
 ) {
 
@@ -54,9 +49,9 @@ class TeamController(
         @PathVariable gameId: String,
         tenant: Tenant,
     ): TeamCollection {
-        val teams = getTeamsUseCase.getTeams(GameId(gameId), pageable, tenant)
-        val foundAgentsByTeam = getTeamFoundAgentsUseCase.getFoundAgentsByTeams(teams.content.map { it.id }, tenant)
-        return TeamCollection(teams, { team -> getTeamMembersUseCase.countTeamMembers(team.id, tenant) }, foundAgentsByTeam)
+        val teams = teamUseCase.getTeams(GameId(gameId), pageable, tenant)
+        val foundAgentsByTeam = findingUseCase.getFoundAgentsByTeams(teams.content.map { it.id }, tenant)
+        return TeamCollection(teams, { team -> teamUseCase.countTeamMembers(team.id, tenant) }, foundAgentsByTeam)
     }
 
     @Operation(summary = "Creates a new team in a game")
@@ -85,12 +80,12 @@ class TeamController(
         tenant: Tenant,
         @RequestBody @Valid request: CreateTeamRequest,
     ): ResponseEntity<Unit> {
-        val command = CreateTeamUseCase.Command(
+        val command = TeamUseCase.CreateTeamCommand(
             GameId(gameId),
             requireNotNull(request.name),
         )
 
-        val teamId = createTeamUseCase.createTeam(command, tenant)
+        val teamId = teamUseCase.createTeam(command, tenant)
 
         val uri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/games/${gameId}/teams/${teamId.value}")
@@ -123,9 +118,9 @@ class TeamController(
         @PathVariable teamId: String,
         tenant: Tenant,
     ): TeamResource {
-        val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
-        val memberCount = getTeamMembersUseCase.countTeamMembers(TeamId(teamId), tenant)
-        val foundAgents = getTeamFoundAgentsUseCase.getFoundAgents(TeamId(teamId), tenant)
+        val team = teamUseCase.getTeam(TeamId(teamId), tenant)
+        val memberCount = teamUseCase.countTeamMembers(TeamId(teamId), tenant)
+        val foundAgents = findingUseCase.getFoundAgents(TeamId(teamId), tenant)
         return TeamResource(team, memberCount, foundAgents)
     }
 
@@ -153,12 +148,12 @@ class TeamController(
         @Valid @RequestBody request: UpdateTeamRequest,
         tenant: Tenant,
     ) {
-        val command = UpdateTeamUseCase.Command(
+        val command = TeamUseCase.UpdateTeamCommand(
             teamId = TeamId(teamId),
             name = request.name,
         )
 
-        updateTeamUseCase.updateTeam(command, tenant)
+        teamUseCase.updateTeam(command, tenant)
     }
 
     @Operation(summary = "Deletes a team and all its members and findings")
@@ -179,8 +174,8 @@ class TeamController(
         @PathVariable teamId: String,
         tenant: Tenant,
     ): ResponseEntity<Unit> {
-        deleteTeamUseCase.deleteTeam(
-            DeleteTeamUseCase.Command(GameId(gameId), TeamId(teamId)),
+        teamUseCase.deleteTeam(
+            TeamUseCase.DeleteTeamCommand(GameId(gameId), TeamId(teamId)),
             tenant,
         )
         return ResponseEntity.noContent().build()
@@ -208,7 +203,7 @@ class TeamController(
         @PathVariable teamId: String,
         tenant: Tenant,
     ): BufferedImage {
-        val team = getTeamUseCase.getTeam(TeamId(teamId), tenant)
+        val team = teamUseCase.getTeam(TeamId(teamId), tenant)
 
         val setupUrl = frontendUriFactory.buildUrl(
             tenant,

@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseCase
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Leaderboard")
 @RestController
 internal class LeaderboardController(
-    private val getLeaderboardUseCase: GetLeaderboardUseCase,
+    private val gameUseCase: GameUseCase,
 ) {
 
     @Operation(summary = "Returns the team ranking by the number of MISTERX agents found")
@@ -47,6 +47,6 @@ internal class LeaderboardController(
         @RequestHeader(name = "X-GameId") gameId: String,
         tenant: Tenant,
     ): LeaderboardResource {
-        return LeaderboardResource(getLeaderboardUseCase.getLeaderboard(GameId(gameId), tenant))
+        return LeaderboardResource(gameUseCase.getLeaderboard(GameId(gameId), tenant))
     }
 }

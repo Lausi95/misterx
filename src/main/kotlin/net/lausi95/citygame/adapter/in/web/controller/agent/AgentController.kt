@@ -9,12 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.common.Tenant
 import net.lausi95.citygame.common.qrCodeImage
@@ -31,12 +27,8 @@ import java.awt.image.BufferedImage
 @RestController
 @RequestMapping("/games/{gameId}/agents")
 class AgentController(
-    private val getAgentsUseCase: GetAgentsUseCase,
-    private val createAgentUseCase: CreateAgentUseCase,
-    private val getAgentUseCase: GetAgentUseCase,
-    private val updateAgentUseCase: UpdateAgentUseCase,
-    private val deleteAgentUseCase: DeleteAgentUseCase,
-    private val getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase,
+    private val agentUseCase: AgentUseCase,
+    private val findingUseCase: FindingUseCase,
     private val frontendUriFactory: FrontendUriFactory,
 ) {
 
@@ -62,7 +54,7 @@ class AgentController(
         @PathVariable gameId: String,
         tenant: Tenant,
     ): AgentCollection {
-        val agents = getAgentsUseCase.getAgents(GameId(gameId), pageable, tenant)
+        val agents = agentUseCase.getAgents(GameId(gameId), pageable, tenant)
         return AgentCollection(agents)
     }
 
@@ -92,7 +84,7 @@ class AgentController(
         tenant: Tenant,
         @RequestBody @Valid request: CreateAgentRequest,
     ): ResponseEntity<Unit> {
-        val command = CreateAgentUseCase.Command(
+        val command = AgentUseCase.CreateAgentCommand(
             GameId(gameId),
             requireNotNull(request.type),
             requireNotNull(request.phoneNumber),
@@ -102,7 +94,7 @@ class AgentController(
             requireNotNull(request.active),
         )
 
-        val agentId = createAgentUseCase.createAgent(command, tenant)
+        val agentId = agentUseCase.createAgent(command, tenant)
 
         val uri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/games/${gameId}/agents/${agentId.value}")
@@ -135,8 +127,8 @@ class AgentController(
         @PathVariable agentId: String,
         tenant: Tenant,
     ): AgentResource {
-        val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
-        val foundByTeams = getAgentFindingTeamsUseCase.getFindingTeams(AgentId(agentId), tenant)
+        val agent = agentUseCase.getAgent(AgentId(agentId), tenant)
+        val foundByTeams = findingUseCase.getFindingTeams(AgentId(agentId), tenant)
         return AgentResource(agent, foundByTeams)
     }
 
@@ -164,7 +156,7 @@ class AgentController(
         @Valid @RequestBody request: UpdateAgentRequest,
         tenant: Tenant,
     ) {
-        val command = UpdateAgentUseCase.Command(
+        val command = AgentUseCase.UpdateAgentCommand(
             agentId = AgentId(agentId),
             gameId = GameId(gameId),
             type = request.type,
@@ -172,10 +164,10 @@ class AgentController(
             firstName = request.firstName,
             lastName = request.lastName,
             alias = request.alias,
-            active = request.active
+            active = request.active,
         )
 
-        updateAgentUseCase.updateAgent(command, tenant)
+        agentUseCase.updateAgent(command, tenant)
     }
 
     @Operation(summary = "Deletes an agent and all its locations and findings")
@@ -196,8 +188,8 @@ class AgentController(
         @PathVariable agentId: String,
         tenant: Tenant,
     ): ResponseEntity<Unit> {
-        deleteAgentUseCase.deleteAgent(
-            DeleteAgentUseCase.Command(GameId(gameId), AgentId(agentId)),
+        agentUseCase.deleteAgent(
+            AgentUseCase.DeleteAgentCommand(GameId(gameId), AgentId(agentId)),
             tenant,
         )
         return ResponseEntity.noContent().build()
@@ -225,7 +217,7 @@ class AgentController(
         @PathVariable agentId: String,
         tenant: Tenant,
     ): BufferedImage {
-        val agent = getAgentUseCase.getAgent(AgentId(agentId), tenant)
+        val agent = agentUseCase.getAgent(AgentId(agentId), tenant)
 
         val setupUrl = frontendUriFactory.buildUrl(
             tenant,
@@ -239,5 +231,4 @@ class AgentController(
 
         return qrCodeImage(setupUrl)
     }
-
 }

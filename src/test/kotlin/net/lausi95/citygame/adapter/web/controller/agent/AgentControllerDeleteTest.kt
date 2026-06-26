@@ -11,12 +11,8 @@ import net.lausi95.citygame.adapter.`in`.web.controller.agent.AgentController
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundException
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
@@ -36,22 +32,10 @@ class AgentControllerDeleteTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getAgentsUseCase: GetAgentsUseCase
+    private lateinit var agentUseCase: AgentUseCase
 
     @MockkBean
-    private lateinit var createAgentUseCase: CreateAgentUseCase
-
-    @MockkBean
-    private lateinit var getAgentUseCase: GetAgentUseCase
-
-    @MockkBean
-    private lateinit var updateAgentUseCase: UpdateAgentUseCase
-
-    @MockkBean
-    private lateinit var deleteAgentUseCase: DeleteAgentUseCase
-
-    @MockkBean
-    private lateinit var getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase
+    private lateinit var findingUseCase: FindingUseCase
 
     @MockkBean
     private lateinit var frontendUriFactory: FrontendUriFactory
@@ -65,15 +49,15 @@ class AgentControllerDeleteTest {
 
     @Test
     fun `returns 204 and delegates the delete to the use case`() {
-        every { deleteAgentUseCase.deleteAgent(any(), tenant) } just runs
+        every { agentUseCase.deleteAgent(any(), tenant) } just runs
 
         deleteAgent().andExpect {
             status { isNoContent() }
         }
 
         verify {
-            deleteAgentUseCase.deleteAgent(
-                DeleteAgentUseCase.Command(GameId("g1"), AgentId("a1")),
+            agentUseCase.deleteAgent(
+                AgentUseCase.DeleteAgentCommand(GameId("g1"), AgentId("a1")),
                 tenant,
             )
         }
@@ -81,7 +65,7 @@ class AgentControllerDeleteTest {
 
     @Test
     fun `returns 404 when the agent belongs to a different game`() {
-        every { deleteAgentUseCase.deleteAgent(any(), tenant) } throws
+        every { agentUseCase.deleteAgent(any(), tenant) } throws
             AgentNotFoundException("Agent not found: a1")
 
         deleteAgent().andExpect {

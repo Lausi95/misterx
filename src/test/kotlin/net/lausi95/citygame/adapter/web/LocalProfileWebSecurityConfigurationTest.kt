@@ -6,11 +6,7 @@ import net.lausi95.citygame.adapter.`in`.web.TenantOriginExtractor
 import net.lausi95.citygame.adapter.`in`.web.WebMvcConfig
 import net.lausi95.citygame.adapter.`in`.web.WebSecurityConfiguration
 import net.lausi95.citygame.adapter.`in`.web.controller.game.GameController
-import net.lausi95.citygame.application.port.`in`.game.CreateGameUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetGameUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetGamesUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetMapUseCase
-import net.lausi95.citygame.application.port.`in`.game.UpdateGameUseCase
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -35,23 +31,11 @@ class LocalProfileWebSecurityConfigurationTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var createGameUseCase: CreateGameUseCase
-
-    @MockkBean
-    private lateinit var getGameUseCase: GetGameUseCase
-
-    @MockkBean
-    private lateinit var getGamesUseCase: GetGamesUseCase
-
-    @MockkBean
-    private lateinit var updateGameUseCase: UpdateGameUseCase
-
-    @MockkBean
-    private lateinit var getMapUseCase: GetMapUseCase
+    private lateinit var gameUseCase: GameUseCase
 
     @Test
     fun `games endpoint is public without a token under the local profile`() {
-        every { getGamesUseCase.getGames(any(), any()) } returns Page.empty()
+        every { gameUseCase.getGames(any(), any()) } returns Page.empty()
 
         mockMvc.get("/games") {
             // TenantFilter is not part of this slice; supply the attribute it would set.

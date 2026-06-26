@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.adapter.`in`.web.FrontendUriFactory
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.GetMyAgentUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
 import net.lausi95.citygame.common.Tenant
 import net.lausi95.citygame.common.qrCodeImage
 import org.springframework.http.MediaType
@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage
 @RestController
 @RequestMapping("/find-qr")
 internal class FindQrController(
-    private val getMyAgentUseCase: GetMyAgentUseCase,
+    private val agentUseCase: AgentUseCase,
     private val frontendUriFactory: FrontendUriFactory,
 ) {
 
@@ -52,8 +52,8 @@ internal class FindQrController(
         @RequestHeader("X-AgentId") agentId: String,
         tenant: Tenant,
     ): BufferedImage {
-        val agent = getMyAgentUseCase.getMyAgent(
-            GetMyAgentUseCase.Query(GameId(gameId), AgentId(agentId)),
+        val agent = agentUseCase.getMyAgent(
+            AgentUseCase.GetMyAgentQuery(GameId(gameId), AgentId(agentId)),
             tenant,
         )
 

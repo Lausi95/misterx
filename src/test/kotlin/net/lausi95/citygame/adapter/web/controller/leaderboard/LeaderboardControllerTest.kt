@@ -19,7 +19,7 @@ import net.lausi95.citygame.application.domain.model.leaderboard.Leaderboard
 import net.lausi95.citygame.application.domain.model.leaderboard.LeaderboardEntry
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.`in`.leaderboard.GetLeaderboardUseCase
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -40,7 +40,7 @@ class LeaderboardControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getLeaderboardUseCase: GetLeaderboardUseCase
+    private lateinit var gameUseCase: GameUseCase
 
     private val gameId = GameId("g1")
 
@@ -54,7 +54,7 @@ class LeaderboardControllerTest {
 
     @Test
     fun `returns 200 with an empty teams array`() {
-        every { getLeaderboardUseCase.getLeaderboard(any(), any()) } returns Leaderboard.of(game(), emptyList())
+        every { gameUseCase.getLeaderboard(any(), any()) } returns Leaderboard.of(game(), emptyList())
 
         mockMvc.get("/leaderboard") {
             header("X-GameId", "g1")
@@ -74,7 +74,7 @@ class LeaderboardControllerTest {
             listOf(FoundMisterX("shadow", foundAt), FoundMisterX("raven", foundAt.plusMinutes(5))),
         )
         val empty = LeaderboardEntry(Team(TeamId("t2"), gameId, "Empties"), emptyList())
-        every { getLeaderboardUseCase.getLeaderboard(any(), any()) } returns Leaderboard.of(game(), listOf(winner, empty))
+        every { gameUseCase.getLeaderboard(any(), any()) } returns Leaderboard.of(game(), listOf(winner, empty))
 
         mockMvc.get("/leaderboard") {
             header("X-GameId", "g1")
@@ -107,7 +107,7 @@ class LeaderboardControllerTest {
         val capturedGameId = slot<GameId>()
         val capturedTenant = slot<Tenant>()
         every {
-            getLeaderboardUseCase.getLeaderboard(capture(capturedGameId), capture(capturedTenant))
+            gameUseCase.getLeaderboard(capture(capturedGameId), capture(capturedTenant))
         } returns Leaderboard.of(game(), emptyList())
 
         mockMvc.get("/leaderboard") {
@@ -121,7 +121,7 @@ class LeaderboardControllerTest {
 
     @Test
     fun `maps not-found domain exceptions to 404`() {
-        every { getLeaderboardUseCase.getLeaderboard(any(), any()) } throws GameNotFoundException("missing")
+        every { gameUseCase.getLeaderboard(any(), any()) } throws GameNotFoundException("missing")
 
         mockMvc.get("/leaderboard") {
             header("X-GameId", "g1")

@@ -10,7 +10,7 @@ import jakarta.validation.Valid
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.game.GameTitle
 import net.lausi95.citygame.application.domain.model.game.Grid
-import net.lausi95.citygame.application.port.`in`.game.*
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Pageable
@@ -24,11 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 @RestController
 @RequestMapping("/games")
 class GameController(
-    private val createGameUseCase: CreateGameUseCase,
-    private val getGameUseCase: GetGameUseCase,
-    private val getGamesUseCase: GetGamesUseCase,
-    private val updateGameUseCase: UpdateGameUseCase,
-    private val getMapUseCase: GetMapUseCase,
+    private val gameUseCase: GameUseCase,
 ) {
 
     @PostMapping
@@ -56,11 +52,11 @@ class GameController(
         @RequestBody @Valid request: CreateGameRequest,
         tenant: Tenant
     ): ResponseEntity<Unit> {
-        val command = CreateGameUseCase.Command(
+        val command = GameUseCase.CreateGameCommand(
             title = GameTitle(requireNotNull(request.title)),
             startTime = requireNotNull(request.startTime),
             endTime = requireNotNull(request.endTime),
-            map = CreateGameUseCase.Command.MapDto(
+            map = GameUseCase.CreateGameCommand.MapDto(
                 cornerA = GeoLocation(
                     latitude = requireNotNull(request.map?.cornerA?.latitude),
                     longitude = requireNotNull(request.map?.cornerA?.longitude),
@@ -76,7 +72,7 @@ class GameController(
             )
         )
 
-        val gameId = createGameUseCase.createGame(command, tenant)
+        val gameId = gameUseCase.createGame(command, tenant)
 
         val uri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/games/{gameId}")
@@ -108,7 +104,7 @@ class GameController(
         @PathVariable gameId: String,
         tenant: Tenant
     ): GameResource {
-        val game = getGameUseCase.getGame(GameId(gameId), tenant)
+        val game = gameUseCase.getGame(GameId(gameId), tenant)
         return GameResource(game)
     }
 
@@ -128,7 +124,7 @@ class GameController(
         @PageableDefault pageable: Pageable,
         tenant: Tenant,
     ): GameCollection {
-        val games = getGamesUseCase.getGames(pageable, tenant)
+        val games = gameUseCase.getGames(pageable, tenant)
         return GameCollection(games)
     }
 
@@ -153,7 +149,7 @@ class GameController(
         @PathVariable gameId: String,
         tenant: Tenant,
     ): MapResource {
-        return MapResource(GameId(gameId), getMapUseCase.getMap(GameId(gameId), tenant))
+        return MapResource(GameId(gameId), gameUseCase.getMap(GameId(gameId), tenant))
     }
 
     @Operation(summary = "Updates the editable fields of a game")
@@ -183,12 +179,12 @@ class GameController(
         @RequestBody @Valid request: PatchGameRequest,
         tenant: Tenant,
     ): ResponseEntity<Unit> {
-        val command = UpdateGameUseCase.Command(
+        val command = GameUseCase.UpdateGameCommand(
             gameId = GameId(gameId),
             title = request.title?.let { GameTitle(it) },
             startTime = request.startTime,
             endTime = request.endTime,
-            map = UpdateGameUseCase.MapDto(
+            map = GameUseCase.UpdateGameMapDto(
                 cornerA = request.map?.cornerA?.let {
                     GeoLocation(
                         latitude = requireNotNull(it.latitude),
@@ -209,7 +205,7 @@ class GameController(
                 },
             )
         )
-        updateGameUseCase.updateGame(command, tenant)
+        gameUseCase.updateGame(command, tenant)
         return ResponseEntity.accepted().build()
     }
 }

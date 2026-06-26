@@ -21,7 +21,7 @@ import net.lausi95.citygame.application.domain.model.game.Grid
 import net.lausi95.citygame.application.domain.model.game.Map
 import net.lausi95.citygame.application.domain.model.game.MapId
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
-import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.common.GeoLocation
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
@@ -42,7 +42,7 @@ class BoardControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getBoardUseCase: GetBoardUseCase
+    private lateinit var gameUseCase: GameUseCase
 
     private fun emptyBoard() = Board(
         game = Game(
@@ -58,7 +58,7 @@ class BoardControllerTest {
 
     @Test
     fun `returns 200 with the map and empty agent lists`() {
-        every { getBoardUseCase.getBoard(any(), any()) } returns emptyBoard()
+        every { gameUseCase.getBoard(any(), any()) } returns emptyBoard()
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")
@@ -79,7 +79,7 @@ class BoardControllerTest {
         val misterX = Agent(AgentId("x1"), game.id, Agent.Type.MISTERX, "p", "f", "l", "shadow", true)
             .apply { setLocation(AgentLocation(AgentLocationId(), id, OffsetDateTime.now(), GeoLocation(3.5, 7.5))) }
 
-        every { getBoardUseCase.getBoard(any(), any()) } returns Board(
+        every { gameUseCase.getBoard(any(), any()) } returns Board(
             game = game,
             utilityAgents = listOf(utility),
             misterxAgents = listOf(MisterXOnBoard(misterX, Cell(row = 3, column = 7))),
@@ -116,9 +116,9 @@ class BoardControllerTest {
 
     @Test
     fun `passes the game id and optional team id to the use case`() {
-        val query = slot<GetBoardUseCase.Query>()
+        val query = slot<GameUseCase.GetBoardQuery>()
         val tenant = slot<Tenant>()
-        every { getBoardUseCase.getBoard(capture(query), capture(tenant)) } returns emptyBoard()
+        every { gameUseCase.getBoard(capture(query), capture(tenant)) } returns emptyBoard()
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")
@@ -133,8 +133,8 @@ class BoardControllerTest {
 
     @Test
     fun `sends a null team id when X-TeamId is omitted`() {
-        val query = slot<GetBoardUseCase.Query>()
-        every { getBoardUseCase.getBoard(capture(query), any()) } returns emptyBoard()
+        val query = slot<GameUseCase.GetBoardQuery>()
+        every { gameUseCase.getBoard(capture(query), any()) } returns emptyBoard()
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")
@@ -146,7 +146,7 @@ class BoardControllerTest {
 
     @Test
     fun `maps not-found domain exceptions to 404`() {
-        every { getBoardUseCase.getBoard(any(), any()) } throws TeamNotFoundException("missing")
+        every { gameUseCase.getBoard(any(), any()) } throws TeamNotFoundException("missing")
 
         mockMvc.get("/board") {
             header("X-GameId", "g1")

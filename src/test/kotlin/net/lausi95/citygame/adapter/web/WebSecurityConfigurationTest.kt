@@ -6,11 +6,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.lausi95.citygame.adapter.`in`.web.WebSecurityConfiguration
 import net.lausi95.citygame.adapter.`in`.web.controller.game.GameController
-import net.lausi95.citygame.application.port.`in`.game.CreateGameUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetGameUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetGamesUseCase
-import net.lausi95.citygame.application.port.`in`.game.GetMapUseCase
-import net.lausi95.citygame.application.port.`in`.game.UpdateGameUseCase
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.common.Tenant
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -36,19 +32,7 @@ class WebSecurityConfigurationTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var createGameUseCase: CreateGameUseCase
-
-    @MockkBean
-    private lateinit var getGameUseCase: GetGameUseCase
-
-    @MockkBean
-    private lateinit var getGamesUseCase: GetGamesUseCase
-
-    @MockkBean
-    private lateinit var updateGameUseCase: UpdateGameUseCase
-
-    @MockkBean
-    private lateinit var getMapUseCase: GetMapUseCase
+    private lateinit var gameUseCase: GameUseCase
 
     // The oauth2ResourceServer { jwt {} } DSL requires a JwtDecoder bean. The jwt()
     // post-processor injects the authentication directly, so the decoder is never invoked.
@@ -63,7 +47,7 @@ class WebSecurityConfigurationTest {
 
     @Test
     fun `games endpoint is reachable with a valid token`() {
-        every { getGamesUseCase.getGames(any(), any()) } returns Page.empty()
+        every { gameUseCase.getGames(any(), any()) } returns Page.empty()
 
         mockMvc.get("/games") {
             with(jwt())

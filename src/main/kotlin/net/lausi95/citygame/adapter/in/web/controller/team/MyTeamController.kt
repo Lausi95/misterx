@@ -8,9 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamMemberId
-import net.lausi95.citygame.application.port.`in`.finding.GetTeamFoundAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetMyTeamUseCase
-import net.lausi95.citygame.application.port.`in`.team.GetTeamMembersUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
+import net.lausi95.citygame.application.port.`in`.team.TeamUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,9 +21,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/my-team")
 class MyTeamController(
-    private val getMyTeamUseCase: GetMyTeamUseCase,
-    private val getTeamMembersUseCase: GetTeamMembersUseCase,
-    private val getTeamFoundAgentsUseCase: GetTeamFoundAgentsUseCase,
+    private val teamUseCase: TeamUseCase,
+    private val findingUseCase: FindingUseCase,
 ) {
 
     @Operation(summary = "Returns the team the caller belongs to, identified by request headers")
@@ -50,15 +48,15 @@ class MyTeamController(
         @RequestHeader(value = "X-MemberId", required = false) memberId: String?,
         tenant: Tenant,
     ): TeamResource {
-        val query = GetMyTeamUseCase.Query(
+        val query = TeamUseCase.GetMyTeamQuery(
             GameId(gameId),
             TeamId(teamId),
             memberId?.let { TeamMemberId(it) },
         )
 
-        val team = getMyTeamUseCase.getMyTeam(query, tenant)
-        val memberCount = getTeamMembersUseCase.countTeamMembers(team.id, tenant)
-        val foundAgents = getTeamFoundAgentsUseCase.getFoundAgents(team.id, tenant)
+        val team = teamUseCase.getMyTeam(query, tenant)
+        val memberCount = teamUseCase.countTeamMembers(team.id, tenant)
+        val foundAgents = findingUseCase.getFoundAgents(team.id, tenant)
 
         return TeamResource(team, memberCount, foundAgents)
     }

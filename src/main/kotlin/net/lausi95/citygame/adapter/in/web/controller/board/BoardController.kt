@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.TeamId
-import net.lausi95.citygame.application.port.`in`.board.GetBoardUseCase
+import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.common.Tenant
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Board")
 @RestController
 internal class BoardController(
-    private val getBoardUseCase: GetBoardUseCase,
+    private val gameUseCase: GameUseCase,
 ) {
 
     @Operation(summary = "Returns the live playfield as a team sees it")
@@ -50,10 +50,10 @@ internal class BoardController(
         @RequestHeader(name = "X-TeamId", required = false) teamId: String?,
         tenant: Tenant,
     ): BoardResource {
-        val query = GetBoardUseCase.Query(
+        val query = GameUseCase.GetBoardQuery(
             gameId = GameId(gameId),
             teamId = teamId?.let { TeamId(it) },
         )
-        return BoardResource(getBoardUseCase.getBoard(query, tenant))
+        return BoardResource(gameUseCase.getBoard(query, tenant))
     }
 }

@@ -10,12 +10,8 @@ import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
 import net.lausi95.citygame.application.domain.model.agent.AgentNotFoundException
 import net.lausi95.citygame.application.domain.model.game.GameId
-import net.lausi95.citygame.application.port.`in`.agent.CreateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.DeleteAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.GetAgentUseCase
-import net.lausi95.citygame.application.port.`in`.agent.GetAgentsUseCase
-import net.lausi95.citygame.application.port.`in`.agent.UpdateAgentUseCase
-import net.lausi95.citygame.application.port.`in`.finding.GetAgentFindingTeamsUseCase
+import net.lausi95.citygame.application.port.`in`.agent.AgentUseCase
+import net.lausi95.citygame.application.port.`in`.finding.FindingUseCase
 import net.lausi95.citygame.common.Tenant
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
@@ -43,22 +39,10 @@ class AgentControllerSetupQrTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var getAgentsUseCase: GetAgentsUseCase
+    private lateinit var agentUseCase: AgentUseCase
 
     @MockkBean
-    private lateinit var createAgentUseCase: CreateAgentUseCase
-
-    @MockkBean
-    private lateinit var getAgentUseCase: GetAgentUseCase
-
-    @MockkBean
-    private lateinit var updateAgentUseCase: UpdateAgentUseCase
-
-    @MockkBean
-    private lateinit var deleteAgentUseCase: DeleteAgentUseCase
-
-    @MockkBean
-    private lateinit var getAgentFindingTeamsUseCase: GetAgentFindingTeamsUseCase
+    private lateinit var findingUseCase: FindingUseCase
 
     @MockkBean
     private lateinit var frontendUriFactory: FrontendUriFactory
@@ -71,7 +55,7 @@ class AgentControllerSetupQrTest {
 
     @Test
     fun `returns 200 with a PNG image for an existing agent`() {
-        every { getAgentUseCase.getAgent(AgentId("a1"), Tenant("https://acme.city-game.net")) } returns anAgent()
+        every { agentUseCase.getAgent(AgentId("a1"), Tenant("https://acme.city-game.net")) } returns anAgent()
         every { frontendUriFactory.buildUrl(any(), any(), any()) } returns "http://localhost:3000/setup-agent?agentId=a1"
 
         getSetupQr().andExpect {
@@ -82,7 +66,7 @@ class AgentControllerSetupQrTest {
 
     @Test
     fun `returns 404 when the agent does not exist`() {
-        every { getAgentUseCase.getAgent(AgentId("missing"), Tenant("https://acme.city-game.net")) } throws
+        every { agentUseCase.getAgent(AgentId("missing"), Tenant("https://acme.city-game.net")) } throws
             AgentNotFoundException("Agent not found: missing")
 
         getSetupQr(agentId = "missing").andExpect {
