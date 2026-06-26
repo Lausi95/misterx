@@ -20,7 +20,6 @@ import net.lausi95.citygame.application.domain.model.team.TeamId
 import net.lausi95.citygame.application.domain.model.team.TeamNotFoundException
 import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
@@ -43,14 +42,12 @@ class GameServiceTest {
         private val gameRepository = mockk<GameRepository>()
         private val teamRepository = mockk<TeamRepository>()
         private val agentRepository = mockk<AgentRepository>()
-        private val agentLocationRepository = mockk<AgentLocationRepository>()
         private val findingRepository = mockk<FindingRepository>()
 
         private val service = GameService(
             gameRepository,
             teamRepository,
             agentRepository,
-            agentLocationRepository,
             findingRepository,
         )
 
@@ -72,17 +69,12 @@ class GameServiceTest {
             active: Boolean = true,
         ) = Agent(id, gameId, type, "phone", "first", "last", "alias", active)
 
-        private fun locationOf(agentId: AgentId, latitude: Double, longitude: Double) =
-            AgentLocation(AgentLocationId(), agentId, OffsetDateTime.now(), GeoLocation(latitude, longitude))
-
         private fun givenAgents(vararg agents: Agent) {
-            every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
+            every { agentRepository.forGameWithLocation(gameId, tenant) } returns agents.toList()
         }
 
-        private fun givenLocations(vararg locations: Pair<AgentId, AgentLocation?>) {
-            locations.forEach { (agentId, location) ->
-                every { agentLocationRepository.latest(agentId) } returns location
-            }
+        private fun locatedAt(agent: Agent, latitude: Double, longitude: Double) {
+            agent.setLocation(AgentLocation(AgentLocationId(), agent.id, OffsetDateTime.now(), GeoLocation(latitude, longitude)))
         }
 
         init {
@@ -92,8 +84,8 @@ class GameServiceTest {
         @Test
         fun `utility agents are shown with their exact location`() {
             val utility = agent(type = Agent.Type.UTILITY)
+            locatedAt(utility, 3.5, 7.5)
             givenAgents(utility)
-            givenLocations(utility.id to locationOf(utility.id, 3.5, 7.5))
 
             val board = service.getBoard(GameUseCase.GetBoardQuery(gameId, teamId = null), tenant)
 
@@ -105,8 +97,8 @@ class GameServiceTest {
         @Test
         fun `misterx agents are shown as the grid cell containing their location`() {
             val misterX = agent(type = Agent.Type.MISTERX)
+            locatedAt(misterX, 3.5, 7.5)
             givenAgents(misterX)
-            givenLocations(misterX.id to locationOf(misterX.id, 3.5, 7.5))
 
             val board = service.getBoard(GameUseCase.GetBoardQuery(gameId, teamId = null), tenant)
 
@@ -119,11 +111,9 @@ class GameServiceTest {
         fun `inactive agents are omitted regardless of type`() {
             val inactiveUtility = agent(type = Agent.Type.UTILITY, active = false)
             val inactiveMisterX = agent(type = Agent.Type.MISTERX, active = false)
+            locatedAt(inactiveUtility, 1.0, 1.0)
+            locatedAt(inactiveMisterX, 1.0, 1.0)
             givenAgents(inactiveUtility, inactiveMisterX)
-            givenLocations(
-                inactiveUtility.id to locationOf(inactiveUtility.id, 1.0, 1.0),
-                inactiveMisterX.id to locationOf(inactiveMisterX.id, 1.0, 1.0),
-            )
 
             val board = service.getBoard(GameUseCase.GetBoardQuery(gameId, teamId = null), tenant)
 
@@ -136,7 +126,6 @@ class GameServiceTest {
             val utility = agent(type = Agent.Type.UTILITY)
             val misterX = agent(type = Agent.Type.MISTERX)
             givenAgents(utility, misterX)
-            givenLocations(utility.id to null, misterX.id to null)
 
             val board = service.getBoard(GameUseCase.GetBoardQuery(gameId, teamId = null), tenant)
 
@@ -147,8 +136,8 @@ class GameServiceTest {
         @Test
         fun `misterx agents located off the map are omitted`() {
             val misterX = agent(type = Agent.Type.MISTERX)
+            locatedAt(misterX, 50.0, 50.0)
             givenAgents(misterX)
-            givenLocations(misterX.id to locationOf(misterX.id, 50.0, 50.0))
 
             val board = service.getBoard(GameUseCase.GetBoardQuery(gameId, teamId = null), tenant)
 
@@ -159,11 +148,9 @@ class GameServiceTest {
         fun `without a team, all misterx agents are shown including found ones`() {
             val found = agent(type = Agent.Type.MISTERX)
             val unfound = agent(type = Agent.Type.MISTERX)
+            locatedAt(found, 2.5, 2.5)
+            locatedAt(unfound, 6.5, 6.5)
             givenAgents(found, unfound)
-            givenLocations(
-                found.id to locationOf(found.id, 2.5, 2.5),
-                unfound.id to locationOf(unfound.id, 6.5, 6.5),
-            )
 
             val board = service.getBoard(GameUseCase.GetBoardQuery(gameId, teamId = null), tenant)
 
@@ -175,12 +162,10 @@ class GameServiceTest {
             val found = agent(type = Agent.Type.MISTERX)
             val unfound = agent(type = Agent.Type.MISTERX)
             val utility = agent(type = Agent.Type.UTILITY)
+            locatedAt(found, 2.5, 2.5)
+            locatedAt(unfound, 6.5, 6.5)
+            locatedAt(utility, 4.5, 4.5)
             givenAgents(found, unfound, utility)
-            givenLocations(
-                found.id to locationOf(found.id, 2.5, 2.5),
-                unfound.id to locationOf(unfound.id, 6.5, 6.5),
-                utility.id to locationOf(utility.id, 4.5, 4.5),
-            )
             every { teamRepository.getOrNull(teamId, tenant) } returns Team(teamId, gameId, "Team A")
             every { findingRepository.byTeam(teamId, tenant) } returns listOf(
                 AgentFinding(FindingId(), gameId, teamId, found.id, OffsetDateTime.now(), null, null),
@@ -222,7 +207,6 @@ class GameServiceTest {
             gameRepository,
             teamRepository,
             agentRepository,
-            mockk(relaxed = true),
             findingRepository,
         )
 

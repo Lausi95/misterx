@@ -25,6 +25,10 @@ interface AgentRepository {
 
     fun forGame(gameId: GameId, tenant: Tenant): List<Agent>
 
+    fun getWithLocation(agentId: AgentId, tenant: Tenant): Agent
+
+    fun forGameWithLocation(gameId: GameId, tenant: Tenant): List<Agent>
+
     fun exists(agentId: AgentId, tenant: Tenant): Boolean
 
     fun requireExists(agentId: AgentId, tenant: Tenant) =

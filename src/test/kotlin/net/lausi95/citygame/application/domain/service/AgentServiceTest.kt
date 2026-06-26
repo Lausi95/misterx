@@ -92,11 +92,10 @@ class AgentServiceTest {
     inner class GetAgents {
 
         private val agentRepository = mockk<AgentRepository>()
-        private val agentLocationRepository = mockk<AgentLocationRepository>()
         private val service = AgentService(
             mockk(relaxed = true),
             agentRepository,
-            agentLocationRepository,
+            mockk(relaxed = true),
             mockk(relaxed = true),
         )
 
@@ -107,16 +106,14 @@ class AgentServiceTest {
             Agent(id, gameId, Agent.Type.UTILITY, "phone", "first", "last", alias, true)
 
         private fun givenAgents(vararg agents: Agent) {
-            every { agentRepository.forGame(gameId, tenant) } returns agents.toList()
+            every { agentRepository.forGameWithLocation(gameId, tenant) } returns agents.toList()
         }
 
-        private fun withoutLocation(agent: Agent) {
-            every { agentLocationRepository.latest(agent.id) } returns null
-        }
+        @Suppress("UnusedParameter")
+        private fun withoutLocation(agent: Agent) = Unit
 
         private fun locatedAt(agent: Agent, timestamp: OffsetDateTime) {
-            every { agentLocationRepository.latest(agent.id) } returns
-                AgentLocation(AgentLocationId(), agent.id, timestamp, GeoLocation(0.0, 0.0))
+            agent.setLocation(AgentLocation(AgentLocationId(), agent.id, timestamp, GeoLocation(0.0, 0.0)))
         }
 
         private fun getAgents(pageable: Pageable = Pageable.unpaged()) =
@@ -127,10 +124,9 @@ class AgentServiceTest {
             val recent = agent("recent")
             val old = agent("old")
             val never = agent("never")
-            givenAgents(recent, old, never)
             locatedAt(recent, now.minusMinutes(5))
             locatedAt(old, now.minusHours(3))
-            withoutLocation(never)
+            givenAgents(recent, old, never)
 
             assertThat(getAgents()).containsExactly("never", "old", "recent")
         }
@@ -141,7 +137,6 @@ class AgentServiceTest {
             val alpha = agent("Alpha")
             val bravo = agent("bravo")
             givenAgents(charlie, alpha, bravo)
-            listOf(charlie, alpha, bravo).forEach { withoutLocation(it) }
 
             assertThat(getAgents()).containsExactly("Alpha", "bravo", "charlie")
         }
@@ -152,7 +147,6 @@ class AgentServiceTest {
             val arger = agent("Ärger")
             val apfel = agent("Apfel")
             givenAgents(zoo, arger, apfel)
-            listOf(zoo, arger, apfel).forEach { withoutLocation(it) }
 
             assertThat(getAgents()).containsExactly("Apfel", "Ärger", "Zoo")
         }
@@ -162,7 +156,6 @@ class AgentServiceTest {
             val first = agent("same", AgentId("00000000-0000-0000-0000-000000000001"))
             val second = agent("same", AgentId("00000000-0000-0000-0000-000000000002"))
             givenAgents(second, first)
-            listOf(first, second).forEach { withoutLocation(it) }
 
             val ids = service.getAgents(gameId, Pageable.unpaged(), tenant).content.map { it.id.value }
             assertThat(ids).containsExactly(
@@ -175,9 +168,9 @@ class AgentServiceTest {
         fun `the client-supplied sort is ignored - the staleness order is always imposed`() {
             val recent = agent("aaa")
             val old = agent("zzz")
-            givenAgents(recent, old)
             locatedAt(recent, now.minusMinutes(1))
             locatedAt(old, now.minusHours(2))
+            givenAgents(recent, old)
 
             val order = getAgents(PageRequest.of(0, 10, Sort.by("alias").ascending()))
             assertThat(order).containsExactly("zzz", "aaa")
@@ -188,10 +181,9 @@ class AgentServiceTest {
             val never = agent("never")
             val old = agent("old")
             val recent = agent("recent")
-            givenAgents(recent, old, never)
-            withoutLocation(never)
             locatedAt(old, now.minusHours(1))
             locatedAt(recent, now.minusMinutes(1))
+            givenAgents(recent, old, never)
 
             val secondPage = service.getAgents(gameId, PageRequest.of(1, 2), tenant)
 
@@ -216,11 +208,10 @@ class AgentServiceTest {
     inner class GetMyAgent {
 
         private val agentRepository = mockk<AgentRepository>()
-        private val agentLocationRepository = mockk<AgentLocationRepository>()
         private val service = AgentService(
             mockk(relaxed = true),
             agentRepository,
-            agentLocationRepository,
+            mockk(relaxed = true),
             mockk(relaxed = true),
         )
 
@@ -240,8 +231,7 @@ class AgentServiceTest {
 
         @Test
         fun `returns the agent for a valid game and agent`() {
-            every { agentRepository.getOrNull(agentId, tenant) } returns anAgent()
-            every { agentLocationRepository.latest(agentId) } returns null
+            every { agentRepository.getWithLocation(agentId, tenant) } returns anAgent()
 
             val result = service.getMyAgent(AgentUseCase.GetMyAgentQuery(gameId, agentId), tenant)
 
@@ -251,8 +241,7 @@ class AgentServiceTest {
         @Test
         fun `populates the last known location when present`() {
             val location = mockk<AgentLocation>()
-            every { agentRepository.getOrNull(agentId, tenant) } returns anAgent()
-            every { agentLocationRepository.latest(agentId) } returns location
+            every { agentRepository.getWithLocation(agentId, tenant) } returns anAgent().also { it.setLocation(location) }
 
             val result = service.getMyAgent(AgentUseCase.GetMyAgentQuery(gameId, agentId), tenant)
 
@@ -261,7 +250,7 @@ class AgentServiceTest {
 
         @Test
         fun `throws when the agent does not exist`() {
-            every { agentRepository.getOrNull(agentId, tenant) } returns null
+            every { agentRepository.getWithLocation(agentId, tenant) } throws AgentNotFoundException("Agent not found")
 
             assertThatThrownBy {
                 service.getMyAgent(AgentUseCase.GetMyAgentQuery(gameId, agentId), tenant)
@@ -270,7 +259,7 @@ class AgentServiceTest {
 
         @Test
         fun `throws when the agent belongs to a different game`() {
-            every { agentRepository.getOrNull(agentId, tenant) } returns anAgent(game = GameId("other"))
+            every { agentRepository.getWithLocation(agentId, tenant) } returns anAgent(game = GameId("other"))
 
             assertThatThrownBy {
                 service.getMyAgent(AgentUseCase.GetMyAgentQuery(gameId, agentId), tenant)

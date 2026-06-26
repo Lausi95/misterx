@@ -15,7 +15,6 @@ import net.lausi95.citygame.application.domain.model.leaderboard.LeaderboardEntr
 import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.application.port.`in`.game.GameUseCase
 import net.lausi95.citygame.application.port.out.agent.AgentRepository
-import net.lausi95.citygame.application.port.out.agentlocation.AgentLocationRepository
 import net.lausi95.citygame.application.port.out.finding.FindingRepository
 import net.lausi95.citygame.application.port.out.game.GameRepository
 import net.lausi95.citygame.application.port.out.team.TeamRepository
@@ -32,7 +31,6 @@ class GameService(
     private val gameRepository: GameRepository,
     private val teamRepository: TeamRepository,
     private val agentRepository: AgentRepository,
-    private val agentLocationRepository: AgentLocationRepository,
     private val findingRepository: FindingRepository,
 ) : GameUseCase {
 
@@ -128,10 +126,7 @@ class GameService(
                 .toSet()
         } ?: emptySet()
 
-        val agents = agentRepository.forGame(query.gameId, tenant)
-            .onEach { agent ->
-                agentLocationRepository.latest(agent.id)?.also { agent.setLocation(it) }
-            }
+        val agents = agentRepository.forGameWithLocation(query.gameId, tenant)
             .filter { it.active && it.location != null }
 
         val utilityAgents = agents.filter { it.type == Agent.Type.UTILITY }

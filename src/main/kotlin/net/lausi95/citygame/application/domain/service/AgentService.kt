@@ -81,10 +81,7 @@ class AgentService(
     override fun getAgents(gameId: GameId, pageable: Pageable, tenant: Tenant): Page<Agent> {
         log.info { "Fetching agents..." }
 
-        val agents = agentRepository.forGame(gameId, tenant)
-            .onEach { agent ->
-                agentLocationRepository.latest(agent.id)?.also { agent.setLocation(it) }
-            }
+        val agents = agentRepository.forGameWithLocation(gameId, tenant)
             .sortedWith(byLocationStaleness)
 
         log.info { "Agents fetched." }
@@ -94,10 +91,7 @@ class AgentService(
     override fun getAgent(agentId: AgentId, tenant: Tenant): Agent {
         log.info { "Fetching agent..." }
 
-        val agent = agentRepository.get(agentId, tenant)
-        agentLocationRepository.latest(agentId)?.also {
-            agent.setLocation(it)
-        }
+        val agent = agentRepository.getWithLocation(agentId, tenant)
 
         log.info { "Agent fetched." }
 
@@ -107,12 +101,8 @@ class AgentService(
     override fun getMyAgent(query: AgentUseCase.GetMyAgentQuery, tenant: Tenant): Agent {
         log.info { "Fetching my agent..." }
 
-        val agent = agentRepository.getOrNull(query.agentId, tenant) ?: agentNotFound(query.agentId)
+        val agent = agentRepository.getWithLocation(query.agentId, tenant)
         if (agent.gameId != query.gameId) agentNotFound(query.agentId)
-
-        agentLocationRepository.latest(query.agentId)?.also {
-            agent.setLocation(it)
-        }
 
         log.info { "My agent fetched." }
 
