@@ -14,43 +14,6 @@ concurrency:
 jobs:
   test:
     name: Test + Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-
-      - name: Run tests + coverage
-        run: ./gradlew test jacocoTestReport --continue
-
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: test-report
-          path: build/reports/tests/test
-          if-no-files-found: warn
-
-      - name: Upload JaCoCo report (HTML)
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: jacoco-html
-          path: build/reports/jacoco/test/html
-          if-no-files-found: warn
-
-      - name: Upload JaCoCo report (XML)
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: jacoco-xml
-          path: build/reports/jacoco/test/jacocoTestReport.xml
-          if-no-files-found: warn
+    uses: ./.github/workflows/test.yml
+    with:
+      upload-coverage: true
