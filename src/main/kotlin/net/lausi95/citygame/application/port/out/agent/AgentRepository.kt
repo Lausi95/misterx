@@ -2,6 +2,7 @@ package net.lausi95.citygame.application.port.out.agent
 
 import net.lausi95.citygame.application.domain.model.agent.Agent
 import net.lausi95.citygame.application.domain.model.agent.AgentId
+import net.lausi95.citygame.application.domain.model.agent.agentNotFound
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.common.Tenant
 
@@ -18,7 +19,7 @@ interface AgentRepository {
     fun getOrNull(agentId: AgentId, tenant: Tenant): Agent?
 
     fun get(agentId: AgentId, tenant: Tenant): Agent =
-        getOrNull(agentId, tenant) ?: error("Agent not found")
+        getOrNull(agentId, tenant) ?: agentNotFound(agentId)
 
     fun byIds(agentIds: Collection<AgentId>, tenant: Tenant): List<Agent>
 

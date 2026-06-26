@@ -3,6 +3,7 @@ package net.lausi95.citygame.application.port.out.team
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.team.Team
 import net.lausi95.citygame.application.domain.model.team.TeamId
+import net.lausi95.citygame.application.domain.model.team.teamNotFound
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -19,7 +20,7 @@ interface TeamRepository {
     fun getOrNull(teamId: TeamId, tenant: Tenant): Team?
 
     fun get(teamId: TeamId, tenant: Tenant): Team =
-        getOrNull(teamId, tenant) ?: error("Team not found")
+        getOrNull(teamId, tenant) ?: teamNotFound(teamId)
 
     fun forGame(gameId: GameId, pageable: Pageable, tenant: Tenant): Page<Team>
 

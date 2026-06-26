@@ -3,6 +3,7 @@ package net.lausi95.citygame.application.port.out.game
 import net.lausi95.citygame.application.domain.model.game.Game
 import net.lausi95.citygame.application.domain.model.game.GameId
 import net.lausi95.citygame.application.domain.model.game.GameTitle
+import net.lausi95.citygame.application.domain.model.game.gameTitleAlreadyExists
 import net.lausi95.citygame.application.domain.model.game.gameNotFound
 import net.lausi95.citygame.common.Tenant
 import org.springframework.data.domain.Page
@@ -33,8 +34,6 @@ interface GameRepository {
     fun titleAvailable(title: GameTitle, tenant: Tenant): Boolean
 
     fun requireTitleAvailable(title: GameTitle, tenant: Tenant) {
-        if (!titleAvailable(title, tenant)) {
-            error("Game with title ${title.value} already exist")
-        }
+        if (!titleAvailable(title, tenant)) gameTitleAlreadyExists(title)
     }
 }
