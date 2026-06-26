@@ -1,6 +1,6 @@
 services:
   city-game-api:
-    image: ghcr.io/lausi95/city-game/city-game-api:latest
+    image: ghcr.io/lausi95/city-game/city-game-api:{{ image_tag }}
     restart: unless-stopped
     networks: [ traefik, backend ]
     mem_limit: 1g

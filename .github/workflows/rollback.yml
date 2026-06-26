@@ -1,0 +1,38 @@
+name: Rollback [Production]
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Full commit SHA to roll back to (e.g. abc123def456...)'
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: tomlausmann@gmail.com
+      DOCKER_PASSWORD: ${{ secrets.GH_TOKEN }}
+    environment:
+      name: production
+      url: https://misterx.lausi95.net
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup SSH
+        shell: bash
+        run: |
+          eval `ssh-agent -s`
+          mkdir -p /home/runner/.ssh/
+          touch /home/runner/.ssh/id_rsa
+          echo -e "${{ secrets.SSH_PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 700 /home/runner/.ssh/id_rsa
+          ssh-keyscan -t rsa,dsa,ecdsa,ed25519 lausi95.net >> /home/runner/.ssh/known_hosts
+      - name: Run ansible script
+        shell: bash
+        run: |
+          sudo service ssh start
+          sudo service ssh status
+          cd ansible
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.yml
+          ansible-playbook -vvv -e "ansible_user=tom" -e "image_tag=sha-${{ inputs.sha }}" --vault-password-file=vault_password.yml --private-key /home/runner/.ssh/id_rsa -i hosts.yml deploy-prod.yml
