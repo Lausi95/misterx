@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureRestTestClient
-@Import(TestcontainersConfiguration::class)
+@Import(SecurityContainersConfig::class)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
 @Tag("IntegrationTest")

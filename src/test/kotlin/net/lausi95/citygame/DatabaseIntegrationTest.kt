@@ -5,6 +5,6 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.context.annotation.Import
 
 @DataJpaTest
-@Import(TestcontainersConfiguration::class)
+@Import(DbContainersConfig::class)
 @Tag("IntegrationTest")
 annotation class DatabaseIntegrationTest
