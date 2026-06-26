@@ -20,7 +20,7 @@ jobs:
     env:
       DOCKER_USERNAME: tomlausmann@gmail.com
       DOCKER_PASSWORD: ${{ secrets.GH_TOKEN }}
-      DOCKER_IMAGE: ghcr.io/lausi95/city-game/city-game-api:latest
+      DOCKER_IMAGE: ghcr.io/lausi95/city-game/city-game-api
     steps:
       - uses: actions/checkout@v6
       - uses: docker/setup-buildx-action@v3
@@ -33,7 +33,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:sha-${{ github.sha }}
           # Persist BuildKit layer cache across runs so dependency layers are reused.
           cache-from: type=gha
           cache-to: type=gha,mode=max
